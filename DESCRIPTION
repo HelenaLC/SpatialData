@@ -40,7 +40,8 @@ Suggests:
     BiocStyle,
     ggnewscale,
     knitr,
-    testthat
+    testthat,
+    anndataR
 Enhances:
     paws
 biocViews: 

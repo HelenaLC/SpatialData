@@ -7,25 +7,30 @@
 \alias{readPoint}
 \alias{readShape}
 \alias{readTable}
+\alias{readTable_basilisk}
+\alias{readTable_anndataR}
 \title{Reading `SpatialData`}
 \usage{
-readImage(x)
+readImage(x, ...)
 
-readLabel(x)
+readLabel(x, ...)
 
-readPoint(x)
+readPoint(x, ...)
 
-readShape(x)
+readShape(x, ...)
 
-readTable(x)
+readTable_basilisk(x)
+
+readTable_anndataR(x)
 
 readSpatialData(
   x,
-  images = TRUE,
-  labels = TRUE,
-  points = TRUE,
-  shapes = TRUE,
-  tables = TRUE
+  images = NULL,
+  labels = NULL,
+  points = NULL,
+  shapes = NULL,
+  tables = NULL,
+  anndataR = FALSE
 )
 }
 \arguments{
@@ -37,6 +42,10 @@ path to a \code{SpatialData}-.zarr store.}
 \item{images, labels, points, shapes, tables}{Control which elements should be read for each layer.
 The default, NULL, reads all elements; alternatively, may be FALSE 
 to skip a layer, or a integer vector specifying which elements to read.}
+
+\item{anndataR, }{logical, default FALSE
+Uses \code{anndataR} to read tables if TRUE.
+Uses \code{basilisk}, \code{anndata} and \code{zellkonverter} to read tables if FALSE.}
 }
 \value{
 \itemize{
