@@ -1,24 +1,24 @@
 #' @name readSpatialData
 #' @title Reading `SpatialData`
-#' 
+#'
 #' @aliases readImage readLabel readPoint readShape readTable
 #'
-#' @param x 
-#'   For \code{readImage/Label/Point/Shape/Table}, 
+#' @param x
+#'   For \code{readImage/Label/Point/Shape/Table},
 #'   path to a \code{SpatialData} element.
 #'   For \code{readSpatialData},
 #'   path to a \code{SpatialData}-.zarr store.
 #' @param images,labels,points,shapes,tables
 #'   Control which elements should be read for each layer.
-#'   The default, NULL, reads all elements; alternatively, may be FALSE 
+#'   The default, NULL, reads all elements; alternatively, may be FALSE
 #'   to skip a layer, or a integer vector specifying which elements to read.
 #' @param anndataR, logical, default FALSE
 #'   Uses \code{anndataR} to read tables if TRUE.
 #'   Uses \code{basilisk}, \code{anndata} and \code{zellkonverter} to read tables if FALSE.
 #'
-#' @return 
+#' @return
 #' \itemize{
-#' \item{For element readers, a \code{ImageArray}, \code{LabelArray}, 
+#' \item{For element readers, a \code{ImageArray}, \code{LabelArray},
 #' \code{PointFrame}, \code{ShapeFrame}, or \code{SingleCellExperiment}.}
 #' \item{For \code{readSpatialData}, a \code{SpatialData}.}}
 #'
@@ -29,9 +29,23 @@
 #' (x <- readSpatialData(base))
 NULL
 
-#' @rdname readSpatialData
 #' @importFrom Rarr ZarrArray
+.checkAndReadZAttr <- function(x) {
+    fpa <- file.path(x, ".zattrs")
+    stopifnot(file.exists(fpa))
+    md <- fromJSON(fpa)
+    return(md)
+}
+
 #' @importFrom jsonlite fromJSON
+.checkAndReadZAttrs0File <- function(x) {
+    md <- .checkAndReadZAttr(x)
+    fp0 <- file.path(x, "0")
+    stopifnot(file.exists(fp0))
+    za <- ZarrArray(fp0)
+    return(list(za=za, md=md))
+}
+#' @rdname readSpatialData
 #' @export
 readImage <- function(x, ...) {
     md <- fromJSON(file.path(x, ".zattrs"))
@@ -42,24 +56,28 @@ readImage <- function(x, ...) {
     ImageArray(data=za_list, meta=meta, ...)
 }
 
-#' @rdname readSpatialData
-#' @importFrom Rarr ZarrArray
-#' @importFrom jsonlite fromJSON
 #' @export
 readLabel <- function(x, ...) {
-    md <- fromJSON(file.path(x, ".zattrs"))
-    za <- ZarrArray(file.path(x, "0"))
-    LabelArray(data=za, meta=Zattrs(md))
+    lzamd <- .checkAndReadZAttrs0File(x)
+    LabelArray(data=lzamd$za, meta=Zattrs(lzamd$md))
 }
 
-#' @rdname readSpatialData
-#' @importFrom jsonlite fromJSON
 #' @importFrom arrow open_dataset
+.checkAndReadGeoParquet <- function(x) {
+    require(geoarrow, quietly=TRUE)
+    # TODO: previously had read_parquet(),
+    # but that doesn't work with geoparquet? -> especially for readShape
+    pq <- list.files(x, "\\.parquet$", full.names=TRUE)
+    stopifnot(file.exists(pq))
+    pqdata <- open_dataset(pq)
+    return(pqdata)
+}
+#' @rdname readSpatialData
 #' @export
 readPoint <- function(x, ...) {
-    md <- fromJSON(file.path(x, ".zattrs"))
-    pq <- list.files(x, "\\.parquet$", full.names=TRUE)
-    PointFrame(data=open_dataset(pq), meta=Zattrs(md))
+    md <- .checkAndReadZAttr(x)
+    pqdata <- .checkAndReadGeoParquet(x)
+    PointFrame(data=pqdata, meta=Zattrs(md))
 }
 
 #' @rdname readSpatialData
@@ -67,12 +85,9 @@ readPoint <- function(x, ...) {
 #' @importFrom arrow open_dataset
 #' @export
 readShape <- function(x, ...) {
-    require(geoarrow, quietly=TRUE)
-    md <- fromJSON(file.path(x, ".zattrs"))
-    # TODO: previously had read_parquet(), 
-    # but that doesn't work with geoparquet?
-    pq <- list.files(x, "\\.parquet$", full.names=TRUE)
-    ShapeFrame(data=open_dataset(pq), meta=Zattrs(md))
+    md <- .checkAndReadZAttr(x)
+    pqdata <- .checkAndReadGeoParquet(x)
+    ShapeFrame(data=pqdata, meta=Zattrs(md))
 }
 
 #' @importFrom basilisk BasiliskEnvironment
