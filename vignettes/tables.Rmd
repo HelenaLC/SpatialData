@@ -1,0 +1,24 @@
+```{r}
+x <- file.path("extdata", "blobs.zarr")
+x <- system.file(x, package="SpatialData")
+blobs <- readSpatialData(x)
+```
+
+```{r}
+shapes(blobs)$blobs_circles
+```
+
+```{r}
+plotSpatialData() + 
+    plotShape(blobs, i="blobs_circles")
+```
+
+```{r}
+plotSpatialData() + 
+    plotPoint(blobs, c="genes")
+```
+
+```{r}
+plotSpatialData() + 
+    plotLabel(blobs, i="blobs_labels")
+```
