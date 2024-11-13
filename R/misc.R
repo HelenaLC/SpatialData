@@ -13,11 +13,19 @@ NULL
 #' @importFrom S4Vectors coolcat
 .showSpatialData <- function(object) {
     cat("class: SpatialData\n")
-    coolcat("images(%d): %s", imageNames(object))
-    coolcat("labels(%d): %s", labelNames(object))
-    coolcat("shapes(%d): %s", shapeNames(object))
-    coolcat("points(%d): %s", pointNames(object))
-    coolcat("tables(%d): %s", tableNames(object))
+    coolcat("- images(%d): %s", i <- imageNames(object))
+    coolcat("- labels(%d): %s", l <- labelNames(object))
+    coolcat("- shapes(%d): %s", s <- shapeNames(object))
+    coolcat("- points(%d): %s", p <- pointNames(object))
+    coolcat("- tables(%d): %s", t <- tableNames(object))
+    cat("coordinate systems:\n")
+    e <- c(i, l, s, p, t)
+    g <- .coord2graph(object)
+    for (c in setdiff(nodes(g), e)) {
+        coolcat(
+            paste0("- ", c, "(%d): %s"), 
+            graph::inEdges(c, g)[[1]])
+    }
 }
 
 #' @rdname misc
@@ -25,8 +33,14 @@ setMethod("show", "SpatialData", .showSpatialData)
 
 #' @importFrom S4Vectors coolcat
 .showImageArray <- function(object) {
-    cat("class: ImageArray\n")
-    cat("dim:", dim(object@data))
+    n.object <- length(object@data)
+    cat("class: ImageArray", ifelse(n.object > 1, "(MultiScale)", ""),"\n")
+    if(n.object > 1){
+      cat("Scales 1-", n.object, "\n", sep = "")
+    }
+    for(i in 1:n.object){
+      cat(i, ": (", paste(dim(object@data[[i]]), collapse = ","), ")", "\n", sep = "")
+    }
 }
 
 #' @rdname misc
