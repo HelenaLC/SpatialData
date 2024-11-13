@@ -80,23 +80,13 @@ readShape <- function(x, ...) {
 #' @importFrom basilisk BasiliskEnvironment
 .env <- BasiliskEnvironment(
     pkgname="SpatialData", envname="anndata_env",
-    packages=c("anndata==0.9.1", "zarr==2.14.2", "spatialdata==0.2.3", "spatialdata-io==0.1.4"))
+    packages=c("anndata==0.9.1", "zarr==2.14.2"))
 
-readTable <- function(x, anndataR = FALSE) {
-    if(anndataR) {
-        readTable_anndataR(x)
-    } else {
-        readTable_basilisk(x)
-    }
-}
-
-#' @rdname readSpatialData
 #' @importFrom reticulate import
 #' @importFrom zellkonverter AnnData2SCE
 #' @importFrom SingleCellExperiment int_metadata<-
 #' @importFrom basilisk basiliskStart basiliskStop basiliskRun
-#' @export
-readTable_basilisk <- function(x) {
+.readTable_basilisk <- function(x) {
     proc <- basiliskStart(.env)
     on.exit(basiliskStop(proc))
     sce <- basiliskRun(proc, zarr=x, \(zarr) {
@@ -112,18 +102,14 @@ readTable_basilisk <- function(x) {
 
 #' @rdname readSpatialData
 #' @importFrom anndataR read_zarr to_SingleCellExperiment
-#' @export
-readTable_anndataR <- function(x) {
-    adata <- anndataR::read_zarr(x)
-    anndataR::to_SingleCellExperiment(adata)
-}
-
-#' @rdname readSpatialData
-#' @importFrom anndataR read_zarr to_SingleCellExperiment
-#' @export
-readTable_anndataR <- function(x) {
-    if (!requireNamespace('anndataR', quietly = TRUE)){
-        stop("Install 'anndataR' to use this function.\nInstall this version: `remotes::install_github(\"keller-mark/anndataR\", ref = \"spatialdata\")`")
+.readTable_anndataR <- function(x) {
+    if (!requireNamespace('anndataR', quietly=TRUE)) {
+        stop("To use this function, install the 'anndataR' package via\n",
+            "`BiocManager::install(\"keller-mark/anndataR\", ref=\"spatialdata\")`")
+    }
+    if (!requireNamespace('pizzarr', quietly=TRUE)) {
+        stop("To use this function, install the 'pizzarr' package via\n",
+            "`BiocManager::install(\"keller-mark/pizzarr\")`")
     }
     adata <- anndataR::read_zarr(x)
     anndataR::to_SingleCellExperiment(adata)
@@ -131,7 +117,19 @@ readTable_anndataR <- function(x) {
 
 #' @rdname readSpatialData
 #' @export
-readSpatialData <- function(x, images=NULL, labels=NULL, points=NULL, shapes=NULL, tables=NULL, anndataR=FALSE) {
+readTable <- function(x, anndataR=FALSE) {
+    if (anndataR) {
+        .readTable_anndataR(x)
+    } else {
+        .readTable_basilisk(x)
+    }
+}
+
+#' @rdname readSpatialData
+#' @export
+readSpatialData <- function(x, 
+    images=NULL, labels=NULL, points=NULL, 
+    shapes=NULL, tables=NULL, anndataR=FALSE) {
     # TODO: validity checks
     args <- as.list(environment())[.LAYERS]
     skip <- vapply(args, isFALSE, logical(1))
@@ -139,6 +137,6 @@ readSpatialData <- function(x, images=NULL, labels=NULL, points=NULL, shapes=NUL
         j <- list.files(file.path(x, i), full.names=TRUE)
         if (is.numeric(args[[i]])) j <- j[args[[i]]]
         i <- paste0(toupper(substr(i, 1, 1)), substr(i, 2, nchar(i)-1))
-        setNames(lapply(j, get(paste0("read", i)), anndataR = anndataR), basename(j))
+        setNames(lapply(j, get(paste0("read", i)), anndataR=anndataR), basename(j))
     }) |> do.call(what=SpatialData)
 }
