@@ -89,6 +89,7 @@ readTable <- function(x) {
         ad <- ad$read_zarr(zarr)
         AnnData2SCE(ad)
     })
+    # put .zattrs f
 }
 
 #' @rdname readSpatialData
