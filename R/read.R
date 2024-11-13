@@ -97,8 +97,6 @@ readTable <- function(x, anndataR = FALSE) {
 #' @importFrom basilisk basiliskStart basiliskStop basiliskRun
 #' @export
 readTable_basilisk <- function(x) {
-    # TODO: temporary, until AnnDataR supports
-    # reading AnnData from .zarr (.h5ad only atm)
     proc <- basiliskStart(.env)
     on.exit(basiliskStop(proc))
     sce <- basiliskRun(proc, zarr=x, \(zarr) {
@@ -124,7 +122,9 @@ readTable_anndataR <- function(x) {
 #' @importFrom anndataR read_zarr to_SingleCellExperiment
 #' @export
 readTable_anndataR <- function(x) {
-    requireNamespace("anndataR")
+    if (!requireNamespace('anndataR', quietly = TRUE)){
+        stop("Install 'anndataR' to use this function.\nInstall this version: `remotes::install_github(\"keller-mark/anndataR\", ref = \"spatialdata\")`")
+    }
     adata <- anndataR::read_zarr(x)
     anndataR::to_SingleCellExperiment(adata)
 }
