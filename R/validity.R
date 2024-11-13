@@ -2,6 +2,8 @@
 #
 .spd_validity <- function(object) {
     msg <- NULL
+    # Checks if the points have the x,y coordinates, as they are hard-coded
+    # in the plot functions
     if (!is.null(data(point(object))))
     {
         np <- length(points(object))
@@ -12,6 +14,8 @@
             }
         }
     }
+    # Checks for region_key and instance_key in the SCE metadatas
+    # cause they are hard-coded in the plot functions
     nt <- length(tables(object))
     for (i in c(1:nt)) {
         sce <- table(object, i)
@@ -24,7 +28,8 @@
                 i, "-th sce metadata"))
         }
     }
-
+    # If present, it checks if the labels and the images have the same
+    # dimensions, it doesn't check otherwise
     if (length(images(object))) {
         if (length(labels(object))) {
             for (i in c(1:length(images))) {
@@ -37,23 +42,6 @@
             }
         }
     }
-
-    # if (!is.null(data(shape(object))))
-    # {
-    #     ns <- length(shape(object))
-    #     for (i in c(1:ns)) {
-    #         dfi <- data(shape(object, i))
-    #             if (!all(c("x", "y") %in% names(dfi))) {
-    #             msg <- c(msg, "'x' and 'y' missing in data shape ", i)
-    #         }
-    #     }
-    # }
-    # if (nrow(int_elementMetadata(object))!=nrow(object)) {
-    #     msg <- c(msg, "'nrow' of 'int_elementMetadata' not equal to 'nrow(object)'")
-    # }
-    # if (nrow(int_colData(object))!=ncol(object)) {
-    #     msg <- c(msg, "'nrow' of 'int_colData' not equal to 'ncol(object)'")
-    # }
     if (length(msg)) { return(msg) } # inspired by .sce_validity
     return(TRUE)
 }
