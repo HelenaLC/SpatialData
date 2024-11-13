@@ -77,15 +77,23 @@ setMethod("plotImage", "SpatialData", \(x, i=1, j=1) {
 #' @importFrom grDevices colorRampPalette
 #' @importFrom abind abind
 #' @export
-setMethod("plotLabel", "SpatialData", \(x, i=1, c=NULL, a=0.5,
+setMethod("plotLabel", "SpatialData", \(x, i=NULL, c=NULL, a=0.5,
     pal=hcl.colors(11, "Spectral")) {
+    if(is.null(i)){
+        i <- labelNames(x)[[1]]
+    }
+    if(is.numeric(i)){
+        i <- labelNames(x)[i]
+    }
+
     y <- as.matrix(data(label(x, i)))
     df <- data.frame(x=c(col(y)), y=c(row(y)), z=c(y))
     if (!is.null(c)) {
-        se <- table(x)
-        md <- metadata(se)[[1]]
-        re <- labelNames(x)[i]
-        se <- se[, se[[md$region_key]] == re]
+
+        se_md <- getRegionData(x, i)
+        se <- se_md$sce
+        md <- se_md$md
+        
         cs <- match(df$z, se[[md$instance_key]])
         df$z <- se[[c]][cs]
         thm <- list(

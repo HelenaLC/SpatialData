@@ -34,6 +34,7 @@ NULL
 #' @importFrom jsonlite fromJSON
 #' @export
 readImage <- function(x, ...) {
+readImage <- function(x, ...) {
     md <- fromJSON(file.path(x, ".zattrs"))
     paths <- .get_multiscales_dataset_paths(md)
     za_list <- lapply(paths, function(ps)
@@ -47,6 +48,7 @@ readImage <- function(x, ...) {
 #' @importFrom jsonlite fromJSON
 #' @export
 readLabel <- function(x, ...) {
+readLabel <- function(x, ...) {
     md <- fromJSON(file.path(x, ".zattrs"))
     za <- ZarrArray(file.path(x, "0"))
     LabelArray(data=za, meta=Zattrs(md))
@@ -57,6 +59,7 @@ readLabel <- function(x, ...) {
 #' @importFrom arrow open_dataset
 #' @export
 readPoint <- function(x, ...) {
+readPoint <- function(x, ...) {
     md <- fromJSON(file.path(x, ".zattrs"))
     pq <- list.files(x, "\\.parquet$", full.names=TRUE)
     PointFrame(data=open_dataset(pq), meta=Zattrs(md))
@@ -66,6 +69,7 @@ readPoint <- function(x, ...) {
 #' @importFrom jsonlite fromJSON
 #' @importFrom arrow open_dataset
 #' @export
+readShape <- function(x, ...) {
 readShape <- function(x, ...) {
     require(geoarrow, quietly=TRUE)
     md <- fromJSON(file.path(x, ".zattrs"))
@@ -83,15 +87,47 @@ readShape <- function(x, ...) {
 #' @importFrom reticulate import
 #' @importFrom zellkonverter AnnData2SCE
 #' @importFrom SingleCellExperiment int_metadata<-
+#' @importFrom SingleCellExperiment int_metadata<-
 #' @importFrom basilisk basiliskStart basiliskStop basiliskRun
+.readTable_basilisk <- function(x) {
 .readTable_basilisk <- function(x) {
     proc <- basiliskStart(.env)
     on.exit(basiliskStop(proc))
+    sce <- basiliskRun(proc, zarr=x, \(zarr) {
     sce <- basiliskRun(proc, zarr=x, \(zarr) {
         ad <- import("anndata")
         ad <- ad$read_zarr(zarr)
         AnnData2SCE(ad)
     })
+    nm <- names(md <- metadata(sce))
+    int_metadata(sce)[[nm]] <- md[[nm]]
+    metadata(sce) <- list()
+    return(sce)
+}
+
+#' @rdname readSpatialData
+#' @importFrom anndataR read_zarr to_SingleCellExperiment
+.readTable_anndataR <- function(x) {
+    if (!requireNamespace('anndataR', quietly=TRUE)) {
+        stop("To use this function, install the 'anndataR' package via\n",
+            "`BiocManager::install(\"keller-mark/anndataR\", ref=\"spatialdata\")`")
+    }
+    if (!requireNamespace('pizzarr', quietly=TRUE)) {
+        stop("To use this function, install the 'pizzarr' package via\n",
+            "`BiocManager::install(\"keller-mark/pizzarr\")`")
+    }
+    adata <- anndataR::read_zarr(x)
+    anndataR::to_SingleCellExperiment(adata)
+}
+
+#' @rdname readSpatialData
+#' @export
+readTable <- function(x, anndataR=FALSE) {
+    if (anndataR) {
+        .readTable_anndataR(x)
+    } else {
+        .readTable_basilisk(x)
+    }
     nm <- names(md <- metadata(sce))
     int_metadata(sce)[[nm]] <- md[[nm]]
     metadata(sce) <- list()

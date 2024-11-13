@@ -6,7 +6,9 @@
 \alias{SpatialData-class}
 \alias{.SpatialData}
 \alias{data,ImageArray-method}
+\alias{data,ImageArray-method}
 \alias{SpatialData}
+\alias{$,Zattrs-method}
 \alias{$,Zattrs-method}
 \alias{$,SpatialData-method}
 \alias{[[,SpatialData,ANY,ANY-method}
@@ -61,7 +63,11 @@
 \usage{
 \S4method{data}{ImageArray}(x, width = 800, height = 800)
 
+\S4method{data}{ImageArray}(x, width = 800, height = 800)
+
 SpatialData(images, labels, points, shapes, tables)
+
+\S4method{$}{Zattrs}(x, name)
 
 \S4method{$}{Zattrs}(x, name)
 
