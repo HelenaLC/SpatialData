@@ -14,7 +14,7 @@ LabelArray(data = array(), meta = Zattrs(), metadata = list(), ...)
 
 \item{meta}{\code{\link{Zattrs}}}
 
-\item{metadata}{optional list of arbitrary 
+\item{metadata}{optional list of arbitrary
 content describing the overall object.}
 
 \item{...}{option arguments passed to and from other methods.}
@@ -25,9 +25,18 @@ content describing the overall object.}
 \code{LabelArray}
 }
 \description{
-The `LabelArray` class
+The `LabelArray` class (LA) is defined to store labels in `array` or
+`data.frame` format into the dedicated `@data` slot together with the `meta`
+attributes defined in the Zattr files.
+Optional metadata can be stored in the `metadata` list.
+
+Defined methods are:
+- dim: returns the dimensions of the `@data` slot.
 }
 \examples{
-# TODO
+y <- file.path("extdata", "blobs.zarr")
+y <- file.path(system.file(y, package="SpatialData"), "labels",
+    "blobs_labels")
+(l <- readLabel(y))
 
 }

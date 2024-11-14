@@ -166,15 +166,15 @@ SpatialData(images, labels, points, shapes, tables)
 
 \S4method{table}{SpatialData,missing,SingleCellExperiment}(x, i) <- value
 
-\S4method{image}{SpatialData,ANY,NULL}(x, i) <- value
+\S4method{image}{SpatialData,ANY,`NULL`}(x, i) <- value
 
-\S4method{label}{SpatialData,ANY,NULL}(x, i) <- value
+\S4method{label}{SpatialData,ANY,`NULL`}(x, i) <- value
 
-\S4method{shape}{SpatialData,ANY,NULL}(x, i) <- value
+\S4method{shape}{SpatialData,ANY,`NULL`}(x, i) <- value
 
-\S4method{point}{SpatialData,ANY,NULL}(x, i) <- value
+\S4method{point}{SpatialData,ANY,`NULL`}(x, i) <- value
 
-\S4method{table}{SpatialData,ANY,NULL}(x, i) <- value
+\S4method{table}{SpatialData,ANY,`NULL`}(x, i) <- value
 
 \S4method{image}{SpatialData,ANY,ANY}(x, i) <- value
 

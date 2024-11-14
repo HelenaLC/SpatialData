@@ -33,7 +33,7 @@ PointFrame(data = data.frame(), meta = Zattrs(), metadata = list(), ...)
 
 \item{meta}{\code{\link{Zattrs}}}
 
-\item{metadata}{optional list of arbitrary 
+\item{metadata}{optional list of arbitrary
 content describing the overall object.}
 
 \item{...}{optional arguments passed to and from other methods.}
@@ -50,7 +50,18 @@ content describing the overall object.}
 \code{PointFrame}
 }
 \description{
-The `PointFrame` class
+The PointFrame (PF) class is defined to store points in `data.frame` format,
+having associated `meta` attributes from the Zattr file, and additional
+`metadata` stored as a list.
+Defined methods for PointFrame are:
+- names: returns the names of the elements in data inside the PF.
+- dim: returns the dimensions of the data inside the PF.
+- length: returns the number of rows of the data inside the PF.
+- `$`: direct accessor for the columns in the PF data.
+- `[[`: direct accessor for the data inside the PF.
+- filter: subsets data PF rows based on specified conditions.
+- as.data.frame: transforms data PF in a `data.frame`.
+- select: subsets data PF colums based on specified conditions.
 }
 \examples{
 tf <- tempfile()
