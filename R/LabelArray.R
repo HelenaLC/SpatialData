@@ -4,9 +4,17 @@
 #' @param x \code{LabelArray}
 #' @param data list of \code{\link[Rarr]{ZarrArray}}s
 #' @param meta \code{\link{Zattrs}}
-#' @param metadata optional list of arbitrary 
+#' @param metadata optional list of arbitrary
 #'   content describing the overall object.
 #' @param ... option arguments passed to and from other methods.
+#' @description
+#' The `LabelArray` class (LA) is defined to store labels in `array` or
+#' `data.frame` format into the dedicated `@data` slot together with the `meta`
+#' attributes defined in the Zattr files.
+#' Optional metadata can be stored in the `metadata` list.
+#'
+#' Defined methods are:
+#' - dim: returns the dimensions of the `@data` slot.
 #'
 #' @return \code{LabelArray}
 #'
