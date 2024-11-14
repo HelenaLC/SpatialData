@@ -5,12 +5,26 @@
 #' @param data \code{arrow}-derived table for on-disk,
 #'   \code{data.frame} for in-memory representation.
 #' @param meta \code{\link{Zattrs}}
-#' @param metadata optional list of arbitrary 
+#' @param metadata optional list of arbitrary
 #'   content describing the overall object.
 #' @param drop ignored.
 #' @param i,j indices for subsetting (see \code{?base::Extract}).
 #' @param name character string for extraction (see \code{?base::`$`}).
 #' @param ... optional arguments passed to and from other methods.
+#'
+#' @description
+#' The PointFrame (PF) class is defined to store points in `data.frame` format,
+#' having associated `meta` attributes from the Zattr file, and additional
+#' `metadata` stored as a list.
+#' Defined methods for PointFrame are:
+#' - names: returns the names of the elements in data inside the PF.
+#' - dim: returns the dimensions of the data inside the PF.
+#' - length: returns the number of rows of the data inside the PF.
+#' - `$`: direct accessor for the columns in the PF data.
+#' - `[[`: direct accessor for the data inside the PF.
+#' - filter: subsets data PF rows based on specified conditions.
+#' - as.data.frame: transforms data PF in a `data.frame`.
+#' - select: subsets data PF colums based on specified conditions.
 #'
 #' @return \code{PointFrame}
 #'
@@ -20,7 +34,7 @@
 #' base <- unzip_merfish_demo(tf)
 #' x <- file.path(base, "points", "single_molecule")
 #' (p <- readPoint(x))
-#' 
+#'
 #' head(as.data.frame(data(p)))
 #' (q <- dplyr::filter(p, cell_type == "VISp_wm"))
 #' plotPoint(q, c="x", s=0.2)
@@ -88,14 +102,14 @@ setAs(
 
 #' @importFrom dplyr filter
 #' @export
-filter.PointFrame <- \(.data, ...) { 
+filter.PointFrame <- \(.data, ...) {
     .data@data <- filter(data(.data), ...)
     return(.data)
 }
 
 #' @importFrom dplyr select
 #' @export
-select.PointFrame <- \(.data, ...) { 
+select.PointFrame <- \(.data, ...) {
     .data@data <- select(data(.data), ...)
     return(.data)
 }
