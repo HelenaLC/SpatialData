@@ -46,7 +46,7 @@ viewShape = function(sdobj, elem) {
 #' @param size numeric(1) target size for glyph
 #' @examples
 #' example(use_sdio) # produces br2fov
-#' viewShape(br2fov, "cell_boundaries") + add_tx(sdobj, "EPCAM")
+#' viewShape(br2fov, "cell_boundaries") + add_tx(br2fov, "EPCAM")
 #' @export
 add_tx = function(sdobj, featurename, size=.1) {
  txdf = .txdf(sdobj) |> dplyr::filter(feature_name == featurename)

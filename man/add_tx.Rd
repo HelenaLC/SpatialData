@@ -18,5 +18,5 @@ Use geom_point to enhance a visualization with viewShape
 }
 \examples{
 example(use_sdio) # produces br2fov
-viewShape(br2fov, "cell_boundaries") + add_tx(sdobj, "EPCAM")
+viewShape(br2fov, "cell_boundaries") + add_tx(br2fov, "EPCAM")
 }
