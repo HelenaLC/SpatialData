@@ -1,3 +1,13 @@
+#
+# notes from VJC -- readSpatialData was modified below so
+# that if anndataR = FALSE, spatialdata.read_zarr is used
+# to get the whole zarr store, and then the tables are
+# transformed via zellkonverter.  this gives a 10x speedup
+# for ingesting the visium_hd_3.0.0 example but fails on
+# the blobs dataset in example("table-utils") because
+# of matters related to metadata/hasTable behavior
+#
+
 #' @name readSpatialData
 #' @title Reading `SpatialData`
 #' 
@@ -13,8 +23,9 @@
 #'   The default, NULL, reads all elements; alternatively, may be FALSE 
 #'   to skip a layer, or a integer vector specifying which elements to read.
 #' @param anndataR logical specifying whether 
-#'   to use \code{anndataR} to read tables; by default (FALSE), 
-#'   \code{basilisk}, \code{anndata} and \code{zellkonverter} are used.
+#'   to use \code{anndataR} to read tables; defaults to FALSE in `readSpatialData`,
+#'   and `readTable`,
+#'   so that pythonic \code{spatialdata} and \code{zellkonverter} are used.
 #' @param ... option arguments passed to and from other methods.
 #'
 #' @return 
@@ -66,6 +77,7 @@ readPoint <- function(x, ...) {
 #' @rdname readSpatialData
 #' @importFrom jsonlite fromJSON
 #' @importFrom arrow open_dataset
+#' @import geoarrow   
 #' @export
 readShape <- function(x, ...) {
     requireNamespace("geoarrow", quietly=TRUE)
@@ -86,14 +98,36 @@ readShape <- function(x, ...) {
 #' @importFrom reticulate import
 #' @importFrom zellkonverter AnnData2SCE
 #' @importFrom basilisk basiliskStart basiliskStop basiliskRun
-.readTable_basilisk <- function(x) {
-    proc <- basiliskStart(.env)
+.readTable_basilisk <- function(x) {  # it will be faster to 'read' all tables
+    stop("not supported")
+    proc <- basiliskStart(.env)       # and process individually
     on.exit(basiliskStop(proc))
     basiliskRun(proc, zarr=x, \(zarr) {
-        ad <- import("anndata")
-        ad <- ad$read_zarr(zarr)
-        AnnData2SCE(ad)
+        sd <- import("spatialdata")
+#        zellkonverter::AnnData2SCE(li$tables[basename(x)])  # need to get key as basename(x)
     })
+}
+
+.readTables_basilisk <- function(x) {  # it will be faster to 'read' all tables
+    proc <- basiliskStart(.env)       # and process individually
+    on.exit(basiliskStop(proc))
+    basiliskRun(proc, zarr=x, \(zarr) {
+        sd <- import("spatialdata")
+        full <- sd$read_zarr(x)  # even a reread is fast, memoise might help?
+        # now I have all tables in full$tables, but I can't get them
+        # out without their names
+        tnames = dir(file.path(x, "tables"))
+        ans = lapply(tnames, function(z) {
+         cur = zellkonverter::AnnData2SCE(full$tables[z])
+         nm <- "spatialdata_attrs"   # thanks HLC
+         md <- metadata(cur)[[nm]]
+         int_metadata(cur)[[nm]] <- md   # what's going on?
+         metadata(cur)[[nm]] <- NULL
+         cur
+         })  # need to get key as basename(x)
+        names(ans) = tnames
+        ans
+        })   # handing back list of SCE
 }
 
 .readTable_anndataR <- function(x) {
@@ -144,10 +178,11 @@ readTable <- function(x, anndataR=FALSE) {
 #' @export
 readSpatialData <- function(x, 
     images=TRUE, labels=TRUE, points=TRUE, 
-    shapes=TRUE, tables=TRUE, anndataR=TRUE) {
+    shapes=TRUE, tables=TRUE, anndataR=FALSE) {
+    if (!anndataR) tables = FALSE  # will do manually below
     args <- as.list(environment())[.LAYERS]
     skip <- vapply(args, isFALSE, logical(1))
-    lapply(.LAYERS[!skip], \(i) {
+    ans = lapply(.LAYERS[!skip], \(i) {
         y <- file.path(x, i)
         j <- list.files(y, full.names=TRUE)
         names(j) <- basename(j)
@@ -161,5 +196,10 @@ readSpatialData <- function(x,
         args <- if (i == "tables") list(anndataR=anndataR)
         f <- get(paste0("read", toupper(substr(i, 1, 1)), substr(i, 2, nchar(i)-1)))
         lapply(j, \(.) do.call(f, c(list(.), args)))
-    }) |> do.call(what=SpatialData)
+    }) 
+    if (!anndataR) {
+      tabs = .readTables_basilisk(x)
+      ans$tables = tabs
+      }
+    ans |> do.call(what=SpatialData)
 }
