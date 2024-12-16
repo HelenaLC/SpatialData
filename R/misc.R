@@ -16,6 +16,7 @@ NULL
 #' @importFrom RBGL sp.between
 #' @importFrom S4Vectors coolcat
 #' @importFrom graph nodeData nodes
+#' @importFrom sf st_as_sf st_geometry_type
 .showSpatialData <- function(object) {
     cat("class: SpatialData\n")
     i <- imageNames(object)
