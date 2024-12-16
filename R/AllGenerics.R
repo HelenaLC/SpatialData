@@ -22,18 +22,6 @@ setGeneric("shapeNames", \(x, ...) standardGeneric("shapeNames"))
 setGeneric("pointNames", \(x, ...) standardGeneric("pointNames"))
 setGeneric("tableNames", \(x, ...) standardGeneric("tableNames"))
 
-setMethod("images", "SpatialData", \(x) x$images)
-setMethod("labels", "SpatialData", \(x) x$labels)
-setMethod("shapes", "SpatialData", \(x) x$shapes)
-setMethod("points", "SpatialData", \(x) x$points)
-setMethod("tables", "SpatialData", \(x) x$tables)
-
-setMethod("imageNames", "SpatialData", \(x) names(images(x)))
-setMethod("labelNames", "SpatialData", \(x) names(labels(x)))
-setMethod("shapeNames", "SpatialData", \(x) names(shapes(x)))
-setMethod("pointNames", "SpatialData", \(x) names(points(x)))
-setMethod("tableNames", "SpatialData", \(x) names(tables(x)))
-
 # set one -----
 
 setGeneric("image<-", \(x, i, ..., value) standardGeneric("image<-"))
@@ -70,6 +58,7 @@ setGeneric("translation", \(x, t, ...) standardGeneric("translation"))
 
 # uts ----
 
+setGeneric("type", \(x, i, ...) standardGeneric("type"))
 setGeneric("layer", \(x, i, ...) standardGeneric("layer"))
 setGeneric("element", \(x, i, j, ...) standardGeneric("element"))
 
@@ -82,6 +71,12 @@ setGeneric("mask", \(x, i, j, ...) standardGeneric("mask"))
 setGeneric("channels", \(x, ...) standardGeneric("channels"))
 
 # tbl ----
+
+setGeneric("instance_key", \(x, ...) standardGeneric("instance_key"))
+setGeneric("instance_ids", \(x, ...) standardGeneric("instance_ids"))
+
+setGeneric("region_key", \(x, ...) standardGeneric("region_key"))
+setGeneric("region_ids", \(x, ...) standardGeneric("region_ids"))
 
 setGeneric("hasTable", \(x, i, ...) standardGeneric("hasTable"))
 setGeneric("getTable", \(x, i, ...) standardGeneric("getTable"))
