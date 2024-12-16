@@ -88,6 +88,29 @@ setMethod("colnames", "SpatialData", \(x) {
     lapply(., \(.) names(x[[.]]))
 })
 
+# type ----
+
+#' @rdname SpatialData
+#' @export
+setMethod("type", c("SpatialData", "character"), \(x, i) {
+    # get elements across layers
+    lys <- lapply(.LAYERS, \(.) layer(x, .))
+    # check for existence of element 'i'
+    nan <- vapply(lys, \(.) is.null(.[[i]]), logical(1))
+    if (!any(!nan)) stop("'i' isn't an element of 'x'")
+    # return layer in which 'i' exists
+    names(nan)[!nan]
+})
+
+#' @rdname SpatialData
+#' @export
+setMethod("type", c("SpatialData", "numeric"), \(x, i) {
+    # get elements across layers
+    lys <- lapply(.LAYERS, \(.) layer(x, .))
+    i <- unlist(lapply(lys, names))[i]
+    type(x, i)
+})
+
 # layer ----
 
 .err_i <- c(

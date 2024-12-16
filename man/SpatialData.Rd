@@ -42,6 +42,8 @@
 \alias{meta,SpatialDataElement-method}
 \alias{rownames,SpatialData-method}
 \alias{colnames,SpatialData-method}
+\alias{type,SpatialData,character-method}
+\alias{type,SpatialData,numeric-method}
 \alias{layer,SpatialData,character-method}
 \alias{layer,SpatialData,numeric-method}
 \alias{layer,SpatialData,missing-method}
@@ -50,8 +52,8 @@
 \alias{element,SpatialData,ANY,numeric-method}
 \alias{element,SpatialData,ANY,missing-method}
 \alias{element,SpatialData,ANY,ANY-method}
-\alias{[[<-,SpatialData,numeric,ANY,ANY-method}
-\alias{[[<-,SpatialData,character,ANY,ANY-method}
+\alias{[[<-,SpatialData,numeric,ANY-method}
+\alias{[[<-,SpatialData,character,ANY-method}
 \title{The `SpatialData` class}
 \usage{
 SpatialData(images, labels, points, shapes, tables)
@@ -72,6 +74,10 @@ SpatialData(images, labels, points, shapes, tables)
 
 \S4method{colnames}{SpatialData}(x)
 
+\S4method{type}{SpatialData,character}(x, i)
+
+\S4method{type}{SpatialData,numeric}(x, i)
+
 \S4method{layer}{SpatialData,character}(x, i)
 
 \S4method{layer}{SpatialData,numeric}(x, i)
@@ -88,9 +94,9 @@ SpatialData(images, labels, points, shapes, tables)
 
 \S4method{element}{SpatialData,ANY,ANY}(x, i, j)
 
-\S4method{[[}{SpatialData,numeric,ANY,ANY}(x, i) <- value
+\S4method{[[}{SpatialData,numeric,ANY}(x, i) <- value
 
-\S4method{[[}{SpatialData,character,ANY,ANY}(x, i) <- value
+\S4method{[[}{SpatialData,character,ANY}(x, i) <- value
 }
 \arguments{
 \item{images}{list of \code{\link{ImageArray}}s}
