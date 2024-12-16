@@ -41,8 +41,10 @@ NULL
     for (. in seq_along(p)) 
         cat(sprintf("  - %s (%s)\n", p[.], d[.]))
     # shapes
-    nc <- vapply(shapes(object), ncol, numeric(1))
-    geom <- ifelse(nc == 1, "polygon", "circle")
+    geom <- vapply(shapes(object), \(.) {
+        . <- st_as_sf(data(.))[1, "geometry"]
+        as.character(st_geometry_type(.))
+    }, character(1))
     d <- vapply(shapes(object), nrow, numeric(1))
     d <- paste(d, unname(geom), sep=",")
     cat(sprintf("- shapes(%s):\n", length(s)))
