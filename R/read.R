@@ -108,10 +108,15 @@ readShape <- function(x, ...) {
         names(ts) <- ts <- names(zs$tables$data)
         lapply(ts, \(z) {
             se <- AnnData2SCE(zs$tables[z])
+            # move 'spatialdata_attrs' to 'int_metadata'
             nm <- "spatialdata_attrs"
             md <- metadata(se)[[nm]]
             int_metadata(se)[[nm]] <- md
             metadata(se)[[nm]] <- NULL
+            # move '_key's to 'int_colData'
+            ks <- c(md$instance_key, md$region_key)
+            int_colData(se)[ks] <- colData(se)[ks]
+            colData(se)[ks] <- NULL
             se
         }) 
     })
