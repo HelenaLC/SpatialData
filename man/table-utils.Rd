@@ -2,11 +2,19 @@
 % Please edit documentation in R/table_utils.R
 \name{table-utils}
 \alias{table-utils}
+\alias{instance_key}
+\alias{region_key}
+\alias{instance_ids}
+\alias{region_ids}
 \alias{hasTable}
 \alias{getTable}
 \alias{setTable}
 \alias{valTable}
 \alias{meta,SingleCellExperiment-method}
+\alias{instance_key,SingleCellExperiment-method}
+\alias{region_key,SingleCellExperiment-method}
+\alias{instance_ids,SingleCellExperiment-method}
+\alias{region_ids,SingleCellExperiment-method}
 \alias{hasTable,SpatialData,ANY-method}
 \alias{hasTable,SpatialData,character-method}
 \alias{getTable,SpatialData,ANY-method}
@@ -17,6 +25,14 @@
 \title{\code{SpatialData} annotations}
 \usage{
 \S4method{meta}{SingleCellExperiment}(x)
+
+\S4method{instance_key}{SingleCellExperiment}(x)
+
+\S4method{region_key}{SingleCellExperiment}(x)
+
+\S4method{instance_ids}{SingleCellExperiment}(x)
+
+\S4method{region_ids}{SingleCellExperiment}(x)
 
 \S4method{hasTable}{SpatialData,ANY}(x, i)
 

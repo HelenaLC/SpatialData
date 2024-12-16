@@ -1,6 +1,9 @@
 #' @name table-utils
 #' @title \code{SpatialData} annotations
-#' @aliases hasTable getTable setTable valTable
+#' @aliases 
+#'   instance_key region_key
+#'   instance_ids region_ids
+#'   hasTable getTable setTable valTable
 #' 
 #' @param x \code{\link{SpatialData}} object.
 #' @param i character string; name of the
@@ -79,6 +82,36 @@ setMethod("meta", c("SingleCellExperiment"),
 .invalid_i <- \() stop(
     "invalid 'i'; should be a character ",
     "string specifying an element in 'x'")
+
+# key ----
+
+#' @rdname table-utils
+#' @export
+setMethod("instance_key", 
+    "SingleCellExperiment", 
+    \(x) meta(x)$instance_key)
+
+#' @rdname table-utils
+#' @export
+setMethod("region_key", 
+    "SingleCellExperiment", 
+    \(x) meta(x)$region_key)
+
+# ids ----
+
+#' @rdname table-utils
+#' @importFrom SingleCellExperiment int_colData
+#' @export
+setMethod("instance_ids", 
+    "SingleCellExperiment", 
+    \(x) int_colData(x)[[instance_key(x)]])
+
+#' @rdname table-utils
+#' @importFrom SingleCellExperiment int_colData
+#' @export
+setMethod("region_ids", 
+    "SingleCellExperiment", 
+    \(x) int_colData(x)[[region_key(x)]])
 
 # has ----
 
@@ -232,6 +265,6 @@ setMethod("valTable", "SpatialData", \(x, i, j, assay=1, drop=TRUE) {
     rs <- j %in% rownames(t)
     cd <- j %in% names(colData(t))
     if (!(rs || cd)) stop("invalid 'j'")
-    if (cd) return(t[[j]])
-    assay(t, assay)[j, ]
+    val <- if (cd) t[[j]] else assay(t, assay)[j, ]
+    return(setNames(val, instance_ids(t)))
 })
