@@ -4,15 +4,26 @@ x <- file.path("extdata", "blobs.zarr")
 x <- system.file(x, package="SpatialData")
 x <- readSpatialData(x)
 
-sdtable = SpatialData::table   # skirt ambiguity and limitations of get()
-"sdtable<-" = "SpatialData::table<-"   # skirt ambiguity and limitations of get()
-sdtables = SpatialData::tables
+sdtable <- SpatialData::table # skirt ambiguity and limitations of get()
+"sdtable<-" <- "SpatialData::table<-" # skirt ambiguity and limitations of get()
+sdtables <- SpatialData::tables
 
 fun <- c("image", "label", "shape", "point", "sdtable")
 nms <- c("blobs_image", "blobs_labels", "blobs_circles", "blobs_points", "table")
 typ <- c("ImageArray", "LabelArray", "ShapeFrame", "PointFrame", "SingleCellExperiment")
 
 # get ----
+
+test_that("type()", {
+    # invalid
+    expect_error(type(x, "."))
+    expect_error(type(x, 100))
+    # valid
+    for (. in .LAYERS) {
+        nms <- get(paste0(gsub("s$", "", .), "Names"))(x)
+        if (length(nms)) expect_true(type(x, nms[1]) == .)
+    }
+})
 
 test_that("layer()", {
     # invalid

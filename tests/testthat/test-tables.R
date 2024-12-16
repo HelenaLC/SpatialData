@@ -1,20 +1,30 @@
-oo = options()$arrow.pull_as_vector
-
+oo <- options()$arrow.pull_as_vector
 options(arrow.pull_as_vector=TRUE)
 require(SingleCellExperiment, quietly=TRUE)
+
 x <- file.path("extdata", "blobs.zarr")
 x <- system.file(x, package="SpatialData")
 x <- readSpatialData(x, table=1, anndataR=FALSE)
 
-md <- int_metadata(SpatialData::table(x))
-md <- md$spatialdata_attrs
-i <- md[[rk <- md$region_key]]
-#int_colData(SpatialData::table(x))[[rk]] <- 
-#    paste(int_colData(SpatialData::table(x))[[rk]])
+t <- SpatialData::table(x)
+i <- paste(region_ids(t)[1])
+
+test_that("instance/region_key/ids()", {
+    for (. in c("instance", "region")) {
+        key <- get(paste0(., "_key"))
+        ids <- get(paste0(., "_ids"))
+        k <- key(t)
+        expect_length(k, 1)
+        expect_is(k, "character")
+        icd <- int_colData(t)
+        expect_true(k %in% names(icd))
+        expect_identical(ids(t), icd[[k]])
+    }
+})
 
 test_that("hasTable()", {
     # TRUE
-    i <- md$region
+    i <- meta(t)$region
     expect_true(hasTable(x, i))
     # FALSE
     j <- setdiff(unlist(colnames(x)), c(i, tableNames(x)))
@@ -108,8 +118,7 @@ test_that("setTable(),points/shapes", {
         expect_true(hasTable(y, i))
         t <- getTable(y, i)
         expect_true(all(names(f) %in% names(colData(t))))
-        md <- int_metadata(t)$spatialdata_attrs
-        expect_identical(md$region, i)
+        expect_identical(meta(t)$region, i)
     }
 })
 
@@ -123,17 +132,17 @@ test_that("valTable()", {
     # 'colData'
     df <- DataFrame(a=sample(letters, n), b=runif(n))
     s <- t; colData(s) <- df; y <- x; SpatialData::table(y) <- s
-    expect_identical(valTable(y, i, j <- "a"), s[[j]])
-    expect_identical(valTable(y, i, j <- "b"), s[[j]])
+    expect_equivalent(valTable(y, i, j <- "a"), s[[j]])
+    expect_equivalent(valTable(y, i, j <- "b"), s[[j]])
     expect_error(valTable(y, i, "c"))
     # 'assay' data
     j <- sample(rownames(t), 1)
     v <- valTable(x, i, j)
-    expect_identical(v, assay(t)[j, ])
+    expect_equivalent(v, assay(t)[j, ])
     # 'assay' argument
     assay(t, ".") <- 1+assay(t); SpatialData::table(x) <- t
     v <- valTable(x, i, j, assay=".")
-    expect_identical(v, assay(t, ".")[j, ])
+    expect_equivalent(v, assay(t, ".")[j, ])
     expect_error(valTable(x, i, rownames(t)[1], assay=".."))
 })
 

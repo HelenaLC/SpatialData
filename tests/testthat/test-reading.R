@@ -1,3 +1,4 @@
+require(SingleCellExperiment, quietly=TRUE)
 x <- file.path("extdata", "blobs.zarr")
 x <- system.file(x, package="SpatialData")
 
@@ -14,7 +15,21 @@ test_that("readElement()", {
         if (l != "tables") {
             expect_is(get(paste0("read", f))(y), typ[l])
         } else {
-            expect_is(.readTables_basilisk(x)[[1]], typ[l])
+            sce <- .readTables_basilisk(x)[[1]]
+            expect_is(sce, typ[l])
+            # check that 'int_metadata/colData' are handled properly
+            # these should exist & be a named list
+            sda <- int_metadata(sce)$spatialdata_attrs
+            expect_is(sda, "list")
+            # each element should be a scalar character
+            nms <- c("region", "region_key", "instance_key")
+            fun <- \(.) length(.) == 1 && is.character(.)
+            expect_true(all(vapply(sda[nms], fun, logical(1))))
+            expect_setequal(names(sda), nms)
+            # '_key's should be present in 'int_colData'
+            key <- unlist(sda[nms[-1]])
+            icd <- names(int_colData(sce))
+            expect_true(all(key %in% icd))
         }
     }
 })
