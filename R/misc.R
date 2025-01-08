@@ -23,49 +23,51 @@ NULL
     p <- pointNames(object)
     s <- shapeNames(object)
     t <- tableNames(object)
+    # helper function for concise printing
+    f <- \(l, e, d) {
+        cat(sprintf("- %s(%s):\n", l, n <- length(e)))
+        for (. in seq_len(n)) {
+            if (. == 4) cat("    ...\n")
+            if (. < 4 || . == n) cat(sprintf("  - %s (%s)\n", e[.], d[.]))
+        }
+    }
     # images
     d <- lapply(images(object), dim)
     d <- lapply(d, paste, collapse=",")
-    cat(sprintf("- images(%s):\n", length(i)))
-    for (. in seq_along(i)) 
-        cat(sprintf("  - %s (%s)\n", i[.], d[.]))
+    f("images", i, d)
     # labels
     d <- lapply(labels(object), dim)
     d <- lapply(d, paste, collapse=",")
-    cat(sprintf("- labels(%s):\n", length(l)))
-    for (. in seq_along(l)) 
-        cat(sprintf("  - %s (%s)\n", l[.], d[.]))
+    f("labels", l, d)
     # points
     d <- lapply(points(object), length)
-    cat(sprintf("- points(%s):\n", length(p)))
-    for (. in seq_along(p)) 
-        cat(sprintf("  - %s (%s)\n", p[.], d[.]))
+    f("points", p, d)
     # shapes
     nc <- vapply(shapes(object), ncol, numeric(1))
     geom <- ifelse(nc == 1, "polygon", "circle")
     d <- vapply(shapes(object), nrow, numeric(1))
     d <- paste(d, unname(geom), sep=",")
-    cat(sprintf("- shapes(%s):\n", length(s)))
-    for (. in seq_along(s)) 
-        cat(sprintf("  - %s (%s)\n", s[.], d[.]))
+    f("shapes", s, d)
     # tables
     d <- lapply(tables(object), dim)
     d <- lapply(d, paste, collapse=",")
-    cat(sprintf("- tables(%s):\n", length(t)))
-    for (. in seq_along(t)) 
-        cat(sprintf("  - %s (%s)\n", t[.], d[.]))
+    f("tables", t, d)
     # spaces
-    cat("coordinate systems:\n")
+    cat("spaces:\n")
     e <- c(i, l, s, p)
     g <- CTgraph(object)
     t <- nodeData(g, nodes(g), "type")
-    for (c in nodes(g)[t == "space"]) {
-        pa <- suppressWarnings(sp.between(g, e, c))
-        ss <- strsplit(names(pa), ":")
-        ss <- ss[vapply(pa, \(.) !is.na(.$length), logical(1))]
-        coolcat(
-            paste0("- ", c, "(%d): %s"),
-            vapply(ss, \(.) .[1], character(1)))
+    n <- nodes(g)[t == "space"]
+    for (. in seq_along(n)) {
+        if (. == 4) cat("...\n")
+        if (. < 4 || . == length(n)) {
+            pa <- suppressWarnings(sp.between(g, e, c <- n[[.]]))
+            ex <- vapply(pa, \(.) is.na(.$length), logical(1))
+            ss <- strsplit(names(pa), ":"); ss <- ss[!ex]
+            coolcat(
+                paste0("- ", c, "(%d): %s"),
+                vapply(ss, \(.) .[1], character(1)))
+            }
     }
 }
 
