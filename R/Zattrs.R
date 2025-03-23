@@ -33,3 +33,11 @@ Zattrs <- \(x=list()) {
 #' @rdname Zattrs
 #' @exportMethod $
 setMethod("$", "Zattrs", \(x, name) x[[name]])
+
+#' @rdname Zattrs
+#' @export
+setMethod("channels", "Zattrs", \(x) {
+  if (!is.null(o <- x$omero)) x <- o
+  if (!is.null(c <- x$channel)) x <- c
+  x$label
+})

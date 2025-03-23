@@ -111,3 +111,17 @@ setMethod("show", "PointFrame", .showPointFrame)
 
 #' @rdname misc
 setMethod("show", "ShapeFrame", .showShapeFrame)
+
+#' @importFrom S4Vectors coolcat
+.showZattrs <- function(object) {
+  cat("class: Zattrs\n")
+  # axes
+  coolcat("axes(%d): %s\n", axes(object)[["name"]])
+  # channel if exists
+  c <- channels(object)
+  if(!is.null(c))
+    coolcat("channels(%d): %s\n", channels(object))
+}
+
+#' @rdname misc
+setMethod("show", "Zattrs", .showZattrs)

@@ -7,6 +7,7 @@
 \alias{show,LabelArray-method}
 \alias{show,PointFrame-method}
 \alias{show,ShapeFrame-method}
+\alias{show,Zattrs-method}
 \title{Miscellaneous `Miro` methods}
 \usage{
 \S4method{show}{SpatialData}(object)
@@ -18,6 +19,8 @@
 \S4method{show}{PointFrame}(object)
 
 \S4method{show}{ShapeFrame}(object)
+
+\S4method{show}{Zattrs}(object)
 }
 \arguments{
 \item{object}{\code{\link{SpatialData}} object or one of its 
