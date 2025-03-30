@@ -51,16 +51,22 @@ NULL
 # axes() ----
 
 #' @rdname coord-utils
+#' @param simple if TRUE, axes data.frame is simplified
 #' @export
-setMethod("axes", "Zattrs", \(x, ...) {
+setMethod("axes", "Zattrs", \(x, simple = FALSE, ...) {
     if (!is.null(ms <- x$multiscales)) x <- ms
     if (is.null(x <- x$axes)) stop("couldn't find 'axes'") 
-    if (is.character(x)) x else x[[1]]
+    if (is.character(x)){
+      return(x)
+    } else {
+      x <- x[[1]]
+      return(if(simple) paste(x$name,x$type, sep = ":") else x)
+    }
 })
 
 #' @rdname coord-utils
 #' @export
-setMethod("axes", "SpatialDataElement", \(x, ...) axes(meta(x)))
+setMethod("axes", "SpatialDataElement", \(x, ...) axes(meta(x), ...))
 
 # CTdata/type/name() ----
 

@@ -116,11 +116,15 @@ setMethod("show", "ShapeFrame", .showShapeFrame)
 .showZattrs <- function(object) {
   cat("class: Zattrs\n")
   # axes
-  coolcat("axes(%d): %s\n", axes(object)[["name"]])
+  coolcat("axes(%d): %s\n", axes(object, simple = TRUE))
   # channel if exists
-  c <- channels(object)
-  if(!is.null(c))
+  if(!is.null(c <- channels(object)))
     coolcat("channels(%d): %s\n", channels(object))
+  # transformations
+  coolcat("transformations(%d): %s\n", CTname(object))
+  # datasets
+  if(!is.null(c <- datasets(object)))
+    coolcat("datasets(%d): %s\n", datasets(object))
 }
 
 #' @rdname misc

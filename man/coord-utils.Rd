@@ -30,7 +30,7 @@
 \alias{addCT,Zattrs-method}
 \title{Coordinate transformations}
 \usage{
-\S4method{axes}{Zattrs}(x, ...)
+\S4method{axes}{Zattrs}(x, simple = FALSE, ...)
 
 \S4method{axes}{SpatialDataElement}(x, ...)
 
@@ -68,6 +68,8 @@
 }
 \arguments{
 \item{x}{\code{SpatialData}, an element, or \code{Zattrs}.}
+
+\item{simple}{if TRUE, axes data.frame is simplified}
 
 \item{...}{option arguments passed to and from other methods.}
 

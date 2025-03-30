@@ -41,3 +41,15 @@ setMethod("channels", "Zattrs", \(x) {
   if (!is.null(c <- x$channel)) x <- c
   x$label
 })
+
+#' @rdname Zattrs
+#' @export
+setMethod("datasets", "Zattrs", \(x) {
+  if (!is.null(ms <- x$multiscales)) x <- ms
+  if (!is.null(d <- x$datasets)) x <- d[[1]]
+  x$path
+})
+
+#' @aliases datasets
+#' @export
+setMethod("datasets", "ANY", \(x, ...) datasets(meta(x)))

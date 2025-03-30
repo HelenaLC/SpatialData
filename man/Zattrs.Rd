@@ -4,6 +4,7 @@
 \alias{Zattrs}
 \alias{$,Zattrs-method}
 \alias{channels,Zattrs-method}
+\alias{datasets,Zattrs-method}
 \title{The `Zattrs` class}
 \usage{
 Zattrs(x = list())
@@ -11,6 +12,8 @@ Zattrs(x = list())
 \S4method{$}{Zattrs}(x, name)
 
 \S4method{channels}{Zattrs}(x)
+
+\S4method{datasets}{Zattrs}(x)
 }
 \arguments{
 \item{x}{list extracted from a OME-NGFF compliant .zattrs file.}
