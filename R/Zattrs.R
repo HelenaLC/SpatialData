@@ -49,7 +49,3 @@ setMethod("datasets", "Zattrs", \(x) {
   if (!is.null(d <- x$datasets)) x <- d[[1]]
   x$path
 })
-
-#' @aliases datasets
-#' @export
-setMethod("datasets", "ANY", \(x, ...) datasets(meta(x)))
