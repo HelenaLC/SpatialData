@@ -47,5 +47,6 @@ setMethod("channels", "Zattrs", \(x) {
 setMethod("datasets", "Zattrs", \(x) {
   if (!is.null(ms <- x$multiscales)) x <- ms
   if (!is.null(d <- x$datasets)) x <- d[[1]]
-  x$path
+  # x$path
+  x
 })
