@@ -115,21 +115,36 @@ setMethod("show", "ShapeFrame", .showShapeFrame)
 #' @importFrom S4Vectors coolcat
 .showZattrs <- function(object) {
   cat("class: Zattrs\n")
+  
   # axes
-  coolcat("axes(%d): %s\n", paste0(axes(object, simple = TRUE)))
+  ax <- axes(object)
+  if(!is(ax, "data.frame"))
+    ax <- data.frame(name = ax)
+  cat(sprintf("axes(%d): \n", nrow(ax)))
+  for(. in seq_along(ax)){
+    coolcat(paste0("- ", names(ax)[[.]], "(%d): %s\n"), ax[[.]])  
+  }
+  
   # transformations
   coolcat("transformations(%d): %s\n", CTname(object))
+  
   # datasets
   if(!is.null(d <- datasets(object))){
-    cat(sprintf("datasets(%d): \n", nrow(d)))
-    coolcat("- path(%d): %s\n", d$path)
-    ct <- d$coordinateTransformations
-    coolcat("- type(%d): %s\n", vapply(ct, \(x) x$type, character(1)))
-    coolcat("- cTrans(%d): %s\n", 
-            vapply(ct, 
-                   \(x) paste0("(", paste(x[[x$type]][[1]], collapse = ","), ")"), 
-                   character(1)))
+    coolcat("datasets(%d): %s\n", d$path)
+    ct <- vapply(d$coordinateTransformations, \(x)
+                 paste(
+                   apply(x, 1, \(y)
+                         paste0("(", x$type, ":", 
+                                paste(x[[x$type]][[1]], collapse = ","), 
+                                ")")
+                   ), collapse = ", "
+                 ),
+                 character(1))
+    for(. in seq_along(ct)){
+      cat(sprintf("- %s: %s", d$path[.], ct[.]), "\n")
+    }
   }
+  
   # channel
   if(!is.null(c <- channels(object)))
     coolcat("channels(%d): %s\n", channels(object))

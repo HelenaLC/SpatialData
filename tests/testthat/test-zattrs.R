@@ -7,9 +7,6 @@ test_that("axes", {
     y <- axes(image(x))
     expect_is(y, "data.frame")
     expect_equal(dim(y), c(3, 2))
-    y <- axes(image(x), simple = TRUE)
-    expect_is(y, "character")
-    expect_equal(length(y), 3)
     # label
     y <- axes(label(x))
     expect_is(y, "data.frame")

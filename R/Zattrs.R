@@ -46,7 +46,9 @@ setMethod("channels", "Zattrs", \(x) {
 #' @export
 setMethod("datasets", "Zattrs", \(x) {
   if (!is.null(ms <- x$multiscales)) x <- ms
-  if (!is.null(d <- x$datasets)) x <- d[[1]]
-  # x$path
-  x
+  if (!is.null(d <- x$datasets)){
+    d[[1]]
+  } else {
+    NULL
+  }
 })

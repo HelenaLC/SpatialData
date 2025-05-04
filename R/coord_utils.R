@@ -51,16 +51,14 @@ NULL
 # axes() ----
 
 #' @rdname coord-utils
-#' @param simple if TRUE, axes data.frame is simplified
 #' @export
-setMethod("axes", "Zattrs", \(x, simple = FALSE, ...) {
+setMethod("axes", "Zattrs", \(x, ...) {
     if (!is.null(ms <- x$multiscales)) x <- ms
     if (is.null(x <- x$axes)) stop("couldn't find 'axes'") 
     if (is.character(x)){
       return(x)
     } else {
-      x <- x[[1]]
-      return(if(simple) paste(x$name,x$type, sep = ":") else x)
+      x[[1]]
     }
 })
 
