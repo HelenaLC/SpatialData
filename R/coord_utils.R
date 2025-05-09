@@ -125,6 +125,11 @@ setMethod("CTgraph", "SpatialDataElement", \(x)
 
 #' @rdname coord-utils
 #' @export
+setMethod("CTgraph", "Zattrs", \(x) 
+          .make_g(list("mock"=list("self"=x))))
+
+#' @rdname coord-utils
+#' @export
 setMethod("CTgraph", "ANY", \(x) stop("'x' should be a", 
     " 'SpatialData' object, or a non-'table' element"))
 
@@ -198,6 +203,13 @@ setMethod("CTpath", "SpatialData", \(x, i, j) {
 setMethod("CTpath", "SpatialDataElement", \(x, j) {
     g <- CTgraph(x)
     .path_ij(g, "self", j)
+})
+
+#' @rdname coord-utils
+#' @export
+setMethod("CTpath", "Zattrs", \(x, j) {
+  g <- CTgraph(x)
+  .path_ij(g, "self", j)
 })
 
 #' @importFrom graph edgeData

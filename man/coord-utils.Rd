@@ -21,16 +21,18 @@
 \alias{CTname,SpatialData-method}
 \alias{CTgraph,SpatialData-method}
 \alias{CTgraph,SpatialDataElement-method}
+\alias{CTgraph,Zattrs-method}
 \alias{CTgraph,ANY-method}
 \alias{CTpath,SpatialData-method}
 \alias{CTpath,SpatialDataElement-method}
+\alias{CTpath,Zattrs-method}
 \alias{rmvCT,SpatialDataElement-method}
 \alias{rmvCT,Zattrs-method}
 \alias{addCT,SpatialDataElement-method}
 \alias{addCT,Zattrs-method}
 \title{Coordinate transformations}
 \usage{
-\S4method{axes}{Zattrs}(x, simple = FALSE, ...)
+\S4method{axes}{Zattrs}(x, ...)
 
 \S4method{axes}{SpatialDataElement}(x, ...)
 
@@ -52,11 +54,15 @@
 
 \S4method{CTgraph}{SpatialDataElement}(x)
 
+\S4method{CTgraph}{Zattrs}(x)
+
 \S4method{CTgraph}{ANY}(x)
 
 \S4method{CTpath}{SpatialData}(x, i, j)
 
 \S4method{CTpath}{SpatialDataElement}(x, j)
+
+\S4method{CTpath}{Zattrs}(x, j)
 
 \S4method{rmvCT}{SpatialDataElement}(x, i)
 
@@ -68,8 +74,6 @@
 }
 \arguments{
 \item{x}{\code{SpatialData}, an element, or \code{Zattrs}.}
-
-\item{simple}{if TRUE, axes data.frame is simplified}
 
 \item{...}{option arguments passed to and from other methods.}
 
