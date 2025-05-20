@@ -32,7 +32,6 @@ allp = c("session_info==1.0.0", "spatialdata==0.3.0", "spatialdata_io==0.1.7",
 # for ingesting the visium_hd_3.0.0 example but fails on
 # the blobs dataset in example("table-utils") because
 # of matters related to metadata/hasTable behavior
-#
 
 #' @name readSpatialData
 #' @title Reading `SpatialData`
@@ -114,8 +113,9 @@ readShape <- function(x, ...) {
 
 #' @importFrom basilisk BasiliskEnvironment
 .env <- BasiliskEnvironment(
-    pkgname="SpatialData", envname="anndata_env",
-    packages=c( "python==3.12.0", "zarr==2.18.4" ),
+    pkgname="SpatialData",
+    envname="anndata_env",
+    packages=c("python==3.12.0", "zarr==2.18.4"),
     pip=allp)
 
 #' @importFrom reticulate import
