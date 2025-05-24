@@ -40,6 +40,8 @@
 \alias{[,SpatialData,ANY,ANY,ANY-method}
 \alias{data,SpatialDataElement-method}
 \alias{meta,SpatialDataElement-method}
+\alias{datasets,SpatialDataElement-method}
+\alias{datasets}
 \alias{rownames,SpatialData-method}
 \alias{colnames,SpatialData-method}
 \alias{layer,SpatialData,character-method}
@@ -67,6 +69,8 @@ SpatialData(images, labels, points, shapes, tables)
 \S4method{data}{SpatialDataElement}(x)
 
 \S4method{meta}{SpatialDataElement}(x)
+
+\S4method{datasets}{SpatialDataElement}(x, ...)
 
 \S4method{rownames}{SpatialData}(x)
 

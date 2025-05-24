@@ -71,6 +71,13 @@ setMethod("data", "SpatialDataElement", \(x) x@data)
 #' @export
 setMethod("meta", "SpatialDataElement", \(x) x@meta)
 
+# datasets ----
+
+#' @rdname SpatialData
+#' @aliases datasets
+#' @export
+setMethod("datasets", "SpatialDataElement", \(x, ...) datasets(meta(x)))
+
 # row/colnms ----
 
 #' @rdname SpatialData

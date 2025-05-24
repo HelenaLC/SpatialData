@@ -132,3 +132,14 @@ test_that("plotCoordGraph", {
     q <- f(plotCoordGraph(g, 0.9))
     expect_true(p < q)
 })
+
+test_that("show",{
+  meta(image(x,1))
+  meta(image(x,2))
+  meta(label(x,1))
+  meta(label(x,2))
+  meta(shape(x,1))
+  meta(shape(x,2))
+  meta(shape(x,3))
+  expect_equal(1L,1L)
+})
