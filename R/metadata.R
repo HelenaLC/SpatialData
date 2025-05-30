@@ -6,22 +6,22 @@
   meta <- list()
   ax <- "axes"
   ct <- "coordinateTransformations"
+  sa <- "spatial_attrs"
   # axis
   meta[[ax]] <- c("x", "y")
   meta[[ax]] <- if(ncol(x) == 3) c(meta[[ax]], "z") else meta[[ax]]
   # encoding type
   meta[["encoding-type"]] <- encoding_type
   # spatialdata_attrs
-  sa <-  list(version = version)
+  meta[[sa]] <-  list(version = version)
   if(!is.null(feature_key)) 
-    sa[["feature_key"]] <- feature_key
+    meta[[sa]][["feature_key"]] <- feature_key
   if(!is.null(instance_key)) 
-    sa[["instance_key"]] <- instance_key
+    meta[[sa]][["instance_key"]] <- instance_key
   # coordinate transformations
-  meta[[ct]] <- .make_ct()
-  meta <- Zattrs(meta)
-  meta <- addCT(meta, name = "test_ct")
+  meta[[ct]] <- .make_empty_ct()
   
-  # return
-  meta
+  # update json list
+  meta <- fromJSON(toJSON(meta, auto_unbox = TRUE), simplifyVector = TRUE)
+  Zattrs(meta)
 }

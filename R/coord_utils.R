@@ -265,18 +265,19 @@ setMethod("addCT", "SpatialDataElement", \(x, name, type, data) {
     if (!.) f(t)
 }
 
-.make_ct <- function(){
-  ts <- "transformations"
-  ct <- "coordinateTransformations"
-  meta <- list()
-  meta[[ct]] <- list()
+.make_empty_ct <- function(){
+  space <- list(
+    list(name = "x", type = "space", unit = "unit"),
+    list(name = "y", type = "space", unit = "unit")
+  )
+  input <- list(axes = space, name = "xy")
+  output <- list(axes = space, name = "global")
+  meta <- list(
+    list(input = input, 
+               output = output, 
+               type = "identity")
+  )
   meta
-}
-
-.make_ctdata <- function(){
-  meta <- setNames(data.frame(matrix(ncol = 3, nrow = 0)),
-                   c("input", "output", "type"))
-  meta$input <- setNames()
 }
 
 #' @rdname coord-utils
@@ -290,8 +291,7 @@ setMethod("addCT", "Zattrs", \(x, name, type="identity", data=NULL) {
     ts <- "transformations"
     ct <- "coordinateTransformations"
     # use existing as skeleton
-    # fd <- (df <- CTdata(x))[1, ]
-    fd <- if(is.null(df <- CTdata(x))) .make_ctdata() else df[1,]
+    fd <- (df <- CTdata(x))[1, ]
     fd <- fd[, c("input", "output", "type")]
     fd$type <- type
     fd$output$name <- name
