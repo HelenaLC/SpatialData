@@ -9,13 +9,28 @@
 \alias{writeTable}
 \title{Writing `SpatialData`}
 \usage{
-writePoint(x, ...)
+writeSpatialData(x, name, path, replace = TRUE, version = "v2", ...)
+
+writePoint(x, name, path, replace = TRUE, version = "v2")
 }
 \arguments{
-\item{x}{For \code{writeImage/Label/Point/Shape/Table}, 
-path to a \code{SpatialData} element.
-For \code{writeSpatialData},
-path to a \code{SpatialData}-.zarr store.}
+\item{x}{For \code{writeSpatialData},
+a \code{SpatialData}
+For \code{writeImage/Label/Point/Shape/Table}, 
+a \code{ImageArray},\code{LabelArray}, 
+\code{PointFrame}, \code{ShapeFrame}}
+
+\item{name}{For \code{writeSpatialData},
+name of the zarr store
+For \code{writeImage/Label/Point/Shape/Table}, 
+name of spatial element to write in the zarr store}
+
+\item{path}{path to zarr store.}
+
+\item{replace}{if TRUE, existing elements with the same name will be
+replaced with the given element}
+
+\item{version}{zarr version, v2 or v3 (only v2 is supported now)}
 
 \item{...}{option arguments passed to and from other methods.}
 }

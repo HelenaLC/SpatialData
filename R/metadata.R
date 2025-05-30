@@ -19,7 +19,7 @@
   if(!is.null(instance_key)) 
     meta[[sa]][["instance_key"]] <- instance_key
   # coordinate transformations
-  meta[[ct]] <- .make_empty_ct()
+  meta[[ct]] <- .make_empty_ct(x)
   
   # update json list
   meta <- fromJSON(toJSON(meta, auto_unbox = TRUE), simplifyVector = TRUE)

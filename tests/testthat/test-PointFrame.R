@@ -58,11 +58,11 @@ test_that("as.data.frame", {
     expect_identical(y, (. <- collect(data(p)))[, !grepl("dask", names(.))])
 })
 
-test_that("write", {
-  
-  # make point data
-  set.seed(1)
-  df <- data.frame(x = runif(100), y = runif(100))
+# make point data
+set.seed(1)
+df <- data.frame(x = runif(100), y = runif(100))
+
+test_that("create", {
   
   # make point frame
   pf <- PointFrame(df)
@@ -83,4 +83,28 @@ test_that("write", {
   expect_identical(data(point(sd)), data(pf))
   expect_identical(point(sd), pf)
   expect_identical(point(sd, 1), pf)
+})
+
+td <- tempdir()
+zarr.store <- "test.zarr"
+zarr.path <- file.path(td, zarr.store)
+unlink(zarr.path, recursive = TRUE)
+
+test_that("write", {
+  
+  # make sd data
+  pf <- PointFrame(df)
+  sd <- SpatialData(points = list(test_points = pf))
+  
+  # write to location
+  writeSpatialData(sd, "test.zarr", path = td)
+  expect_true(dir.exists(zarr.path))
+  
+  # read back and compare
+  sd2 <- readSpatialData(zarr.path)
+  pf2 <- point(sd2)
+  expect_identical(data(pf), as.data.frame(as.data.frame(pf2)))
+  expect_identical(meta(pf),meta(pf2))
+  expect_identical(names(pf), names(pf2))
+  expect_identical(data(pf[1:50, 1]), as.data.frame(data(pf2[1:50,1])))
 })

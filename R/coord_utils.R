@@ -265,11 +265,12 @@ setMethod("addCT", "SpatialDataElement", \(x, name, type, data) {
     if (!.) f(t)
 }
 
-.make_empty_ct <- function(){
-  space <- list(
-    list(name = "x", type = "space", unit = "unit"),
-    list(name = "y", type = "space", unit = "unit")
-  )
+# make ----
+
+.make_empty_ct <- function(x){
+  space <- lapply(names(x), \(.){
+    list(names = ., type = "space", unit = "unit")
+  })
   input <- list(axes = space, name = "xy")
   output <- list(axes = space, name = "global")
   meta <- list(

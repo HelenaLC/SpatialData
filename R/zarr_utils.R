@@ -25,14 +25,15 @@ create_zarr_group <- function(store, name, version = "v2"){
          },
          stop("only zarr v2 is supported. Use version = 'v2'")
   )
+  
 }
 
 #' create_zarr
 #'
 #' create zarr store
 #'
-#' @param dir the location of zarr store
-#' @param prefix prefix of the zarr store
+#' @param name prefix of the zarr store, e.g. <name>.zarr
+#' @param dir the location of zarr store, e.g. <dir>/<name>.zarr
 #' @param version zarr version
 #' 
 #' @examples
@@ -42,8 +43,8 @@ create_zarr_group <- function(store, name, version = "v2"){
 #' dir.exists(file.path(td, "test.zarr"))
 #' 
 #' @export
-create_zarr <- function(dir, prefix, version = "v2"){
-  create_zarr_group(store = dir, name = paste0(prefix, ".zarr"), version = version)
+create_zarr <- function(name, dir, version = "v2"){
+  create_zarr_group(store = dir, name = name, version = version)
 }
 
 #' Read the .zattrs file associated with a Zarr array or group

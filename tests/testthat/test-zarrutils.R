@@ -1,13 +1,13 @@
-library(Rarr)
+# library(Rarr)
 
 test_that("create zarr/group", {
   
   dir.create(td <- tempfile())
-  name <- "test"
-  output_zarr <- file.path(td, paste0(name, ".zarr"))
+  name <- "test.zarr"
+  output_zarr <- file.path(td, name)
   
   # open zarr
-  create_zarr(dir = td, prefix = name)
+  create_zarr(name = name, dir = td)
   expect_true(dir.exists(output_zarr))
   expect_true(file.exists(file.path(output_zarr, ".zgroup")))
   
@@ -36,7 +36,7 @@ test_that("create zarr/group", {
   dir.create(td <- tempfile())
   name <- "test"
   output_zarr <- file.path(td, paste0(name, ".zarr"))
-  expect_error(create_zarr(dir = td, prefix = name, version = "v4"), pattern = "only zarr v2 is supported")
+  expect_error(create_zarr(dir = td, name = name, version = "v4"), pattern = "only zarr v2 is supported")
 })
 
 
