@@ -74,9 +74,9 @@ read_zattrs <- function(path, s3_client = NULL) {
     s3_object <- s3_client$get_object(Bucket = parsed_url$bucket, 
                                       Key = parsed_url$object)
     
-    zattrs <- fromJSON(rawToChar(s3_object$Body))
+    zattrs <- fromJSON(rawToChar(s3_object$Body), simplifyVector = TRUE)
   } else {
-    zattrs <- read_json(zattrs_path)
+    zattrs <- read_json(zattrs_path, simplifyVector = TRUE)
   }
   return(zattrs)
 }

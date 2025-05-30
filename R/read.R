@@ -67,7 +67,8 @@ allp = c("session_info==1.0.0", "spatialdata==0.3.0", "spatialdata_io==0.1.7",
 NULL
 
 readsdlayer <- function(x, ...) {
-  md <- fromJSON(file.path(x, ".zattrs"))
+  # md <- fromJSON(file.path(x, ".zattrs"))
+  md <- read_zattrs(x)
   ps <- .get_multiscales_dataset_paths(md)
   list(array = lapply(ps, \(.) ZarrArray(file.path(x, as.character(.)))), 
        md = md)
@@ -75,7 +76,6 @@ readsdlayer <- function(x, ...) {
 
 #' @rdname readSpatialData
 #' @importFrom Rarr ZarrArray
-#' @importFrom jsonlite fromJSON
 #' @export
 readImage <- function(x, ...) {
     lyrs <- readsdlayer(x, ...)
@@ -84,7 +84,6 @@ readImage <- function(x, ...) {
 
 #' @rdname readSpatialData
 #' @importFrom Rarr ZarrArray
-#' @importFrom jsonlite fromJSON
 #' @export
 readLabel <- function(x, ...) {
   lyrs <- readsdlayer(x, ...)
@@ -96,7 +95,8 @@ readLabel <- function(x, ...) {
 #' @importFrom arrow open_dataset
 #' @export
 readPoint <- function(x, ...) {
-    md <- fromJSON(file.path(x, ".zattrs"))
+    # md <- fromJSON(file.path(x, ".zattrs"))
+    md <- read_zattrs(x)
     pq <- list.files(x, "\\.parquet$", full.names=TRUE)
     PointFrame(data=open_dataset(pq), meta=Zattrs(md))
 }
@@ -108,7 +108,8 @@ readPoint <- function(x, ...) {
 #' @export
 readShape <- function(x, ...) {
     requireNamespace("geoarrow", quietly=TRUE)
-    md <- fromJSON(file.path(x, ".zattrs"))
+    # md <- fromJSON(file.path(x, ".zattrs"))
+    md <- read_zattrs(x)
     # TODO: previously had read_parquet(), 
     # but that doesn't work with geoparquet?
     pq <- list.files(x, "\\.parquet$", full.names=TRUE)
@@ -163,7 +164,6 @@ readShape <- function(x, ...) {
 }
 
 #' @rdname readSpatialData
-#' @importFrom jsonlite fromJSON
 #' @importFrom S4Vectors metadata metadata<-
 #' @importFrom SummarizedExperiment colData colData<- 
 #' @importFrom SingleCellExperiment 
