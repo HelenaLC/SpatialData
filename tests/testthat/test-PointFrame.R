@@ -57,3 +57,30 @@ test_that("as.data.frame", {
     expect_equal(names(y), names(p))
     expect_identical(y, (. <- collect(data(p)))[, !grepl("dask", names(.))])
 })
+
+test_that("write", {
+  
+  # make point data
+  set.seed(1)
+  df <- data.frame(x = runif(100), y = runif(100))
+  
+  # make point frame
+  pf <- PointFrame(df)
+  expect_identical(data(pf), df)
+  expect_identical(dim(pf),dim(df))
+  expect_identical(names(pf), names(df))
+  expect_identical(data(pf[1:50, 1]), df[1:50,1, drop = FALSE])
+  
+  # coordinate systems
+  expect_identical(CTname(pf), "global")
+  expect_identical(CTtype(pf), "identity")
+  pf_new <- addCT(pf, "test", "scale", c(2,2))
+  expect_identical(CTname(pf_new), c("global", "test"))
+  expect_identical(CTtype(pf_new), c("identity", "scale"))
+  
+  # make spatial data
+  sd <- SpatialData(points = list(test_points = pf))
+  expect_identical(data(point(sd)), data(pf))
+  expect_identical(point(sd), pf)
+  expect_identical(point(sd, 1), pf)
+})

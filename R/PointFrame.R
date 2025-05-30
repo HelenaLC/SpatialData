@@ -44,6 +44,11 @@
 #' @importFrom methods new
 #' @export
 PointFrame <- function(data=data.frame(), meta=Zattrs(), metadata=list(), ...) {
+    if(length(meta) < 1){
+      meta <- .make_pointshape_meta(data, 
+                                    encoding_type = "ngff:points", 
+                                    version = 0.1)
+    } 
     x <- .PointFrame(data=data, meta=meta, ...)
     metadata(x) <- metadata
     return(x)
@@ -66,7 +71,8 @@ setMethod("length", "PointFrame", \(x) nrow(data(x)))
 #' @importFrom dplyr select all_of collect
 #' @exportMethod [[
 setMethod("[[", "PointFrame", \(x, i, ...) {
-    x <- select(data(x), !"__null_dask_index__")
+    # x <- select(data(x), !"__null_dask_index__")
+    x <- select(data(x), names(x))
     collect(select(x, all_of(i)))[[1]] })
 
 #' @importFrom utils .DollarNames
@@ -109,16 +115,21 @@ setMethod("[", c("PointFrame", "ANY", "character"), \(x, i, j, ...) {
 #' @importFrom dplyr mutate filter select
 #' @export
 setMethod("[", c("PointFrame", "numeric", "numeric"), \(x, i, j, ...) {
-    .i <- `__null_dask_index__` <- NULL # R CMD check
-    i <- seq_len(nrow(x))[i]
-    x@data <- data(x) |>
+    if("__null_dask_index__" %in% names(data(x))){
+      .i <- `__null_dask_index__` <- NULL # R CMD check
+      i <- seq_len(nrow(x))[i]
+      x@data <- data(x) |>
         mutate(.i=1+`__null_dask_index__`) |>
         filter(.i %in% i) |>
         select(-.i)
-    # make sure this is kept in any case
-    ndi <- "__null_dask_index__"
-    ndi <- match(ndi, names(x@data), nomatch=0)
-    x@data <- x@data[, c(j, ndi)]
+      # make sure this is kept in any case
+      ndi <- "__null_dask_index__"
+      ndi <- match(ndi, names(x@data), nomatch=0)
+      x@data <- x@data[, c(j, ndi)] 
+    } else {
+      # TODO: can we avoid checking for __null_dask_index__
+      x@data <- x@data[i,j,drop = FALSE] 
+    }
     return(x)
 })
 

@@ -1,4 +1,4 @@
-.createPointmeta <- function(x, 
+.make_pointshape_meta <- function(x, 
                              encoding_type = "ngff:points",
                              feature_key = NULL, 
                              instance_key = NULL, 
