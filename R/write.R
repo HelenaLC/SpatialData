@@ -37,9 +37,14 @@ writeSpatialData <- function(x, name, path, replace = TRUE, version = "v2",
                              ...) {
   zarr.path <- .replace_zarr(name, path, replace, version)
   
-  # write points only for now
+  # write points
   . <- lapply(pointNames(x), \(.){
     writePoint(point(x, .),., path = zarr.path, replace = replace)
+  })
+  
+  # write shapes
+  . <- lapply(shapeNames(x), \(.){
+    writeShape(shape(x, .),., path = zarr.path, replace = replace)
   })
 }
 
@@ -47,9 +52,20 @@ writeSpatialData <- function(x, name, path, replace = TRUE, version = "v2",
 #' @export
 writePoint <- function(x, name, path, replace = TRUE, version = "v2") {
   # if no PointFrames were written before, update zarr store
-  zarr.group <- .make_zarr_group(x, name, path, replace, version)
+  zarr.group <- .make_zarr_group(x, name, file.path(path, "points"), replace, version)
   # write meta
   write_zattrs(path = zarr.group, meta(x))
   # write data
   arrow::write_dataset(data(x), file.path(zarr.group, "points.parquet"))
+}
+
+#' @rdname writeSpatialData
+#' @export
+writeShape <- function(x, name, path, replace = TRUE, version = "v2") {
+  # if no PointFrames were written before, update zarr store
+  zarr.group <- .make_zarr_group(x, name, file.path(path, "shapes"), replace, version)
+  # write meta
+  write_zattrs(path = zarr.group, meta(x))
+  # write data
+  arrow::write_dataset(data(x), file.path(zarr.group, "shapes.parquet"))
 }

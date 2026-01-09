@@ -134,20 +134,20 @@ write_zattrs <- function(path, new.zattrs = list(), overwrite = TRUE){
 }
 
 .make_zarr_group <- function(x, name, path, replace, version){
-  gd <- file.path(path, "points")
-  if(!dir.exists(gd))
-    dir.create(gd)
-  ng <- file.path(gd, name)
+  # gd <- file.path(path, "points")
+  if(!dir.exists(path))
+    dir.create(path)
+  ng <- file.path(path, name)
   if(replace){
     unlink(ng, recursive = TRUE)
   } else {
-    nms <- list.dirs(file.path(gd), full.names = FALSE)
+    nms <- list.dirs(file.path(path), full.names = FALSE)
     if(name %in% nms)
       stop("Directory \"", ng, "\" already exists. ",
            "Use 'replace=TRUE' to replace it. ",
            "Its content will be lost!")
   }
-  create_zarr_group(gd, name, version)
+  create_zarr_group(path, name, version)
   return(ng)
 }
 

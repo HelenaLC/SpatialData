@@ -30,6 +30,11 @@
 #' @importFrom methods new
 #' @export
 ShapeFrame <- function(data=data.frame(), meta=Zattrs(), metadata=list(), ...) {
+    if(length(meta) < 1){
+      meta <- .make_pointshape_meta(data, 
+                                    encoding_type = "ngff:points", 
+                                    version = 0.1)
+    } 
     x <- .ShapeFrame(data=data, meta=meta, ...)
     metadata(x) <- metadata
     return(x)
@@ -82,7 +87,7 @@ setMethod("[", c("ShapeFrame", "missing", "missing"),
 #' @export
 setMethod("[", c("ShapeFrame", "numeric", "numeric"), \(x, i, j, ...) { 
     i <- seq_len(nrow(x))[i]
-    j <- seq_len(nrow(x))[j]
+    j <- seq_len(ncol(x))[j]
     x@data <- x@data[i, j]
     return(x)
 })
