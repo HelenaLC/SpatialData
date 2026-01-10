@@ -5,7 +5,14 @@
 \alias{[,LabelArray,ANY,ANY,ANY-method}
 \title{The \code{LabelArray} class}
 \usage{
-LabelArray(data = array(), meta = Zattrs(), metadata = list(), ...)
+LabelArray(
+  data = array(),
+  meta = Zattrs(),
+  metadata = list(),
+  multiscale = FALSE,
+  axes = NULL,
+  ...
+)
 
 \S4method{[}{LabelArray,ANY,ANY,ANY}(x, i, j, ..., drop = FALSE)
 }
@@ -16,6 +23,11 @@ LabelArray(data = array(), meta = Zattrs(), metadata = list(), ...)
 
 \item{metadata}{optional list of arbitrary 
 content describing the overall object.}
+
+\item{multiscale}{if TRUE (and \code{data} is not a list), 
+multiscale image will be generated.}
+
+\item{axes}{axes}
 
 \item{...}{option arguments passed to and from other methods.}
 

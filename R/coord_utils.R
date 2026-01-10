@@ -297,7 +297,7 @@ setMethod("addCT", "SpatialDataElement", \(x, name, type, data) {
       coordinateTransformations = list(
         list(
           scale = vapply(axes, \(.){
-            if(. == "c") 1 else 1/(2^as.numeric(p))
+            if(. == "c") 1 else (2^as.numeric(p))
           }, numeric(1)),
           type = "scale" 
         )
@@ -305,16 +305,6 @@ setMethod("addCT", "SpatialDataElement", \(x, name, type, data) {
       path = p
     )
   }, paths, USE.NAMES = FALSE, SIMPLIFY = FALSE)
-  # list(
-  #     list(
-  #   coordinateTransformations = list(
-  #     list(
-  #       scale = list(rep(1, length(axes))),
-  #       type = "scale"
-  #     )
-  #   ), 
-  #   path = "0"
-  # ))
 }
 
 #' @rdname coord-utils

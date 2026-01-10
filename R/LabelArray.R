@@ -18,6 +18,9 @@
 #' @param meta \code{\link{Zattrs}}
 #' @param metadata optional list of arbitrary 
 #'   content describing the overall object.
+#' @param multiscale if TRUE (and \code{data} is not a list), 
+#' multiscale image will be generated.
+#' @param axes axes
 #' @param i,j indices specifying elements to extract.
 #' @param drop ignored.
 #' @param ... option arguments passed to and from other methods.
@@ -30,7 +33,20 @@
 #' @importFrom S4Vectors metadata<-
 #' @importFrom methods new
 #' @export
-LabelArray <- function(data=array(), meta=Zattrs(), metadata=list(), ...) {
+LabelArray <- function(data=array(), meta=Zattrs(), metadata=list(), 
+                       multiscale = FALSE, axes = NULL, ...) {
+    if(!is.list(data)){
+      if(multiscale){
+        data <- .generate_multiscale(data, axes = axes)
+      } else {
+        data <- list(DelayedArray::DelayedArray(data))
+      }
+    }
+    if(length(meta) < 1){
+      meta <- .make_label_meta(data, 
+                               version = 0.4, 
+                               axes = axes)
+    } 
     x <- .LabelArray(data=data, meta=meta, ...)
     metadata(x) <- metadata
     return(x)

@@ -16,6 +16,8 @@ writePoint(x, name, path, replace = TRUE, version = "v2")
 writeShape(x, name, path, replace = TRUE, version = "v2")
 
 writeImage(x, name, path, replace = TRUE, version = "v2")
+
+writeLabel(x, name, path, replace = TRUE, version = "v2")
 }
 \arguments{
 \item{x}{For \code{writeSpatialData},
