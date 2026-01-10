@@ -46,6 +46,11 @@ writeSpatialData <- function(x, name, path, replace = TRUE, version = "v2",
   . <- lapply(shapeNames(x), \(.){
     writeShape(shape(x, .),., path = zarr.path, replace = replace)
   })
+  
+  # write images
+  . <- lapply(imageNames(x), \(.){
+    writeImage(image(x, .),., path = zarr.path, replace = replace)
+  })
 }
 
 #' @rdname writeSpatialData
@@ -68,4 +73,23 @@ writeShape <- function(x, name, path, replace = TRUE, version = "v2") {
   write_zattrs(path = zarr.group, meta(x))
   # write data
   arrow::write_dataset(data(x), file.path(zarr.group, "shapes.parquet"))
+}
+
+#' @rdname writeSpatialData
+#' @export
+writeImage <- function(x, name, path, replace = TRUE, version = "v2") {
+  # if no PointFrames were written before, update zarr store
+  zarr.group <- .make_zarr_group(x, name, file.path(path, "images"), replace, version)
+  # write meta
+  write_zattrs(path = zarr.group, meta(x))
+  # write data
+  lapply(
+    .get_multiscales_dataset_paths(meta(x)),
+    \(.){
+      da <- data(x, . + 1)
+      Rarr::write_zarr_array(realize(da), 
+                             zarr_array_path = file.path(zarr.group, .), 
+                             chunk_dim = dim(da))
+    }
+  )
 }

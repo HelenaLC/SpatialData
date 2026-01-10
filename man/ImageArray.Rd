@@ -8,7 +8,14 @@
 \alias{[,ImageArray,ANY,ANY,ANY-method}
 \title{The `ImageArray` class}
 \usage{
-ImageArray(data = list(), meta = Zattrs(), metadata = list(), ...)
+ImageArray(
+  data = list(),
+  meta = Zattrs(),
+  metadata = list(),
+  multiscale = FALSE,
+  axes = NULL,
+  ...
+)
 
 \S4method{channels}{ImageArray}(x, ...)
 
@@ -23,6 +30,11 @@ ImageArray(data = list(), meta = Zattrs(), metadata = list(), ...)
 
 \item{metadata}{optional list of arbitrary 
 content describing the overall object.}
+
+\item{multiscale}{if TRUE (and \code{data} is not a list), 
+multiscale image will be generated.}
+
+\item{axes}{axes}
 
 \item{...}{option arguments passed to and from other methods.}
 

@@ -19,6 +19,7 @@
 #' @param x \code{SpatialData}
 #' @param i,j character string, scalar or vector of indices
 #'   specifying the element to extract from a given layer.
+#'   
 #' @param drop ignored.
 #' @param name character string for extraction (see \code{?base::`$`}).
 #' @param value (list of) element(s) with layer-compliant object(s), 
