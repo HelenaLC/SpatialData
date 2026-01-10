@@ -52,7 +52,8 @@ setMethod("length", "sdArray", \(x) length(data(x, NULL)))
 .generate_multiscale <- function(image,
                                  scalefactor = 2,
                                  axes, 
-                                 max_layer = 5){
+                                 max_layer = 5, 
+                                 method = "image"){
   
   # check dim
   ndim <- length(dim(image))
@@ -78,7 +79,10 @@ setMethod("length", "sdArray", \(x) length(data(x, NULL)))
       image_list[[i]] <- 
         aperm(EBImage::resize(cur_image,
                               w = dim_image[1],
-                              h = dim_image[2]), 
+                              h = dim_image[2],
+                              filter = switch(method, 
+                                              image = "bilinear",
+                                              label = "none")), 
               perm = rev(seq_len(length(axes))))
     }
   }

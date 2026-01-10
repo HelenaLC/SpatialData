@@ -37,7 +37,7 @@ LabelArray <- function(data=array(), meta=Zattrs(), metadata=list(),
                        multiscale = FALSE, axes = NULL, ...) {
     if(!is.list(data)){
       if(multiscale){
-        data <- .generate_multiscale(data, axes = axes)
+        data <- .generate_multiscale(data, axes = axes, method = "label")
       } else {
         data <- list(DelayedArray::DelayedArray(data))
       }
