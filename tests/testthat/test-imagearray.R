@@ -3,26 +3,31 @@ rgb <- seq_len(255)
 test_that("ImageArray()", {
     val <- sample(rgb, 3*20*20, replace=TRUE)
     mat <- array(val, dim=c(3, 20, 20))
-    # invalid
-    # TODO: these arrays do not give error anymore
-    # since ImageArray can create in-memory objects
-    # expect_error(ImageArray(mat))
+    expect_silent(ImageArray(mat, axes = c("c", "y", "x")))
+    # invalid, need to define axes
+    expect_error(ImageArray(mat))
     expect_error(ImageArray(mat, 1))
-    # expect_error(ImageArray(mat, list()))
+    expect_error(ImageArray(mat, list()))
+
     # single scale
-    expect_silent(ImageArray(list()))
-    expect_silent(ImageArray(list(mat)))
-    expect_silent(ImageArray(list(mat), Zattrs()))
+    # empty ImageArray is not accepted anymore!
+    expect_error(ImageArray(list()))
+    expect_error(ImageArray(list(mat)))
+    expect_error(ImageArray(list(), Zattrs()))
+    expect_silent(ImageArray(list(mat), axes = c("c", "y", "x")))
+    
     # multiscale
+    # only for ImageArray with 2 dimensions, we can guess the dimensions
     dim <- lapply(c(20, 10, 5), \(.) c(3, rep(., 2)))
     lys <- lapply(dim, \(.) array(sample(rgb, prod(.), replace=TRUE), dim=.))
-    expect_silent(ImageArray(lys))
+    expect_error(ImageArray(lys))
+    expect_silent(ImageArray(lys, axes = c("c", "y", "x")))
 })
 
 test_that("data(),ImageArray", {
     dim <- lapply(c(8, 4, 2), \(.) c(3, rep(., 2)))
     lys <- lapply(dim, \(.) array(0, dim=.))
-    img <- ImageArray(lys)
+    img <- ImageArray(lys, axes = c("c", "y", "x"))
     for (. in seq_along(lys))
         expect_identical(data(img, .), lys[[.]])
     expect_identical(data(img, Inf), lys[[3]])
@@ -50,7 +55,7 @@ test_that("create", {
                dim = c(3,100,100))
   
   # make image array
-  imgarray <- ImageArray(img)
+  imgarray <- ImageArray(img, axes = c("c", "y", "x"))
   expect_identical(realize(data(imgarray)), img)
   expect_identical(dim(imgarray),dim(img))
   
@@ -81,7 +86,7 @@ test_that("write", {
                dim = c(3,100,100))
   
   # make image array
-  imgarray <- ImageArray(img)
+  imgarray <- ImageArray(img, axes = c("c", "y", "x"))
   sd <- SpatialData(images = list(test_image = imgarray))
   
   # write to location

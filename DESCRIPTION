@@ -51,20 +51,22 @@ Imports:
     S4Vectors,
     SingleCellExperiment,
     SummarizedExperiment,
-    zellkonverter
+    zellkonverter,
+    EBImage,
+    stringr
 Suggests:
     BiocStyle,
     ggnewscale,
     knitr,
     magick,
-    EBImage
     patchwork,
     paws,
     Rgraphviz,
     SpatialData.data,
     SpatialData.plot,
     testthat,
-    DT
+    DT,
+    dplyr
 Enhances:
     anndataR,
     pizzarr

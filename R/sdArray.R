@@ -45,6 +45,7 @@ setMethod("length", "sdArray", \(x) length(data(x, NULL)))
 #' Generate a downsampled pyramid of images.
 #'
 #' @importFrom EBImage resize
+#' @importFrom stats setNames
 #' 
 #' @inheritParams write_image
 #' 
@@ -62,7 +63,7 @@ setMethod("length", "sdArray", \(x) length(data(x, NULL)))
   }
   
   # validate axes
-  axes <- .get_valid_axes(ndim = length(dim(image)), 
+  axes <- .get_valid_axes(image, 
                           axes = axes)
   
   # get x y dimensions for EBImage
@@ -87,43 +88,4 @@ setMethod("length", "sdArray", \(x) length(data(x, NULL)))
     }
   }
   image_list
-}
-
-#' .get_valid_axes
-#' 
-#' Get validated axes
-#'
-#' @inheritParams write_image
-#' 
-#' @noRd
-.get_valid_axes <- function(
-    ndim = NULL,
-    axes = NULL
-) {
-  
-  # We can guess axes for 2D and 5D data
-  if (is.null(axes)) {
-    if (!is.null(ndim) && ndim == 2) {
-      axes <- c("y", "x")
-      message(sprintf("Auto using axes %s for 2D data", 
-                      paste(axes, collapse = ", ")))
-    } else {
-      stop("axes must be provided. Can't be guessed for 3D or 4D data", 
-           call. = FALSE)
-    }
-  }
-  
-  # axes may be string e.g. "tczyx"
-  if (is.character(axes) && length(axes) == 1L) 
-    axes <- strsplit(axes, "", fixed = TRUE)[[1]]
-  
-  if (!is.null(ndim) && length(axes) != ndim) {
-    stop(
-      sprintf("axes length (%d) must match number of dimensions (%d)", 
-              length(axes), ndim),
-      call. = FALSE
-    )
-  }
-  
-  axes
 }

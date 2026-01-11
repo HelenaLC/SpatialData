@@ -69,13 +69,7 @@ read_zattrs <- function(path, s3_client = NULL) {
     stop("The group or array does not contain attributes (.zattrs)")
   
   if (!is.null(s3_client)) {
-    
-    parsed_url <- parse_s3_path(zattrs_path)
-    
-    s3_object <- s3_client$get_object(Bucket = parsed_url$bucket, 
-                                      Key = parsed_url$object)
-    
-    zattrs <- fromJSON(rawToChar(s3_object$Body), simplifyVector = TRUE)
+    stop("no s3 support!")
   } else {
     zattrs <- read_json(zattrs_path, simplifyVector = TRUE)
   }

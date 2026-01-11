@@ -1,4 +1,5 @@
 .make_pointshape_meta <- function(x, 
+                                  axes = NULL,
                                   encoding_type = "ngff:points",
                                   feature_key = NULL, 
                                   instance_key = NULL, 
@@ -9,8 +10,9 @@
   sa <- "spatial_attrs"
   
   # axis
-  meta[[ax]] <- c("x", "y")
-  meta[[ax]] <- if(ncol(x) == 3) c(meta[[ax]], "z") else meta[[ax]]
+  # NOTE: rev dimensions since points and shapes want x, y
+  # whereas images and labels want y, x, etc.
+  meta[[ax]] <- rev(.get_valid_axes(x, axes = axes, image = FALSE))
   
   # encoding type
   meta[["encoding-type"]] <- encoding_type
@@ -31,8 +33,8 @@
 }
 
 .make_image_meta <- function(x, 
-                                  axes = c("c", "y", "x"),
-                                  version = 0.4){
+                             axes = NULL,
+                             version = 0.4){
   meta <- list()
   ax <- "axes"
   ct <- "coordinateTransformations"
@@ -42,6 +44,7 @@
   n <- "name"
   
   # axis
+  axes <- .get_valid_axes(x, axes, image = TRUE)
   meta[[ax]] <- .make_axes_meta(axes, unit = FALSE)
   
   # coordinate transformations
@@ -89,6 +92,7 @@
   n <- "name"
   
   # axis
+  axes <- .get_valid_axes(x, axes, image = FALSE)
   if(is.null(axes)){
     axes <- c("y", "x")
     axes <- if(length(dim(x)) == 3) c("z", axes) else axes
@@ -119,3 +123,115 @@
   meta <- fromJSON(toJSON(meta, auto_unbox = TRUE), simplifyVector = TRUE)
   Zattrs(meta)
 }
+
+#' .get_valid_axes
+#' 
+#' Get validated axes
+#'
+#' @inheritParams write_image
+#' 
+#' @noRd
+.get_valid_axes <- function(
+    x,
+    axes = NULL,
+    image = FALSE
+) {
+  
+  # axes may be string e.g. "tczyx"
+  if (is.character(axes) && length(axes) == 1L) 
+    axes <- strsplit(axes, "", fixed = TRUE)[[1]]
+
+  # We can guess axes for images, labels, points/shapes
+  ndim <- length(.get_dim(x))
+  if (is.null(axes)) {
+    if (ndim == 2) {
+      axes <- c("y", "x")
+    } else {
+      if(image){
+        stop("axes must be provided. Can't be guessed beyond 2D image", 
+             call. = FALSE)
+      } else {
+        if(ndim == 3) {
+          axes <- c("z", "y", "x")
+        } else {
+          stop("axes must be provided. Can't be guessed beyond 2D or 3D data", 
+               call. = FALSE)
+        }
+      }
+    } 
+  } else {
+    if (length(axes) != ndim) {
+      stop(
+        sprintf("axes length (%d) must match number of dimensions (%d)", 
+                length(axes), ndim),
+        call. = FALSE
+      )
+    }
+  }
+  
+  axes
+}
+
+# TODO: what is the best way to get the inherint dimension of geometry 
+# objects
+
+.get_dim <- function(x){
+  if(is.list(x) && length(x) > 0 &&
+     !is.matrix(x) && !is.data.frame(x))
+    x <- x[[1]]
+  if("arrow_OR_df" %in% is(x)){
+    return(.get_arrow_dim(x))
+  } else if(!is.null(nd <- dim(x))) {
+    return(nd)
+  } else {
+    # TODO: I don't like this message!
+    stop("no dimensions!")
+  }
+}
+
+#' @importFrom sf st_as_sf st_geometry
+.get_arrow_dim <- function(x){
+  if("geometry" %in% colnames(x)){
+    sfx <- st_as_sf(x)
+    sfx <- st_geometry(sfx)
+    axes <- class(st_geometry(st_as_sf(sfx))[[1]])
+    if("XY" %in% axes){
+      n_col <- 2
+    } else if("XYZ" %in% axes){
+      n_col <- 3
+    } else{
+      stop("No geometry object is detected!")
+    } 
+  } else {
+    axes <- colnames(x)
+    axes <- axes[axes %in% c("x", "y", "z")]
+    n_col <- length(axes)
+  }
+  return(c(nrow(x), n_col))
+}
+
+#' #' @importFrom sf st_as_sf st_geometry
+#' .get_geoarrow_dim <- function(x){
+#'   meta <- .get_geoarrow_metadata(x)
+#'   if(length(meta) > 1){
+#'     if("geometry" %in% colnames(meta)){
+#'       bbox <- meta$geo$columns$geometry$bbox
+#'       n_col <- if(length(bbox) == 4) 2 else 3
+#'     } else {
+#'       n_col <- ncol(x)
+#'     } 
+#'   } else {
+#'     if("geometry" %in% colnames(x)){
+#'       geo <- st_geometry(st_as_sf(df))
+#'     } else{
+#'       stop("No geometry object is detected!")
+#'     }
+#'   }
+#'   return(c(nrow(x), n_col))
+#' }
+#' 
+#' #' @importFrom jsonlite fromJSON
+#' .get_geoarrow_metadata <- function(x){
+#'   lapply(x$metadata, fromJSON)
+#' }
+  

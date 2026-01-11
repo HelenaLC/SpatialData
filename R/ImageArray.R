@@ -31,7 +31,7 @@ ImageArray <- function(data=list(), meta=Zattrs(), metadata=list(),
                        multiscale=FALSE, axes = NULL, ...) {
     if(!is.list(data)){
       if(multiscale){
-        data <- .generate_multiscale_image(data, axes = axes, method = "image")
+        data <- .generate_multiscale(data, axes = axes, method = "image")
       } else {
         data <- list(DelayedArray::DelayedArray(data))
       }

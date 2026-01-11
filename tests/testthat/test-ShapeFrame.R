@@ -2,7 +2,7 @@ library(arrow)
 library(geoarrow)
 
 # make shape data
-df <- tibble(
+df <- arrow_table(
   geometry = geoarrow::as_geoarrow_vctr(
     c(
       "POLYGON ((4.53 2.11, 5.55 1.43, 5.78 1.33, 6.89 9.10, 4.30 4.15, 3.06 4.29, 4.53 2.11))",
@@ -12,7 +12,6 @@ df <- tibble(
     )
   )
 )
-df <- arrow_table(df)
 
 test_that("create polygon", {
   
@@ -66,7 +65,7 @@ test_that("write polygon", {
 })
 
 # make shape data
-df <- tibble(
+df <- arrow_table(
   geometry = geoarrow::as_geoarrow_vctr(
     c(
       "POINT (36.382774 24.6331748)",
@@ -77,7 +76,6 @@ df <- tibble(
   ),
   radius = c(4,4,4,4)
 )
-df <- arrow_table(df)
 
 test_that("create radius shapes", {
   
