@@ -51,8 +51,8 @@ allp = c("zarr==3.1.5", "spatialdata==0.7.0", "spatialdata_io==0.6.0",
 #'   The default, NULL, reads all elements; alternatively, may be FALSE 
 #'   to skip a layer, or a integer vector specifying which elements to read.
 #' @param anndataR logical specifying whether 
-#'   to use \code{anndataR} to read tables; defaults to FALSE in `readSpatialData`,
-#'   and `readTable`,
+#'   to use \code{anndataR} to read tables; 
+#'   defaults to FALSE in `readSpatialData`, and `readTable`,
 #'   so that pythonic \code{spatialdata} and \code{zellkonverter} are used.
 #' @param ... option arguments passed to and from other methods.
 #'
@@ -66,7 +66,7 @@ allp = c("zarr==3.1.5", "spatialdata==0.7.0", "spatialdata_io==0.6.0",
 #' library(SpatialData.data)
 #' dir.create(tf <- tempfile())
 #' base <- SpatialData.data:::.unzip_merfish_demo(tf)
-#' (x <- readSpatialData(base))
+#' (x <- readSpatialData(base, anndataR=TRUE))
 NULL
 
 readsdlayer <- function(x, ...) {
@@ -152,15 +152,10 @@ readShape <- function(x, ...) {
 .readTable_anndataR <- function(x) {
     if (!requireNamespace('anndataR', quietly=TRUE)) {
         stop("To use this function, install the 'anndataR' package via\n",
-            "`BiocManager::install(\"keller-mark/anndataR\", ref=\"spatialdata\")`")
-    }
-    if (!requireNamespace('pizzarr', quietly=TRUE)) {
-        stop("To use this function, install the 'pizzarr' package via\n",
-            "`BiocManager::install(\"keller-mark/pizzarr\")`")
+            "`BiocManager::install(\"keller-mark/anndataR\", ref=\"keller-mark/zarr\")`")
     }
     suppressWarnings({ # suppress warnings related to hidden files
-        adata <- anndataR::read_zarr(x)
-        anndataR::to_SingleCellExperiment(adata)
+        anndataR::read_zarr(x, as="SingleCellExperiment")
     })
 }
 
