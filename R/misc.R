@@ -102,3 +102,89 @@ setMethod("show", "PointFrame", .showPointFrame)
 
 #' @rdname misc
 setMethod("show", "ShapeFrame", .showShapeFrame)
+
+.showZattrsAxes <- function(object){
+  ax <- axes(object)
+  if(!is(ax, "data.frame"))
+    ax <- data.frame(name = ax)
+  cat(sprintf("axes(%d): \n", nrow(ax)))
+  for(. in seq_along(ax)){
+    cat(sprintf(paste0("- ", names(ax)[[.]], ": %s\n"),
+            paste(ax[[.]], collapse = " ")))
+  }
+}
+
+.showZattrsDatasets <- function(object){
+  if(!is.null(d <- datasets(object))){
+    coolcat("datasets(%d): %s\n", d$path)
+    ct <- vapply(d$coordinateTransformations, \(x)
+                 paste(
+                   apply(x, 1, \(y)
+                         paste0("(", x$type, ":", "[",
+                                paste(x[[x$type]][[1]], collapse = ","), 
+                                "]", ")")
+                   ), collapse = ", "
+                 ),
+                 character(1))
+    for(. in seq_along(ct)){
+      cat(sprintf("- %s: %s", d$path[.], ct[.]), "\n")
+    }
+  }
+}
+
+.collapse_trans_data <- function(data){
+  if(is.null(data)){
+    return(NULL)
+  } else if(is.matrix(data)){
+    return(
+      paste0("[", 
+             paste(
+               apply(data, 1, \(x){
+                 paste0("[",
+                        paste(x, collapse = ","),
+                        "]")
+               }),
+               collapse = ","), 
+             "]")
+    )
+  } else{
+    return(paste0("[",paste(data, collapse = ","), "]"))
+  }
+}
+  
+.showZattrsTransformations <- function(object){
+  ctdata.name <- CTname(object)
+  cat(sprintf("coordTrans(%d):\n", length(ctdata.name)))
+  for(. in seq_along(ctdata.name)){
+    ct <- CTpath(object, ctdata.name[[.]])
+    cat(sprintf(paste0("- ", ctdata.name[[.]],": ", 
+                       paste(
+                         vapply(ct, \(x) {
+                           paste0("(", 
+                                  x$type, 
+                                  if(!is.null(x$data)) 
+                                    paste0(":", .collapse_trans_data(x$data)),
+                                  ")") 
+                         }, character(1)),
+                       collapse = ", "),
+                       "\n")))
+  }
+}
+
+#' @importFrom S4Vectors coolcat
+.showZattrs <- function(object) {
+  cat("class: Zattrs\n")
+  # axes
+  .showZattrsAxes(object)
+  # transformations
+  # coolcat("transformations(%d): %s\n", CTname(object))
+  .showZattrsTransformations(object)
+  # datasets
+  .showZattrsDatasets(object)
+  # channel
+  if(!is.null(c <- channels(object)))
+    coolcat("channels(%d): %s\n", channels(object))
+}
+
+#' @rdname misc
+setMethod("show", "Zattrs", .showZattrs)
