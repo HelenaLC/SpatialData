@@ -54,7 +54,8 @@ Imports:
     SingleCellExperiment,
     SummarizedExperiment,
     EBImage,
-    stringr
+    stringr,
+    jsonlite
 Suggests:
     BiocStyle,
     ggnewscale,
