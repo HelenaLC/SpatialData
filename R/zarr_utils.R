@@ -9,23 +9,25 @@
 create_zarr_group <- function(store, name, version = "v2"){
   split.name <- strsplit(name, split = "\\/")[[1]]
   if(length(split.name) > 1){
-    split.name <- vapply(seq_len(length(split.name)), 
-                         function(x) paste(split.name[seq_len(x)], collapse = "/"), 
-                         FUN.VALUE = character(1)) 
+    split.name <- vapply(seq_len(length(split.name)),
+                         function(x) paste(split.name[seq_len(x)], collapse = "/"),
+                         FUN.VALUE = character(1))
     split.name <- rev(tail(split.name,2))
     if(!dir.exists(file.path(store,split.name[2])))
-      create_zarr_group(store = store, name = split.name[2])
+      create_zarr_group(store = store, name = split.name[2], version = version)
   }
   dir.create(file.path(store, split.name[1]), showWarnings = FALSE)
-  switch(version, 
+  switch(version,
          v2 = {
            write("{\"zarr_format\":2}", file = file.path(store, split.name[1], ".zgroup"))},
          v3 = {
-           stop("Currently only zarr v2 is supported!") 
+           write(
+             "{\"zarr_format\":3,\"node_type\":\"group\",\"attributes\":{}}",
+             file = file.path(store, split.name[1], "zarr.json"))
          },
-         stop("only zarr v2 is supported. Use version = 'v2'")
+         stop("version must be 'v2' or 'v3'")
   )
-  
+
 }
 
 #' create_zarr
@@ -63,16 +65,25 @@ create_zarr <- function(name, dir, version = "v2"){
 #' @export
 read_zattrs <- function(path, s3_client = NULL) {
   path <- .normalize_array_path(path)
-  zattrs_path <- paste0(path, ".zattrs")
-  
-  if(!file.exists(zattrs_path))
-    stop("The group or array does not contain attributes (.zattrs)")
-  
-  if (!is.null(s3_client)) {
+
+  if (!is.null(s3_client))
     stop("no s3 support!")
-  } else {
+
+  zarr_json_path <- paste0(path, "zarr.json")
+  zattrs_path    <- paste0(path, ".zattrs")
+
+  if (file.exists(zarr_json_path)) {
+    # zarr v3: attributes are nested under the "attributes" key in zarr.json
+    parsed <- read_json(zarr_json_path, simplifyVector = TRUE)
+    zattrs <- parsed[["attributes"]]
+    if (is.null(zattrs)) zattrs <- list()
+  } else if (file.exists(zattrs_path)) {
+    # zarr v2: standalone .zattrs file
     zattrs <- read_json(zattrs_path, simplifyVector = TRUE)
+  } else {
+    stop("The group or array does not contain attributes (.zattrs or zarr.json)")
   }
+
   return(zattrs)
 }
 
@@ -88,28 +99,44 @@ read_zattrs <- function(path, s3_client = NULL) {
 #' @export
 write_zattrs <- function(path, new.zattrs = list(), overwrite = TRUE){
   path <- .normalize_array_path(path)
-  zattrs_path <- paste0(path, ".zattrs")
-  
+
   if(is.null(names(new.zattrs)))
     stop("list elements should be named")
-  
+
   if("" %in% names(new.zattrs)){
     message("Ignoring unnamed list elements")
     new.zattrs <- new.zattrs[which(names(new.zattrs == ""))]
   }
-  
-  if(file.exists(zattrs_path)){
-    old.zattrs <- read_json(zattrs_path)
-    if(overwrite){
+
+  zarr_json_path <- paste0(path, "zarr.json")
+  zattrs_path    <- paste0(path, ".zattrs")
+
+  if (file.exists(zarr_json_path)) {
+    # zarr v3: merge new.zattrs into the "attributes" key of zarr.json
+    parsed <- read_json(zarr_json_path)
+    old.zattrs <- if (!is.null(parsed[["attributes"]])) parsed[["attributes"]] else list()
+    if (overwrite) {
       old.zattrs <- old.zattrs[setdiff(names(old.zattrs), names(new.zattrs))]
     } else {
-      new.zattrs <- new.zattrs[setdiff(names(new.zattrs), names(old.zattrs))] 
+      new.zattrs <- new.zattrs[setdiff(names(new.zattrs), names(old.zattrs))]
     }
-    new.zattrs <- c(old.zattrs, new.zattrs)
+    parsed[["attributes"]] <- c(old.zattrs, new.zattrs)
+    json <- toJSON(parsed, auto_unbox = TRUE, pretty = TRUE, null = "null")
+    write(x = json, file = zarr_json_path)
+  } else {
+    # zarr v2: standalone .zattrs file
+    if (file.exists(zattrs_path)) {
+      old.zattrs <- read_json(zattrs_path)
+      if (overwrite) {
+        old.zattrs <- old.zattrs[setdiff(names(old.zattrs), names(new.zattrs))]
+      } else {
+        new.zattrs <- new.zattrs[setdiff(names(new.zattrs), names(old.zattrs))]
+      }
+      new.zattrs <- c(old.zattrs, new.zattrs)
+    }
+    json <- .format_json(toJSON(new.zattrs, auto_unbox = TRUE, pretty = TRUE, null = "null"))
+    write(x = json, file = zattrs_path)
   }
-  
-  json <- .format_json(toJSON(new.zattrs, auto_unbox = TRUE, pretty = TRUE, null = "null"))
-  write(x = json, file = zattrs_path)
 }
 
 .replace_zarr <- function(name, path, replace, version = "v2")
