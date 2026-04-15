@@ -1,5 +1,7 @@
 # `SpatialData`
 
+[![x](https://github.com/HelenaLC/SpatialData/actions/workflows/check-bioc.yml/badge.svg?branch=main&event=push)](https://github.com/HelenaLC/SpatialData/actions/workflows/check-bioc.yml)
+
 > for a demo of the class, see the [vignette](https://htmlpreview.github.io/?https://github.com/HelenaLC/SpatialData/blob/main/vignettes/SpatialData.html)
 
 > for visualization capabilites, see [`SpatialData.plot`](https://github.com/HelenaLC/SpatialData.plot)

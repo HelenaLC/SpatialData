@@ -22,18 +22,6 @@ setGeneric("shapeNames", \(x, ...) standardGeneric("shapeNames"))
 setGeneric("pointNames", \(x, ...) standardGeneric("pointNames"))
 setGeneric("tableNames", \(x, ...) standardGeneric("tableNames"))
 
-setMethod("images", "SpatialData", \(x) x$images)
-setMethod("labels", "SpatialData", \(x) x$labels)
-setMethod("shapes", "SpatialData", \(x) x$shapes)
-setMethod("points", "SpatialData", \(x) x$points)
-setMethod("tables", "SpatialData", \(x) x$tables)
-
-setMethod("imageNames", "SpatialData", \(x) names(images(x)))
-setMethod("labelNames", "SpatialData", \(x) names(labels(x)))
-setMethod("shapeNames", "SpatialData", \(x) names(shapes(x)))
-setMethod("pointNames", "SpatialData", \(x) names(points(x)))
-setMethod("tableNames", "SpatialData", \(x) names(tables(x)))
-
 # set one -----
 
 setGeneric("image<-", \(x, i, ..., value) standardGeneric("image<-"))
@@ -52,7 +40,7 @@ setGeneric("tables<-", \(x, value) standardGeneric("tables<-"))
 
 # trs ----
 
-setGeneric("axes", \(x, ...) standardGeneric("axes"))
+setGeneric("CTlist", \(x, ...) standardGeneric("CTlist"))
 setGeneric("CTdata", \(x, ...) standardGeneric("CTdata"))
 setGeneric("CTname", \(x, ...) standardGeneric("CTname"))
 setGeneric("CTtype", \(x, ...) standardGeneric("CTtype"))
@@ -68,6 +56,17 @@ setGeneric("rotate", \(x, t, ...) standardGeneric("rotate"))
 setGeneric("transform", \(x, ...) standardGeneric("transform"))
 setGeneric("translation", \(x, t, ...) standardGeneric("translation"))
 
+setGeneric("flip", \(x, ...) standardGeneric("flip"))
+setGeneric("flop", \(x, ...) standardGeneric("flop"))
+setGeneric("mirror", \(x, ...) standardGeneric("mirror"))
+
+# sda ----
+
+setGeneric("region", \(x, ...) standardGeneric("region"))
+setGeneric("region_key", \(x, ...) standardGeneric("region_key"))
+setGeneric("feature_key", \(x, ...) standardGeneric("feature_key"))
+setGeneric("instance_key", \(x, ...) standardGeneric("instance_key"))
+
 # uts ----
 
 setGeneric("layer", \(x, i, ...) standardGeneric("layer"))
@@ -79,7 +78,13 @@ setGeneric("meta", \(x, ...) standardGeneric("meta"))
 setGeneric("query", \(x, ...) standardGeneric("query"))
 setGeneric("mask", \(x, i, j, ...) standardGeneric("mask"))
 
+setGeneric("axes", \(x, ...) standardGeneric("axes"))
+setGeneric("extent", \(x, ...) standardGeneric("extent"))
 setGeneric("channels", \(x, ...) standardGeneric("channels"))
+setGeneric("centroids", \(x, ...) standardGeneric("centroids"))
+setGeneric("data_type", \(x, ...) standardGeneric("data_type"))
+setGeneric("geom_type", \(x, ...) standardGeneric("geom_type"))
+setGeneric("multiscales", \(x, ...) standardGeneric("multiscales"))
 
 # tbl ----
 

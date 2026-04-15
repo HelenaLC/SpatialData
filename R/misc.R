@@ -1,16 +1,33 @@
 #' @name misc
-#' @title Miscellaneous `Miro` methods
-#' @description ...
-#'
-#' @param object \code{\link{SpatialData}} object or one of its 
-#'   elements, i.e., an Image/LabelArray or Point/ShapeFrame.
+#' @title Miscellaneous `SpatialData` methods
+#' @aliases show,SpatialData-method
+#' 
+#' @description 
+#' Miscellaneous methods (e.g., \code{show}) for the
+#' \code{\link{SpatialData}} class and its elements.
+#' 
+#' @param object 
+#'   \code{\link{SpatialData}} object or one of its elements,
+#'   i.e., an \code{Image/LabelArray} or \code{Point/ShapeFrame}.
 #'
 #' @return \code{NULL}
 #'
 #' @author Helena L. Crowell
 #'
 #' @examples
-#' # TODO
+#' zs <- file.path("extdata", "blobs.zarr")
+#' zs <- system.file(zs, package="SpatialData")
+#' (sd <- readSpatialData(zs, anndataR=TRUE))
+#' 
+#' # show element
+#' image(sd)
+#' label(sd)
+#' point(sd)
+#' shape(sd)
+#' 
+#' # show .zattrs
+#' meta(label(sd))
+#' meta(image(sd, 2))
 NULL
 
 #' @importFrom RBGL sp.between
@@ -55,11 +72,12 @@ NULL
     for (. in seq_along(t)) 
         cat(sprintf("  - %s (%s)\n", t[.], d[.]))
     # spaces
-    cat("coordinate systems:\n")
     e <- c(i, l, s, p)
     g <- CTgraph(object)
     t <- nodeData(g, nodes(g), "type")
-    for (c in nodes(g)[t == "space"]) {
+    n <- sum(i <- (t == "space"))
+    cat(sprintf("coordinate systems(%s):\n", n))
+    for (c in nodes(g)[i]) {
         pa <- suppressWarnings(sp.between(g, e, c))
         ss <- strsplit(names(pa), ":")
         ss <- ss[vapply(pa, \(.) !is.na(.$length), logical(1))]

@@ -5,7 +5,15 @@
 \alias{scale}
 \alias{rotate}
 \alias{translation}
-\alias{scale,ImageArray,numeric-method}
+\alias{flip}
+\alias{flop}
+\alias{mirror}
+\alias{mirror,sdArray-method}
+\alias{flip,sdArray-method}
+\alias{flop,sdArray-method}
+\alias{scale,sdArray,numeric-method}
+\alias{rotate,sdArray,numeric-method}
+\alias{translation,sdArray,numeric-method}
 \alias{scale,PointFrame,numeric-method}
 \alias{rotate,PointFrame,numeric-method}
 \alias{translation,PointFrame,numeric-method}
@@ -14,7 +22,17 @@
 \alias{translation,ShapeFrame,numeric-method}
 \title{Transformations}
 \usage{
-\S4method{scale}{ImageArray,numeric}(x, j, t, ...)
+\S4method{mirror}{sdArray}(x, t = c("v", "h"), k = 1, ...)
+
+\S4method{flip}{sdArray}(x, k = 1, ...)
+
+\S4method{flop}{sdArray}(x, k = 1, ...)
+
+\S4method{scale}{sdArray,numeric}(x, t, k = 1, ...)
+
+\S4method{rotate}{sdArray,numeric}(x, t, k = 1, ...)
+
+\S4method{translation}{sdArray,numeric}(x, t, k = 1, ...)
 
 \S4method{scale}{PointFrame,numeric}(x, t, ...)
 
@@ -29,14 +47,20 @@
 \S4method{translation}{ShapeFrame,numeric}(x, t, ...)
 }
 \arguments{
-\item{x}{\code{SpatialData} element}
+\item{x}{\code{SpatialData} element.}
 
-\item{j}{scalar character or numeric; 
-name or index of coordinate space.}
+\item{t}{transformation data; exceptions: for \code{mirror}, controls
+whether to perform \bold{v}ertical or \bold{h}orizontal reflection;
+no data is needed for \code{flip} (\bold{v}) and \code{flop} (\bold{h}).}
 
-\item{t}{transformation data.}
+\item{k}{scalar index specifying which scale to use; 
+\code{Inf} to use lowest available resolution;
+only applies to \code{sdArray}s (images, labels).}
 
 \item{...}{option arguments passed to and from other methods.}
+}
+\value{
+\code{SpatialData} element with transformation(s) applied.
 }
 \description{
 Transformations
@@ -48,14 +72,14 @@ x <- readSpatialData(x, tables=FALSE)
 
 # image
 y <- x
-image(y) <- scale(image(y), 1, c(1, 1, 1/3))
-CTpath(image(x), "global")
-CTpath(image(y), "global")
+image(y) <- scale(image(y), c(1, 1, 1/3))
+dim(image(x))
+dim(image(y))
   
 # point
 y <- x
 point(y, "rot") <- rotate(point(y), 20)
-point(y, "wide") <- scale(point(y), c(1, 1.2))
+point(y, "wide") <- scale(point(y), c(1.2, 1))
 
 xy0 <- as.data.frame(point(y))
 xy1 <- as.data.frame(point(y, "rot"))
@@ -68,8 +92,7 @@ points(xy2[, c(1, 2)], col=4)
 # shape
 y <- x
 shape(y, "rot") <- rotate(shape(y), 5)
-shape(y, "high") <- scale(shape(y), c(1.2, 1))
+shape(y, "wide") <- scale(shape(y), c(1.2, 1))
 shape(y, "left") <- translation(shape(y), c(-5, 0))
-
-graph::plot(CTgraph(y))
+y["shapes", c("rot", "wide", "left")]
 }

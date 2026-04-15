@@ -37,7 +37,8 @@ test_that("filter", {
     n <- length(p <- point(x))
     expect_length(filter(p), n)
     expect_length(filter(p, x > Inf), 0)
-    expect_error(filter(p, z == 1))
+    f <- \() filter(p, z == 1)
+    expect_error(show(f()))
 })
 
 test_that("select", {
@@ -45,7 +46,8 @@ test_that("select", {
     replicate(3, {
         n <- sample(ncol(p), 1)
         i <- sample(names(p), n)
-        y <- select(p, i); z <- data(p)[, i]
+        y <- select(p, all_of(i))
+        z <- data(p)[, i]
         expect_equal(collect(data(y)), collect(z))
     })
 })

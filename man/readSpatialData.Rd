@@ -26,7 +26,7 @@ readSpatialData(
   points = TRUE,
   shapes = TRUE,
   tables = TRUE,
-  anndataR = FALSE
+  anndataR = TRUE
 )
 }
 \arguments{
@@ -42,9 +42,9 @@ The default, NULL, reads all elements; alternatively, may be FALSE
 to skip a layer, or a integer vector specifying which elements to read.}
 
 \item{anndataR}{logical specifying whether 
-to use \code{anndataR} to read tables; defaults to FALSE in `readSpatialData`,
-and `readTable`,
-so that pythonic \code{spatialdata} and \code{zellkonverter} are used.}
+to use \code{anndataR} to read tables; 
+defaults to FALSE in `readSpatialData`, and `readTable`,
+so that pythonic \code{anndata} are used.}
 }
 \value{
 \itemize{
@@ -57,7 +57,16 @@ Reading `SpatialData`
 }
 \examples{
 library(SpatialData.data)
-dir.create(tf <- tempfile())
-base <- SpatialData.data:::.unzip_merfish_demo(tf)
-(x <- readSpatialData(base))
+zs <- get_demo_SDdata("merfish")
+
+# read complete Zarr store
+(sd <- readSpatialData(zs, anndataR=TRUE))
+
+# helper that gets path to first element in layer 'l' 
+fn <- \(l) list.files(file.path(zs, l), full.names=TRUE)[1]
+  
+# read individual element  
+readImage(fn("images"))
+readShape(fn("shapes"))
+readPoint(fn("points"))
 }

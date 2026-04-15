@@ -17,17 +17,23 @@ do_tx_to_ext(srcdir, dest, coordinate_system, ...)
 can include "maintain_positioning" (logical (1)) or numerics for
 target_unit_to_pixels, target_width, target_height, target_depth.}
 }
+\value{
+\code{SpatialData} object.
+}
 \description{
 Use Python's 'spatialdata' 'transform_to_data_extent' on a spatialdata zarr store
 }
 \examples{
 src <- system.file("extdata", "blobs.zarr", package="SpatialData")
 td <- tempfile()
-do_tx_to_ext(
-  srcdir=src, dest=td, 
-  coordinate_system="global",
-  maintain_positioning=FALSE, 
-  target_width=400.)
-(sd <- readSpatialData(td))
+# TODO: for now this example converts to a zarr v3 so we comment out, 
+# check again later
+
+# do_tx_to_ext(
+#  srcdir=src, dest=td, 
+#  coordinate_system="global",
+#  maintain_positioning=FALSE, 
+#  target_width=400.)
+# (sd <- readSpatialData(td))
 
 }

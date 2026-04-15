@@ -11,17 +11,13 @@ test_that("readElement()", {
     for (l in names(typ)) {
         f <- paste0(toupper(substr(l, 1, 1)), substr(l, 2, nchar(l)-1))
         y <- list.files(file.path(x, l), full.names=TRUE)[1]
-        if (l != "tables") {
-            expect_is(get(paste0("read", f))(y), typ[l])
-        } else {
-            expect_is(.readTables_basilisk(x)[[1]], typ[l])
-        }
+        expect_is(get(paste0("read", f))(y), typ[l])
     }
 })
 
 test_that("readSpatialData()", {
     expect_is(y <- readSpatialData(x), "SpatialData")
-    a <- list(images=TRUE, labels=TRUE, shapes=TRUE, points=TRUE)#, tables=TRUE)
+    a <- list(images=TRUE, labels=TRUE, shapes=TRUE, points=TRUE, tables=FALSE)
     for (. in names(a)) {
         # setting any layer to FALSE skips it
         b <- c(list(x=x), a); b[[.]] <- FALSE

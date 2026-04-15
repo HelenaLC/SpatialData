@@ -14,7 +14,7 @@
 #' }
 #'
 #' @param x \code{LabelArray}
-#' @param data list of \code{\link[Rarr]{ZarrArray}}s
+#' @param data list of \code{\link[ZarrArray]{ZarrArray}}s
 #' @param meta \code{\link{Zattrs}}
 #' @param metadata optional list of arbitrary 
 #'   content describing the overall object.
@@ -28,12 +28,18 @@
 #' @return \code{LabelArray}
 #'
 #' @examples
-#' # TODO
+#' x <- file.path("extdata", "blobs.zarr")
+#' x <- system.file(x, package="SpatialData")
+#' x <- file.path(x, "labels", "blobs_labels")
+#' 
+#' (y <- readLabel(x))
+#' y[1:10, 1:10]
+#' meta(y)
 #'
 #' @importFrom S4Vectors metadata<-
 #' @importFrom methods new
 #' @export
-LabelArray <- function(data=array(), meta=Zattrs(), metadata=list(), 
+LabelArray <- function(data=list(), meta=Zattrs(), metadata=list(), 
                        multiscale = FALSE, axes = NULL, ...) {
     if(!is.list(data)){
       if(multiscale){
