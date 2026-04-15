@@ -41,7 +41,17 @@
 }
 
 # metadata constructors ----
-
+#' @title Make point/shape metadata
+#' @description Make point/shape metadata
+#' @param x A points or shapes object
+#' @param axes A character vector of axes names
+#' @param encoding_type A string specifying the encoding type
+#' @param feature_key A string specifying the feature key
+#' @param instance_key A string specifying the instance key
+#' @param version A string specifying the version
+#' @return A list of metadata for the point/shape object
+#' @importFrom jsonlite fromJSON toJSON
+#' @noRd
 .make_pointshape_meta <- function(x,
                                   axes = NULL,
                                   encoding_type = "ngff:points",
@@ -51,7 +61,7 @@
   meta <- list()
   ax <- "axes"
   ct <- "coordinateTransformations"
-  sa <- "spatial_attrs"
+  sa <- "spatialdata_attrs"
   
   # axis
   # NOTE: rev dimensions since points and shapes want x, y
@@ -72,10 +82,20 @@
   meta[[ct]] <- .make_empty_ct(meta[[ax]])
   
   # update json list
-  meta <- fromJSON(toJSON(meta, auto_unbox = TRUE), simplifyVector = TRUE)
+  meta <- fromJSON(toJSON(meta, auto_unbox = TRUE), simplifyVector = FALSE)
   Zattrs(meta)
 }
+# TODO: make it the functions take a global option e.g. sd_zarr_version
+# as an argument for the default zarr version
 
+#' @title Make image metadata
+#' @description Make image metadata
+#' @param x An image object
+#' @param axes A character vector of axes names
+#' @param version A string specifying the version
+#' @return A list of metadata for the image object
+#' @importFrom jsonlite fromJSON toJSON
+#' @noRd
 .make_image_meta <- function(x, 
                              axes = NULL,
                              version = 0.4){
@@ -113,18 +133,26 @@
   meta[[v]] <-  list(version = version)
   
   # multiscales
-  meta <- list(multiscales = list(meta), 
+  meta <- list(multiscales = list(meta),
                omero = list(
-                 channels = lapply(seq_len(length(axes))-1, \(.) 
+                 channels = lapply(seq_len(length(axes))-1, \(.)
                                    list(label = .))
-               ), 
+               ),
                spatialdata_attrs = list(version = "0.1"))
-  
+
   # update json list
-  meta <- fromJSON(toJSON(meta, auto_unbox = TRUE), simplifyVector = TRUE)
+  meta <- fromJSON(toJSON(meta, auto_unbox = TRUE), simplifyVector = FALSE)
   Zattrs(meta)
 }
 
+#' @title Make label metadata
+#' @description Make label metadata
+#' @param x A label object
+#' @param axes A character vector of axes names
+#' @param version A string specifying the version
+#' @return A list of metadata for the label object
+#' @importFrom jsonlite fromJSON toJSON
+#' @noRd
 .make_label_meta <- function(x, 
                              axes = NULL,
                              version = 0.4){
@@ -164,13 +192,12 @@
                spatialdata_attrs = list(version = "0.1"))
   
   # update json list
-  meta <- fromJSON(toJSON(meta, auto_unbox = TRUE), simplifyVector = TRUE)
+  meta <- fromJSON(toJSON(meta, auto_unbox = TRUE), simplifyVector = FALSE)
   Zattrs(meta)
 }
 
-#' .get_valid_axes
-#' 
-#' Get validated axes
+#' @title Get valid axes
+#' @description Get validated axes
 #'
 #' @inheritParams write_image
 #' 
@@ -254,28 +281,5 @@
   return(c(nrow(x), n_col))
 }
 
-#' #' @importFrom sf st_as_sf st_geometry
-#' .get_geoarrow_dim <- function(x){
-#'   meta <- .get_geoarrow_metadata(x)
-#'   if(length(meta) > 1){
-#'     if("geometry" %in% colnames(meta)){
-#'       bbox <- meta$geo$columns$geometry$bbox
-#'       n_col <- if(length(bbox) == 4) 2 else 3
-#'     } else {
-#'       n_col <- ncol(x)
-#'     } 
-#'   } else {
-#'     if("geometry" %in% colnames(x)){
-#'       geo <- st_geometry(st_as_sf(df))
-#'     } else{
-#'       stop("No geometry object is detected!")
-#'     }
-#'   }
-#'   return(c(nrow(x), n_col))
-#' }
-#' 
-#' #' @importFrom jsonlite fromJSON
-#' .get_geoarrow_metadata <- function(x){
-#'   lapply(x$metadata, fromJSON)
-#' }
+
   

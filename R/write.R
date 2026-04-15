@@ -39,22 +39,22 @@ writeSpatialData <- function(x, name, path, replace = TRUE, version = "v2",
   
   # write points
   . <- lapply(pointNames(x), \(.){
-    writePoint(point(x, .),., path = zarr.path, replace = replace)
+    writePoint(point(x, .),., path = zarr.path, replace = replace, version = version)
   })
-  
+
   # write shapes
   . <- lapply(shapeNames(x), \(.){
-    writeShape(shape(x, .),., path = zarr.path, replace = replace)
+    writeShape(shape(x, .),., path = zarr.path, replace = replace, version = version)
   })
-  
+
   # write images
   . <- lapply(imageNames(x), \(.){
-    writeImage(image(x, .),., path = zarr.path, replace = replace)
+    writeImage(image(x, .),., path = zarr.path, replace = replace, version = version)
   })
-  
+
   # write labels
   . <- lapply(labelNames(x), \(.){
-    writeLabel(label(x, .),., path = zarr.path, replace = replace)
+    writeLabel(label(x, .),., path = zarr.path, replace = replace, version = version)
   })
 }
 
@@ -64,7 +64,7 @@ writePoint <- function(x, name, path, replace = TRUE, version = "v2") {
   # if no PointFrames were written before, update zarr store
   zarr.group <- .make_zarr_group(x, name, file.path(path, "points"), replace, version)
   # write meta
-  write_zattrs(path = zarr.group, meta(x))
+  Rarr::write_zarr_attributes(zarr.group, new.zattrs = meta(x))
   # write data
   arrow::write_dataset(data(x), file.path(zarr.group, "points.parquet"))
 }
@@ -75,45 +75,53 @@ writeShape <- function(x, name, path, replace = TRUE, version = "v2") {
   # if no ShapeFrames were written before, update zarr store
   zarr.group <- .make_zarr_group(x, name, file.path(path, "shapes"), replace, version)
   # write meta
-  write_zattrs(path = zarr.group, meta(x))
+  Rarr::write_zarr_attributes(zarr.group, new.zattrs = meta(x))
   # write data
   arrow::write_dataset(data(x), file.path(zarr.group, "shapes.parquet"))
 }
 
 #' @rdname writeSpatialData
+#' @importFrom Rarr write_zarr_array
+#' @importFrom DelayedArray realize
 #' @export
 writeImage <- function(x, name, path, replace = TRUE, version = "v2") {
   # if no ImageArray were written before, update zarr store
   zarr.group <- .make_zarr_group(x, name, file.path(path, "images"), replace, version)
+  zarr_version <- if (version == "v3") 3L else 2L
   # write meta
-  write_zattrs(path = zarr.group, meta(x))
+  Rarr::write_zarr_attributes(zarr.group, new.zattrs = meta(x))
   # write data
   lapply(
     .get_multiscales_dataset_paths(meta(x)),
     \(.){
       da <- data(x, . + 1)
-      Rarr::write_zarr_array(realize(da), 
-                             zarr_array_path = file.path(zarr.group, .), 
-                             chunk_dim = dim(da))
+      Rarr::write_zarr_array(realize(da),
+                             zarr_array_path = file.path(zarr.group, .),
+                             chunk_dim = dim(da),
+                             zarr_version = zarr_version)
     }
   )
 }
 
 #' @rdname writeSpatialData
+#' @importFrom Rarr write_zarr_array
+#' @importFrom DelayedArray realize
 #' @export
 writeLabel <- function(x, name, path, replace = TRUE, version = "v2") {
   # if no LabelArray were written before, update zarr store
   zarr.group <- .make_zarr_group(x, name, file.path(path, "labels"), replace, version)
+  zarr_version <- if (version == "v3") 3L else 2L
   # write meta
-  write_zattrs(path = zarr.group, meta(x))
+  Rarr::write_zarr_attributes(zarr.group, new.zattrs = meta(x))
   # write data
   lapply(
     .get_multiscales_dataset_paths(meta(x)),
     \(.){
       da <- data(x, . + 1)
-      Rarr::write_zarr_array(realize(da), 
-                             zarr_array_path = file.path(zarr.group, .), 
-                             chunk_dim = dim(da))
+      Rarr::write_zarr_array(realize(da),
+                             zarr_array_path = file.path(zarr.group, .),
+                             chunk_dim = dim(da),
+                             zarr_version = zarr_version)
     }
   )
 }

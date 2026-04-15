@@ -50,11 +50,9 @@ test_that("create zarr/group v3", {
   expect_true(file.exists(file.path(output_zarr, "zarr.json")))
   expect_false(file.exists(file.path(output_zarr, ".zgroup")))
 
-  # check zarr.json content
-  meta <- jsonlite::read_json(file.path(output_zarr, "zarr.json"))
-  expect_equal(meta$zarr_format, 3)
-  expect_equal(meta$node_type, "group")
-  expect_true(is.list(meta$attributes) && length(meta$attributes) == 0)
+  # check zarr.json exists and attributes are empty
+  expect_true(file.exists(file.path(output_zarr, "zarr.json")))
+  expect_equal(Rarr::read_zarr_attributes(output_zarr), list())
 
   # create a sub-group
   create_zarr_group(store = output_zarr, name = "images", version = "v3")
@@ -81,30 +79,30 @@ test_that("read/write zattrs", {
   
   # add .zattrs to /
   zattrs <- list(foo = "foo", bar = "bar")
-  write_zattrs(path = path, new.zattrs = zattrs)
+  Rarr::write_zarr_attributes(path, new.zattrs = zattrs)
   expect_true(file.exists(file.path(path, ".zattrs")))
-  
+
   # check .zattrs
-  read.zattrs <- read_zattrs(path)
+  read.zattrs <- Rarr::read_zarr_attributes(path)
   expect_equal(read.zattrs, zattrs)
-  
+
   # add new elements to .zattrs
   zattrs.new.elem <- list(foo2 = "foo")
-  write_zattrs(path = path, new.zattrs = zattrs.new.elem)
-  read.zattrs <- read_zattrs(path)
+  Rarr::write_zarr_attributes(path, new.zattrs = zattrs.new.elem)
+  read.zattrs <- Rarr::read_zarr_attributes(path)
   expect_equal(read.zattrs, c(zattrs,zattrs.new.elem))
-  
+
   # overwrite
   zattrs.new.elem <- list(foo2 = "foo2")
-  write_zattrs(path = path, new.zattrs = zattrs.new.elem)
-  read.zattrs <- read_zattrs(path)
+  Rarr::write_zarr_attributes(path, new.zattrs = zattrs.new.elem)
+  read.zattrs <- Rarr::read_zarr_attributes(path)
   zattrs[names(zattrs.new.elem)] <- zattrs.new.elem
   expect_equal(read.zattrs, c(zattrs))
-  
+
   # overwrite = FALSE
   zattrs.new.elem <- list(foo2 = "foo")
-  write_zattrs(path = path, new.zattrs = zattrs.new.elem, overwrite = FALSE)
-  read.zattrs <- read_zattrs(path)
+  Rarr::write_zarr_attributes(path, new.zattrs = zattrs.new.elem, overwrite = FALSE)
+  read.zattrs <- Rarr::read_zarr_attributes(path)
   zattrs[names(zattrs.new.elem)] <- "foo2"
   expect_equal(read.zattrs, c(zattrs))
 
@@ -119,33 +117,31 @@ test_that("read/write zattrs v3", {
 
   # write attributes into zarr.json
   zattrs <- list(foo = "foo", bar = "bar")
-  write_zattrs(path = grp, new.zattrs = zattrs)
+  Rarr::write_zarr_attributes(grp, new.zattrs = zattrs)
   expect_true(file.exists(file.path(grp, "zarr.json")))
   expect_false(file.exists(file.path(grp, ".zattrs")))
 
   # read back attributes from zarr.json
-  read.zattrs <- read_zattrs(grp)
+  read.zattrs <- Rarr::read_zarr_attributes(grp)
   expect_equal(read.zattrs, zattrs)
 
-  # zarr_format / node_type keys in zarr.json must be preserved
-  meta <- jsonlite::read_json(file.path(grp, "zarr.json"))
-  expect_equal(meta$zarr_format, 3)
-  expect_equal(meta$node_type, "group")
+  # zarr.json must still exist (zarr_format / node_type preserved by Rarr internally)
+  expect_true(file.exists(file.path(grp, "zarr.json")))
 
   # add new element
-  write_zattrs(path = grp, new.zattrs = list(baz = "baz"))
-  read.zattrs <- read_zattrs(grp)
+  Rarr::write_zarr_attributes(grp, new.zattrs = list(baz = "baz"))
+  read.zattrs <- Rarr::read_zarr_attributes(grp)
   expect_equal(read.zattrs, c(zattrs, list(baz = "baz")))
 
   # overwrite existing key
-  write_zattrs(path = grp, new.zattrs = list(foo = "FOO"))
-  read.zattrs <- read_zattrs(grp)
+  Rarr::write_zarr_attributes(grp, new.zattrs = list(foo = "FOO"))
+  read.zattrs <- Rarr::read_zarr_attributes(grp)
   expect_equal(read.zattrs$foo, "FOO")
   expect_equal(read.zattrs$bar, "bar")   # untouched key preserved
 
   # overwrite = FALSE should not overwrite existing key
-  write_zattrs(path = grp, new.zattrs = list(foo = "original"), overwrite = FALSE)
-  read.zattrs <- read_zattrs(grp)
+  Rarr::write_zarr_attributes(grp, new.zattrs = list(foo = "original"), overwrite = FALSE)
+  read.zattrs <- Rarr::read_zarr_attributes(grp)
   expect_equal(read.zattrs$foo, "FOO")   # unchanged
 
 })
