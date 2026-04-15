@@ -111,5 +111,11 @@ setMethod("data_type", "DelayedArray", \(x) zarr_overview(path(x), as_data_frame
               perm = rev(seq_len(length(axes))))
     }
   }
+  if (method == "label") {
+    image_list <- lapply(image_list, function(x) {
+      storage.mode(x) <- "integer"
+      x
+    })
+  }
   image_list
 }

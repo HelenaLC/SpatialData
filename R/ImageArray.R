@@ -26,8 +26,10 @@
 #' @importFrom methods new
 #' @importFrom DelayedArray DelayedArray
 #' @export
-ImageArray <- function(data=list(), meta=Zattrs(), metadata=list(), 
+ImageArray <- function(data=list(), meta=Zattrs(), metadata=list(),
                        multiscale=FALSE, axes = NULL, ...) {
+    if (!missing(data) && is.list(data) && length(data) == 0)
+        stop("'data' must not be an empty list; use ImageArray() for an empty placeholder")
     if(!is.list(data)){
       if(multiscale){
         data <- .generate_multiscale(data, axes = axes, method = "image")
@@ -35,11 +37,11 @@ ImageArray <- function(data=list(), meta=Zattrs(), metadata=list(),
         data <- list(DelayedArray::DelayedArray(data))
       }
     }
-    if(length(meta) < 1){
-      meta <- .make_image_meta(data, 
-                               version = 0.4, 
+    if(length(meta) < 1 && length(data) > 0){
+      meta <- .make_image_meta(data,
+                               version = 0.4,
                                axes = axes)
-    } 
+    }
     x <- .ImageArray(data=data, meta=meta, ...)
     metadata(x) <- metadata
     return(x)
