@@ -67,8 +67,14 @@ create_zarr <- function(name, dir, version = "v2"){
 
 .make_zarr_group <- function(x, name, path, replace, version){
   # gd <- file.path(path, "points")
-  if(!dir.exists(path))
+  if(!dir.exists(path)) {
     dir.create(path)
+    switch(version,
+      v2 = write('{"zarr_format":2}', file = file.path(path, ".zgroup")),
+      v3 = write('{"zarr_format":3,"node_type":"group","attributes":{}}',
+                 file = file.path(path, "zarr.json"))
+    )
+  }
   ng <- file.path(path, name)
   if(replace){
     unlink(ng, recursive = TRUE)
