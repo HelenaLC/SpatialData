@@ -89,3 +89,66 @@ create_zarr <- function(name, dir, version = "v2"){
   return(ng)
 }
 
+
+# For zarr v3, OME-NGFF content (multiscales, omero, image-label) must be
+# nested under an "ome" key inside "attributes"; spatialdata_attrs stays at top.
+# If the metadata was read from a v3 store it already has "ome", so skip wrapping.
+.wrap_ome_for_v3 <- function(zattrs, version) {
+  if (version != "v3" || "ome" %in% names(zattrs)) return(as.list(zattrs))
+  ome_keys <- setdiff(names(zattrs), "spatialdata_attrs")
+  ome_content <- as.list(zattrs)[ome_keys]
+  # Strip v2-only fields from each multiscales entry
+  if (!is.null(ome_content$multiscales)) {
+    ome_content$multiscales <- lapply(ome_content$multiscales, function(ms) {
+      ms[setdiff(names(ms), c("version", "metadata"))]
+    })
+  }
+  list(
+    ome = c(list(version = "0.5-dev-spatialdata"), ome_content),
+    spatialdata_attrs = zattrs[["spatialdata_attrs"]]
+  )
+}
+
+.get_multiscale_axes <- function(zattrs) {
+  multiscales <- zattrs[["multiscales"]]
+  if (is.null(multiscales) && !is.null(zattrs[["ome"]]))
+    multiscales <- zattrs[["ome"]][["multiscales"]]
+  if (is.null(multiscales) || length(multiscales) == 0L) return(NULL)
+  axes <- multiscales[[1]][["axes"]]
+  if (is.null(axes) || length(axes) == 0L) return(NULL)
+  vapply(axes, `[[`, character(1), "name")
+}
+
+# Post-processes Rarr-written v3 array zarr.json:
+#   1. Sorts codecs to required order [array-array → array-bytes → bytes-bytes].
+#      Rarr currently serialises them as [transpose, zstd, bytes] which Python rejects.
+#   2. Adds "attributes": {} and "storage_transformers": [] which Python zarr expects
+#      but Rarr does not emit.
+# dimension_names are handled upstream by setting names(dimnames()) before write_zarr_array.
+.normalize_v3_array_metadata <- function(zarr_array_path) {
+  metadata_path <- file.path(zarr_array_path, "zarr.json")
+  if (!file.exists(metadata_path)) return(invisible(FALSE))
+
+  metadata <- jsonlite::read_json(metadata_path, simplifyVector = FALSE)
+  codecs <- metadata[["codecs"]]
+  if (!is.null(codecs) && length(codecs) > 1L) {
+    codec_names <- vapply(codecs, `[[`, character(1), "name")
+    codec_stage <- ifelse(
+      codec_names %in% "transpose", 1L,
+      ifelse(codec_names %in% c("bytes", "vlen-utf8", "vlen_utf8"), 2L, 3L)
+    )
+    metadata[["codecs"]] <- codecs[order(codec_stage)]
+  }
+
+  if (is.null(metadata[["attributes"]])) metadata[["attributes"]] <- list()
+  if (is.null(metadata[["storage_transformers"]])) metadata[["storage_transformers"]] <- list()
+
+  jsonlite::write_json(
+    metadata,
+    path = metadata_path,
+    auto_unbox = TRUE,
+    pretty = 4,
+    null = "null"
+  )
+  invisible(TRUE)
+}

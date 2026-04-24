@@ -31,25 +31,6 @@
 #'
 NULL
 
-# For zarr v3, OME-NGFF content (multiscales, omero, image-label) must be
-# nested under an "ome" key inside "attributes"; spatialdata_attrs stays at top.
-# If the metadata was read from a v3 store it already has "ome", so skip wrapping.
-.wrap_ome_for_v3 <- function(zattrs, version) {
-  if (version != "v3" || "ome" %in% names(zattrs)) return(as.list(zattrs))
-  ome_keys <- setdiff(names(zattrs), "spatialdata_attrs")
-  ome_content <- as.list(zattrs)[ome_keys]
-  # Strip v2-only fields from each multiscales entry
-  if (!is.null(ome_content$multiscales)) {
-    ome_content$multiscales <- lapply(ome_content$multiscales, function(ms) {
-      ms[setdiff(names(ms), c("version", "metadata"))]
-    })
-  }
-  list(
-    ome = c(list(version = "0.5-dev-spatialdata"), ome_content),
-    spatialdata_attrs = zattrs[["spatialdata_attrs"]]
-  )
-}
-
 #' @rdname writeSpatialData
 #' @export
 writeSpatialData <- function(x, name, path, replace = TRUE, version = "v2",
@@ -128,6 +109,7 @@ writeImage <- function(x, name, path, replace = TRUE, version = "v2") {
   # if no ImageArray were written before, update zarr store
   zarr.group <- .make_zarr_group(x, name, file.path(path, "images"), replace, version)
   zarr_version <- if (version == "v3") 3L else 2L
+  dimension_names <- .get_multiscale_axes(meta(x))
   # write meta: for v3, OME-NGFF content goes under "ome" key in attributes
   zattrs <- .wrap_ome_for_v3(meta(x), version)
   if (version == "v3") zattrs$spatialdata_attrs$version <- "0.3"
@@ -136,13 +118,18 @@ writeImage <- function(x, name, path, replace = TRUE, version = "v2") {
   lapply(
     .get_multiscales_dataset_paths(meta(x)),
     \(.){
-      da <- data(x, . + 1)
-      Rarr::write_zarr_array(realize(da),
+      arr <- realize(data(x, . + 1))
+      # Rarr reads names(dimnames(x)) to write dimension_names in v3 zarr.json
+      if (!is.null(dimension_names))
+        dimnames(arr) <- setNames(vector("list", length(dim(arr))), dimension_names)
+      Rarr::write_zarr_array(arr,
                              zarr_array_path = file.path(zarr.group, .),
-                             chunk_dim = dim(da),
+                             chunk_dim = dim(arr),
                              order = "C",
                              dimension_separator = "/",
                              zarr_version = zarr_version)
+      if (version == "v3")
+        .normalize_v3_array_metadata(file.path(zarr.group, .))
     }
   )
 }
@@ -155,6 +142,7 @@ writeLabel <- function(x, name, path, replace = TRUE, version = "v2") {
   # if no LabelArray were written before, update zarr store
   zarr.group <- .make_zarr_group(x, name, file.path(path, "labels"), replace, version)
   zarr_version <- if (version == "v3") 3L else 2L
+  dimension_names <- .get_multiscale_axes(meta(x))
   # write meta: for v3, OME-NGFF content goes under "ome" key in attributes
   zattrs <- .wrap_ome_for_v3(meta(x), version)
   if (version == "v3") zattrs$spatialdata_attrs$version <- "0.3"
@@ -163,13 +151,17 @@ writeLabel <- function(x, name, path, replace = TRUE, version = "v2") {
   lapply(
     .get_multiscales_dataset_paths(meta(x)),
     \(.){
-      da <- data(x, . + 1)
-      Rarr::write_zarr_array(realize(da),
+      arr <- realize(data(x, . + 1))
+      if (!is.null(dimension_names))
+        dimnames(arr) <- setNames(vector("list", length(dim(arr))), dimension_names)
+      Rarr::write_zarr_array(arr,
                              zarr_array_path = file.path(zarr.group, .),
-                             chunk_dim = dim(da),
+                             chunk_dim = dim(arr),
                              order = "C",
                              dimension_separator = "/",
                              zarr_version = zarr_version)
+      if (version == "v3")
+        .normalize_v3_array_metadata(file.path(zarr.group, .))
     }
   )
 }
