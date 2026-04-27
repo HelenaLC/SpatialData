@@ -1,80 +1,122 @@
-# TODO: everything...
-
-.validateTable <- function(object) {
+# https://spatialdata.scverse.org/en/latest/design_doc.html#table-table-of-annotations-for-regions
+#' @importFrom SingleCellExperiment int_metadata int_colData
+.validateTables <- \(object) {
     msg <- c()
+    sce <- \(.) is(., "SingleCellExperiment")
     for (i in seq_along(tables(object))) {
-        t <- table(object, i)
-        if (!is(t, "SingleCellExperiment")) {
-            msg <- c(msg, paste0("Table ", i, " is not a 'SingleCellExperiment'"))
+        ok <- sce(se <- table(object, i))
+        if (!ok) msg <- c(msg, paste0(
+            i, "-th table is not a 'SingleCellExperiment'"))
+        if (!ok) next
+        md <- int_metadata(se)$spatialdata_attrs
+        nm <- c("region", "region_key", "instance_key")
+        .nm <- sprintf("'%s'", paste(nm, collapse="/"))
+        if (any(ok <- nm %in% names(md))) {
+            if (!all(ok)) msg <- c(msg, paste0(
+                i, "-th table missing ", .nm, "; must set all if any"))
+            ok <- all(vapply(md, is.character, logical(1)))
+            if (!ok) msg <- c(msg, paste0(
+                i, "-th table's ", .nm, " is not of type character"))
+            ok <- all(vapply(intersect(md, nm[-1]), length, integer(1)) == 1)
+            if (!ok) msg <- c(msg, paste0(
+                i, "-th table's 'region/instance_key' is not length 1"))
+            ok <- !is.null(int_colData(se)[[md$region_key]])
+            if (!ok) msg <- c(msg, paste0(
+                i, "-th table missing 'region_key' column in 'int_colData'"))
+            ok <- !is.null(int_colData(se)[[md$instance_key]])
+            if (!ok) msg <- c(msg, paste0(
+                i, "-th table missing 'instance_key' column in 'int_colData'"))
+
         }
-        # TODO: validate int_metadata$spatialdata_attrs
-        # md <- int_metadata(sce)[["spatialdata_attrs"]]
-        # if (!all(c("region_key", "instance_key") %in% names(md))) {
-        #     msg <- c(msg, paste0("region_key/instance_key not present in ",
-        #                          i, "-th sce int_metadata"))
-        # }
     }
+    na <- setdiff(
+        unlist(lapply(tables(object), \(.) if (sce(.)) region(.))),
+        unlist(colnames(object)[setdiff(.LAYERS, "tables")])) # don't flip!
+    if (length(na))
+        msg <- c(msg, paste(
+            "table region(s) not found in any layer:",
+            paste(sprintf("'%s'", na), collapse=", ")))
     return(msg)
 }
 
-.validatePointFrame <- function(object) {
-    msg <- NULL
-    # Checks if the points have the x,y coordinates, as they are hard-coded
-    # in the plot functions
-    if (length(points(object))) { # there are some cases where the points are empty
-        if (!is.null(data(point(object)))) {
-            np <- length(points(object))
-            for (i in seq_len(np)) {
-                dfi <- data(point(object, i))
-                if (!all(c("x", "y") %in% names(dfi))) {
-                    msg <- c(msg, paste0("'x' and 'y' missing in data point ", i))
-                }
-            }
-        }
-    }
-    return(msg)
-}
-
-.validateImageArray <- function(object) {
+.validateImageArray <- \(object) {
     msg <- c()
-    if (ni <- length(images(object))) {
-        for (i in seq_along(ni)) {
-            ai <- as.array(aperm(data(image(object,1))/255, perm=c(3,2,1)))
-            for (j in dim(ai)[3]) {
-                if (!all(vapply(ai[,,j], is.numeric, logical(1)))) {
-                    msg <- c(msg, paste0("Image ", i, " channel ", j, " not numeric"))
-                }
-            }
-        }
+    res <- length(object)
+    for (k in seq_len(res)) {
+        x <- data(object, k)
+        if (length(dim(x)) != 3) msg <- c(msg, paste(
+            "'ImageArray' resolution", k, "is not 3D"))
+        if (!type(x) %in% c("double", "integer")) msg <- c(msg, paste(
+            "'ImageArray' resolution", k, "is not of type double or integer"))
     }
     return(msg)
 }
+#' @importFrom S4Vectors setValidity2
+setValidity2("ImageArray", .validateImageArray)
+
+#' @importFrom ZarrArray type
+.validateLabelArray <- \(object) {
+    msg <- c()
+    res <- length(object)
+    for (k in seq_len(res)) {
+        x <- data(object, k)
+        if (length(dim(x)) != 2) msg <- c(msg, paste(
+            "'LabelArray' resolution", k, "is not 2D"))
+        if (type(x) != "integer") msg <- c(msg, paste(
+            "'LabelArray' resolution", k, "is not of type integer"))
+    }
+    return(msg)
+}
+#' @importFrom S4Vectors setValidity2
+setValidity2("LabelArray", .validateLabelArray)
+
+.validatePointFrame <- \(object) {
+    msg <- c()
+    if (!length(object)) return(msg)
+    if (!"x" %in% names(object)) msg <- c(msg, "'PointFrame' missing 'x'.")
+    if (!"y" %in% names(object)) msg <- c(msg, "'PointFrame' missing 'y'.")
+    return(msg)
+}
+#' @importFrom S4Vectors setValidity2
+setValidity2("PointFrame", .validatePointFrame)
+
+.validateShapeFrame <- \(object) {
+    msg <- c()
+    if (!nrow(object)) return(msg)
+    if (!"geometry" %in% names(object)) msg <- c(msg, "'ShapeFrame' missing 'geometry'.")
+    return(msg)
+}
+#' @importFrom S4Vectors setValidity2
+setValidity2("ShapeFrame", .validateShapeFrame)
 
 #' @importFrom methods is
 .validateSpatialData <- \(x) {
+    msg <- c()
     typ <- c(
         images="ImageArray",
         labels="LabelArray",
         points="PointFrame",
         shapes="ShapeFrame",
         tables="SingleCellExperiment")
-    msg <- NULL
     for (. in names(typ)) if (length(x[[.]]))
         if (!all(vapply(x[[.]], \(y) is(y, typ[.]), logical(1))))
             msg <- c(msg, sprintf("'%s' should be a list of '%s'", ., typ[.]))
-    msg <- c(msg, .validatePointFrame(x))
-    msg <- c(msg, .validateTable(x))
-    for (y in labels(x)) .validateZattrsLabelArray(y)
-    if (length(msg))
-        return(msg)
-    return(TRUE)
+    # TODO: validate .zattrs across all layers
+    for (y in labels(x)) msg <- c(msg, .validateLabelArray(y))
+    for (y in images(x)) msg <- c(msg, .validateImageArray(y))
+    for (y in points(x)) msg <- c(msg, .validatePointFrame(y))
+    for (y in shapes(x)) msg <- c(msg, .validateShapeFrame(y))
+    msg <- c(msg, .validateTables(x))
+    return(msg)
 }
 
 #' @importFrom S4Vectors setValidity2
 setValidity2("SpatialData", .validateSpatialData)
 
+# TODO: version-specific .zattrs validation for all layers
+
 .validateZattrs_multiscales <- \(x, msg) {
-    if (is.null(ms <- x$multiscales))
+    if (is.null(ms <- x$multiscales[[1]]))
         msg <- c(msg, "missing 'multiscales'")
     # MUST contain
     for (. in c("axes", "datasets"))
@@ -96,18 +138,18 @@ setValidity2("SpatialData", .validateSpatialData)
 .validateZattrs_coordTrans <- \(x, msg) {
     if (!is.list(ct <- x$coordinateTransformations))
         msg <- c(msg, "missing or non-list 'coordTrans'")
-    ct <- ct[[1]]
-    for (. in c("input", "output", "type"))
-        if (is.null(ct[[.]]))
-            msg <- c(msg, sprintf("'coordTrans' missing '%s'", .))
+    for (i in seq_along(ct))
+        for (j in c("input", "output", "type"))
+            if (is.null(ct[[i]][[j]]))
+                msg <- c(msg, sprintf("'coordTrans' %s missing '%s'", i, j))
     return(msg)
 }
 .validateZattrsLabelArray <- \(x) {
     msg <- c()
     za <- meta(x)
     msg <- .validateZattrs_multiscales(za, msg)
-    ms <- za$multiscales
+    ms <- za$multiscales[[1]]
     msg <- .validateZattrs_axes(ms, msg)
     msg <- .validateZattrs_coordTrans(ms, msg)
-    if (length(msg)) return(msg) else return(TRUE)
+    return(msg)
 }

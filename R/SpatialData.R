@@ -8,6 +8,8 @@
 #' image images image<- images<- imageNames 
 #' shape shapes shape<- shapes<- shapeNames 
 #' table tables table<- tables<- tableNames 
+#' [[<-,SpatialData,character,ANY-method
+#' [[<-,SpatialData,numeric,ANY-method
 #' 
 #' @description ...
 #' 
@@ -31,7 +33,7 @@
 #' @examples
 #' x <- file.path("extdata", "blobs.zarr")
 #' x <- system.file(x, package="SpatialData")
-#' (x <- readSpatialData(x, anndataR=FALSE))
+#' (x <- readSpatialData(x, anndataR=TRUE))
 #' 
 #' # subsetting
 #' # layers are taken in order of appearance

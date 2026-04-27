@@ -1,3 +1,44 @@
+changes in version 0.99.29
+
+- revision of Zarr version-specific .zattrs handling
+- added Zarr v3 example dataset 'inst/extdata/blobs_v3'
+- reorganization of unit tests to facilitate v3-specific testing
+
+changes in version 0.99.28
+
+- validity checks for 'table' elements
+- fixed and reenable broken/skipped tests
+- spatialdata_attrs utilities (instance_key(), region_key(), region())
+
+changes in version 0.99.27
+
+- spatial queries (aka subsetting) by bounding box 
+  (all element types) or polygons (points and shapes),
+  including unit tests, documentation, visual examples
+- masking draft to aggregate information across layers
+  (image by label, point by shape, shape by shape;
+  the latter aggregates values in an associated table)
+
+changes in version 0.99.26
+
+- added unit tests for existing transformations
+- implemented minimal layer-wise validity checks
+  (Image/LabelArray and Shape/PointFrame elements)
+
+changes in version 0.99.25
+
+- improved Zattrs show method (cf., PR #117)
+- replace jsonlite::fromJSON() with Rarr::read_zarr_attributes()
+  for reading .zattrs & rewrite code-/test-base accordingly
+
+changes in version 0.99.24
+
+- ZarrArray imported by Bioconductor/ZarrArray
+- Rarr replaces pizzarr for importing tables via anndataR
+- anndataR replaces zellkonverter
+- update basilisk env to spatialdata==0.7.0
+- replace spatialdata.read with anndata.read_zarr to read tables
+
 changes in version 0.99.22
 
 - split off 'SpatialData.data'

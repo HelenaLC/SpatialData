@@ -34,6 +34,8 @@
 \alias{table<-}
 \alias{tables<-}
 \alias{tableNames}
+\alias{[[<-,SpatialData,character,ANY-method}
+\alias{[[<-,SpatialData,numeric,ANY-method}
 \alias{$,SpatialData-method}
 \alias{[[,SpatialData,numeric,ANY-method}
 \alias{[[,SpatialData,character,ANY-method}
@@ -50,8 +52,6 @@
 \alias{element,SpatialData,ANY,numeric-method}
 \alias{element,SpatialData,ANY,missing-method}
 \alias{element,SpatialData,ANY,ANY-method}
-\alias{[[<-,SpatialData,numeric,ANY-method}
-\alias{[[<-,SpatialData,character,ANY-method}
 \title{The `SpatialData` class}
 \usage{
 SpatialData(images, labels, points, shapes, tables)
@@ -126,7 +126,7 @@ or NULL/\code{list()} to remove an element/layer completely.}
 \examples{
 x <- file.path("extdata", "blobs.zarr")
 x <- system.file(x, package="SpatialData")
-(x <- readSpatialData(x, anndataR=FALSE))
+(x <- readSpatialData(x, anndataR=TRUE))
 
 # subsetting
 # layers are taken in order of appearance

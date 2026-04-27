@@ -2,8 +2,9 @@
 % Please edit documentation in R/ImageArray.R
 \name{ImageArray}
 \alias{ImageArray}
-\alias{channels,ImageArray-method}
+\alias{channels,Zattrs-method}
 \alias{channels}
+\alias{channels,ImageArray-method}
 \alias{channels,ANY-method}
 \alias{[,ImageArray,ANY,ANY,ANY-method}
 \title{The `ImageArray` class}
@@ -17,6 +18,8 @@ ImageArray(
   ...
 )
 
+\S4method{channels}{Zattrs}(x, ...)
+
 \S4method{channels}{ImageArray}(x, ...)
 
 \S4method{channels}{ANY}(x, ...)
@@ -24,7 +27,7 @@ ImageArray(
 \S4method{[}{ImageArray,ANY,ANY,ANY}(x, i, j, k, ..., drop = FALSE)
 }
 \arguments{
-\item{data}{list of \code{\link[Rarr]{ZarrArray}}s}
+\item{data}{list of \code{\link[ZarrArray]{ZarrArray}}s}
 
 \item{meta}{\code{\link{Zattrs}}}
 
@@ -54,9 +57,8 @@ The `ImageArray` class
 }
 \examples{
 library(SpatialData.data)
-dir.create(td <- tempfile())
-pa <- SpatialData.data:::.unzip_merfish_demo(td)
-pa <- file.path(pa, "images", "rasterized")
+zs <- get_demo_SDdata("merfish")
+pa <- file.path(zs, "images", "rasterized")
 (ia <- readImage(pa))
 
 }

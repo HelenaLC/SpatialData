@@ -9,23 +9,25 @@
 create_zarr_group <- function(store, name, version = "v2"){
   split.name <- strsplit(name, split = "\\/")[[1]]
   if(length(split.name) > 1){
-    split.name <- vapply(seq_len(length(split.name)), 
-                         function(x) paste(split.name[seq_len(x)], collapse = "/"), 
-                         FUN.VALUE = character(1)) 
+    split.name <- vapply(seq_len(length(split.name)),
+                         function(x) paste(split.name[seq_len(x)], collapse = "/"),
+                         FUN.VALUE = character(1))
     split.name <- rev(tail(split.name,2))
     if(!dir.exists(file.path(store,split.name[2])))
-      create_zarr_group(store = store, name = split.name[2])
+      create_zarr_group(store = store, name = split.name[2], version = version)
   }
   dir.create(file.path(store, split.name[1]), showWarnings = FALSE)
-  switch(version, 
+  switch(version,
          v2 = {
            write("{\"zarr_format\":2}", file = file.path(store, split.name[1], ".zgroup"))},
          v3 = {
-           stop("Currently only zarr v2 is supported!") 
+           write(
+             "{\"zarr_format\":3,\"node_type\":\"group\",\"attributes\":{}}",
+             file = file.path(store, split.name[1], "zarr.json"))
          },
-         stop("only zarr v2 is supported. Use version = 'v2'")
+         stop("version must be 'v2' or 'v3'")
   )
-  
+
 }
 
 #' create_zarr
@@ -47,70 +49,6 @@ create_zarr <- function(name, dir, version = "v2"){
   create_zarr_group(store = dir, name = name, version = version)
 }
 
-#' Read the .zattrs file associated with a Zarr array or group
-#' 
-#' @param path A character vector of length 1. This provides the
-#'   path to a Zarr array or group. This can either be on a local file
-#'   system or on S3 storage.
-#' @param s3_client A list representing an S3 client.  This should be produced
-#' by [paws.storage::s3()].
-#' 
-#' @returns A list containing the .zattrs elements
-#' 
-#' @importFrom jsonlite read_json fromJSON
-#' @importFrom stringr str_extract str_remove
-#'
-#' @export
-read_zattrs <- function(path, s3_client = NULL) {
-  path <- .normalize_array_path(path)
-  zattrs_path <- paste0(path, ".zattrs")
-  
-  if(!file.exists(zattrs_path))
-    stop("The group or array does not contain attributes (.zattrs)")
-  
-  if (!is.null(s3_client)) {
-    stop("no s3 support!")
-  } else {
-    zattrs <- read_json(zattrs_path, simplifyVector = TRUE)
-  }
-  return(zattrs)
-}
-
-#' Read the .zattrs file associated with a Zarr array or group
-#' 
-#' @param path A character vector of length 1. This provides the
-#'   path to a Zarr array or group. 
-#' @param new.zattrs a list inserted to .zattrs at the \code{path}.
-#' @param overwrite if TRUE, existing .zattrs elements will be overwritten by \code{new.zattrs}.
-#' 
-#' @importFrom jsonlite toJSON
-#'
-#' @export
-write_zattrs <- function(path, new.zattrs = list(), overwrite = TRUE){
-  path <- .normalize_array_path(path)
-  zattrs_path <- paste0(path, ".zattrs")
-  
-  if(is.null(names(new.zattrs)))
-    stop("list elements should be named")
-  
-  if("" %in% names(new.zattrs)){
-    message("Ignoring unnamed list elements")
-    new.zattrs <- new.zattrs[which(names(new.zattrs == ""))]
-  }
-  
-  if(file.exists(zattrs_path)){
-    old.zattrs <- read_json(zattrs_path)
-    if(overwrite){
-      old.zattrs <- old.zattrs[setdiff(names(old.zattrs), names(new.zattrs))]
-    } else {
-      new.zattrs <- new.zattrs[setdiff(names(new.zattrs), names(old.zattrs))] 
-    }
-    new.zattrs <- c(old.zattrs, new.zattrs)
-  }
-  
-  json <- .format_json(toJSON(new.zattrs, auto_unbox = TRUE, pretty = TRUE, null = "null"))
-  write(x = json, file = zattrs_path)
-}
 
 .replace_zarr <- function(name, path, replace, version = "v2")
 {
@@ -129,8 +67,14 @@ write_zattrs <- function(path, new.zattrs = list(), overwrite = TRUE){
 
 .make_zarr_group <- function(x, name, path, replace, version){
   # gd <- file.path(path, "points")
-  if(!dir.exists(path))
+  if(!dir.exists(path)) {
     dir.create(path)
+    switch(version,
+      v2 = write('{"zarr_format":2}', file = file.path(path, ".zgroup")),
+      v3 = write('{"zarr_format":3,"node_type":"group","attributes":{}}',
+                 file = file.path(path, "zarr.json"))
+    )
+  }
   ng <- file.path(path, name)
   if(replace){
     unlink(ng, recursive = TRUE)
@@ -145,46 +89,66 @@ write_zattrs <- function(path, new.zattrs = list(), overwrite = TRUE){
   return(ng)
 }
 
-#' Normalize a Zarr array path
-#'
-#' Taken from https://zarr.readthedocs.io/en/stable/spec/v2.html#logical-storage-paths
-#'
-#' @param path Character vector of length 1 giving the path to be normalised.
-#'
-#' @returns A character vector of length 1 containing the normalised path.
-#'
-#' @keywords Internal
-.normalize_array_path <- function(path) {
-  ## we strip the protocol because it gets messed up by the slash removal later
-  if (grepl(x = path, pattern = "^((https?://)|(s3://)).*$")) {
-    root <- gsub(x = path, pattern = "^((https?://)|(s3://)).*$", 
-                 replacement = "\\1")
-    path <- gsub(x = path, pattern = "^((https?://)|(s3://))(.*$)", 
-                 replacement = "\\4")
-  } else {
-    ## Replace all backward slash ("\\") with forward slash ("/")
-    path <- gsub(x = path, pattern = "\\", replacement = "/", fixed = TRUE)
-    path <- normalizePath(path, winslash = "/", mustWork = FALSE)
-    root <- gsub(x = path, "(^[[:alnum:]:.]*/)(.*)", replacement = "\\1")
-    path <- gsub(x = path, "(^[[:alnum:]:.]*/)(.*)", replacement = "\\2")
+
+# For zarr v3, OME-NGFF content (multiscales, omero, image-label) must be
+# nested under an "ome" key inside "attributes"; spatialdata_attrs stays at top.
+# If the metadata was read from a v3 store it already has "ome", so skip wrapping.
+.wrap_ome_for_v3 <- function(zattrs, version) {
+  if (version != "v3" || "ome" %in% names(zattrs)) return(as.list(zattrs))
+  ome_keys <- setdiff(names(zattrs), "spatialdata_attrs")
+  ome_content <- as.list(zattrs)[ome_keys]
+  # Strip v2-only fields from each multiscales entry
+  if (!is.null(ome_content$multiscales)) {
+    ome_content$multiscales <- lapply(ome_content$multiscales, function(ms) {
+      ms[setdiff(names(ms), c("version", "metadata"))]
+    })
   }
-  
-  ## Strip any leading "/" characters
-  path <- gsub(x = path, pattern = "^/", replacement = "", fixed = FALSE)
-  ## Strip any trailing "/" characters
-  path <- gsub(x = path, pattern = "/$", replacement = "", fixed = FALSE)
-  ## Collapse any sequence of more than one "/" character into a single "/" 
-  path <- gsub(x = path, pattern = "//*", replacement = "/", fixed = FALSE)
-  ## The key prefix is then obtained by appending a single "/" character to 
-  ## the normalized logical path.
-  path <- paste0(root, path, "/")
-  
-  return(path)
+  list(
+    ome = c(list(version = "0.5-dev-spatialdata"), ome_content),
+    spatialdata_attrs = zattrs[["spatialdata_attrs"]]
+  )
 }
 
-.format_json <- function(json) {
-  json <- gsub(x = json, pattern = "[", replacement = "[\n    ", fixed = TRUE)
-  json <- gsub(x = json, pattern = "],", replacement = "\n  ],", fixed = TRUE)
-  json <- gsub(x = json, pattern = ", ", replacement = ",\n    ", fixed = TRUE)
-  return(json)
+.get_multiscale_axes <- function(zattrs) {
+  multiscales <- zattrs[["multiscales"]]
+  if (is.null(multiscales) && !is.null(zattrs[["ome"]]))
+    multiscales <- zattrs[["ome"]][["multiscales"]]
+  if (is.null(multiscales) || length(multiscales) == 0L) return(NULL)
+  axes <- multiscales[[1]][["axes"]]
+  if (is.null(axes) || length(axes) == 0L) return(NULL)
+  vapply(axes, `[[`, character(1), "name")
+}
+
+# Post-processes Rarr-written v3 array zarr.json:
+#   1. Sorts codecs to required order [array-array → array-bytes → bytes-bytes].
+#      Rarr currently serialises them as [transpose, zstd, bytes] which Python rejects.
+#   2. Adds "attributes": {} and "storage_transformers": [] which Python zarr expects
+#      but Rarr does not emit.
+# dimension_names are handled upstream by setting names(dimnames()) before write_zarr_array.
+.normalize_v3_array_metadata <- function(zarr_array_path) {
+  metadata_path <- file.path(zarr_array_path, "zarr.json")
+  if (!file.exists(metadata_path)) return(invisible(FALSE))
+
+  metadata <- jsonlite::read_json(metadata_path, simplifyVector = FALSE)
+  codecs <- metadata[["codecs"]]
+  if (!is.null(codecs) && length(codecs) > 1L) {
+    codec_names <- vapply(codecs, `[[`, character(1), "name")
+    codec_stage <- ifelse(
+      codec_names %in% "transpose", 1L,
+      ifelse(codec_names %in% c("bytes", "vlen-utf8", "vlen_utf8"), 2L, 3L)
+    )
+    metadata[["codecs"]] <- codecs[order(codec_stage)]
+  }
+
+  if (is.null(metadata[["attributes"]])) metadata[["attributes"]] <- list()
+  if (is.null(metadata[["storage_transformers"]])) metadata[["storage_transformers"]] <- list()
+
+  jsonlite::write_json(
+    metadata,
+    path = metadata_path,
+    auto_unbox = TRUE,
+    pretty = 4,
+    null = "null"
+  )
+  invisible(TRUE)
 }

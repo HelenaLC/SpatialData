@@ -6,7 +6,7 @@
 \title{The \code{LabelArray} class}
 \usage{
 LabelArray(
-  data = array(),
+  data = list(),
   meta = Zattrs(),
   metadata = list(),
   multiscale = FALSE,
@@ -17,7 +17,7 @@ LabelArray(
 \S4method{[}{LabelArray,ANY,ANY,ANY}(x, i, j, ..., drop = FALSE)
 }
 \arguments{
-\item{data}{list of \code{\link[Rarr]{ZarrArray}}s}
+\item{data}{list of \code{\link[ZarrArray]{ZarrArray}}s}
 
 \item{meta}{\code{\link{Zattrs}}}
 
@@ -53,6 +53,12 @@ Currently defined methods (here, \code{x} is a \code{LabelArray}):
 }
 }
 \examples{
-# TODO
+x <- file.path("extdata", "blobs.zarr")
+x <- system.file(x, package="SpatialData")
+x <- file.path(x, "labels", "blobs_labels")
+
+(y <- readLabel(x))
+y[1:10, 1:10]
+meta(y)
 
 }

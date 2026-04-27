@@ -14,7 +14,7 @@
 #' }
 #'
 #' @param x \code{LabelArray}
-#' @param data list of \code{\link[Rarr]{ZarrArray}}s
+#' @param data list of \code{\link[ZarrArray]{ZarrArray}}s
 #' @param meta \code{\link{Zattrs}}
 #' @param metadata optional list of arbitrary 
 #'   content describing the overall object.
@@ -28,13 +28,21 @@
 #' @return \code{LabelArray}
 #'
 #' @examples
-#' # TODO
+#' x <- file.path("extdata", "blobs.zarr")
+#' x <- system.file(x, package="SpatialData")
+#' x <- file.path(x, "labels", "blobs_labels")
+#' 
+#' (y <- readLabel(x))
+#' y[1:10, 1:10]
+#' meta(y)
 #'
 #' @importFrom S4Vectors metadata<-
 #' @importFrom methods new
 #' @export
-LabelArray <- function(data=array(), meta=Zattrs(), metadata=list(), 
+LabelArray <- function(data=list(), meta=Zattrs(), metadata=list(),
                        multiscale = FALSE, axes = NULL, ...) {
+    if (!missing(data) && is.list(data) && length(data) == 0)
+        stop("'data' must not be an empty list; use LabelArray() for an empty placeholder")
     if(!is.list(data)){
       if(multiscale){
         data <- .generate_multiscale(data, axes = axes, method = "label")
@@ -42,11 +50,11 @@ LabelArray <- function(data=array(), meta=Zattrs(), metadata=list(),
         data <- list(DelayedArray::DelayedArray(data))
       }
     }
-    if(length(meta) < 1){
-      meta <- .make_label_meta(data, 
-                               version = 0.4, 
+    if(length(meta) < 1 && length(data) > 0){
+      meta <- .make_label_meta(data,
+                               version = 0.4,
                                axes = axes)
-    } 
+    }
     x <- .LabelArray(data=data, meta=meta, ...)
     metadata(x) <- metadata
     return(x)

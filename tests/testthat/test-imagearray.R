@@ -37,16 +37,6 @@ test_that("data(),ImageArray", {
     expect_error(data(img, ""))
     expect_error(data(img, c(1,2)))
 })
-
-x <- file.path("extdata", "blobs.zarr")
-x <- system.file(x, package="SpatialData")
-x <- readSpatialData(x, tables=FALSE)
-
-test_that("[,ImageArray", {
-  y <- image(x, i <- "blobs_image")
-  y <- y[,seq_len(32)] # subset to make things harder
-})
-
 test_that("create", {
   
   # create image
@@ -159,4 +149,29 @@ test_that("write multiscale", {
   expect_identical(realize(data(imgarray, 3)), 
                    realize(data(imgarray2, 3)))
   expect_identical(meta(imgarray),meta(imgarray2))
+})
+
+test_that("write v3 uses Python-readable codec ordering", {
+  td <- tempdir()
+  zarr.path <- file.path(td, "test_v3.zarr")
+  unlink(zarr.path, recursive = TRUE)
+
+  set.seed(1)
+  img <- array(sample(1:255, size = 20 * 20 * 3, replace = TRUE),
+               dim = c(3, 20, 20))
+  imgarray <- ImageArray(img, axes = c("c", "y", "x"))
+  sd <- SpatialData(images = list(test_image = imgarray))
+
+  writeSpatialData(sd, "test_v3.zarr", path = td, version = "v3")
+
+  metadata <- jsonlite::read_json(
+    file.path(zarr.path, "images", "test_image", "0", "zarr.json"),
+    simplifyVector = FALSE
+  )
+  codec_names <- vapply(metadata$codecs, `[[`, character(1), "name")
+
+  expect_identical(codec_names, c("transpose", "bytes", "zstd"))
+  expect_equal(unname(unlist(metadata$dimension_names)), c("c", "y", "x"))
+  expect_equal(metadata$attributes, list())
+  expect_equal(metadata$storage_transformers, list())
 })

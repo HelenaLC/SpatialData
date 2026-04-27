@@ -2,10 +2,13 @@
 % Please edit documentation in R/ShapeFrame.R
 \name{ShapeFrame}
 \alias{ShapeFrame}
+\alias{geom_type}
 \alias{dim,ShapeFrame-method}
 \alias{length,ShapeFrame-method}
 \alias{names,ShapeFrame-method}
+\alias{.DollarNames.ShapeFrame}
 \alias{$,ShapeFrame-method}
+\alias{geom_type,ShapeFrame-method}
 \alias{[,ShapeFrame,missing,ANY,ANY-method}
 \alias{[,ShapeFrame,ANY,missing,ANY-method}
 \alias{[,ShapeFrame,missing,missing,ANY-method}
@@ -20,7 +23,11 @@ ShapeFrame(data = data.frame(), meta = Zattrs(), metadata = list(), ...)
 
 \S4method{names}{ShapeFrame}(x)
 
+\method{.DollarNames}{ShapeFrame}(x, pattern = "")
+
 \S4method{$}{ShapeFrame}(x, name)
+
+\S4method{geom_type}{ShapeFrame}(x)
 
 \S4method{[}{ShapeFrame,missing,ANY,ANY}(x, i, j, ..., drop = TRUE)
 
@@ -47,7 +54,7 @@ content describing the overall object.}
 
 \item{i, j}{indices specifying elements to extract.}
 
-\item{drop}{ignored.}
+\item{drop, pattern}{ignored.}
 }
 \value{
 \code{ShapeFrame}
@@ -57,13 +64,13 @@ The `ShapeFrame` class
 }
 \examples{
 library(SpatialData.data)
-dir.create(tf <- tempfile())
-base <- SpatialData.data:::.unzip_merfish_demo(tf)
-y <- file.path(base, "shapes", "cells")
+zs <- get_demo_SDdata("merfish")
+
+y <- file.path(zs, "shapes", "cells")
 (s <- readShape(y))
 plot(sf::st_as_sf(data(s)), cex=0.2)
 
-y <- file.path(base, "shapes", "anatomical")
+y <- file.path(zs, "shapes", "anatomical")
 (s <- readShape(y))
 plot(sf::st_as_sf(data(s)), cex=0.2)
 

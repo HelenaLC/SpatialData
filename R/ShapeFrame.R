@@ -1,5 +1,6 @@
 #' @name ShapeFrame
 #' @title The `ShapeFrame` class
+#' @aliases geom_type
 #'
 #' @param x \code{ShapeFrame}
 #' @param data \code{arrow}-derived table for on-disk,
@@ -9,20 +10,20 @@
 #'   content describing the overall object.
 #' @param name character string for extraction (see \code{?base::`$`}).
 #' @param i,j indices specifying elements to extract.
-#' @param drop ignored.
+#' @param drop,pattern ignored.
 #' @param ... optional arguments passed to and from other methods.
 #'
 #' @return \code{ShapeFrame}
 #'
 #' @examples
 #' library(SpatialData.data)
-#' dir.create(tf <- tempfile())
-#' base <- SpatialData.data:::.unzip_merfish_demo(tf)
-#' y <- file.path(base, "shapes", "cells")
+#' zs <- get_demo_SDdata("merfish")
+#' 
+#' y <- file.path(zs, "shapes", "cells")
 #' (s <- readShape(y))
 #' plot(sf::st_as_sf(data(s)), cex=0.2)
 #' 
-#' y <- file.path(base, "shapes", "anatomical")
+#' y <- file.path(zs, "shapes", "anatomical")
 #' (s <- readShape(y))
 #' plot(sf::st_as_sf(data(s)), cex=0.2)
 #'
@@ -56,15 +57,24 @@ setMethod("length", "ShapeFrame", \(x) nrow(data(x)))
 #' @export
 setMethod("names", "ShapeFrame", \(x) names(data(x)))
 
-#' @importFrom utils .DollarNames
 #' @export
-.DollarNames.ShapeFrame <- \(x, pattern="") {
+#' @rdname ShapeFrame
+#' @importFrom utils .DollarNames
+.DollarNames.ShapeFrame <- \(x, pattern="") 
     grep(pattern, names(x), value=TRUE)
-}
 
 #' @rdname ShapeFrame
 #' @exportMethod $
 setMethod("$", "ShapeFrame", \(x, name) data(x)[[name]])
+
+#' @export
+#' @rdname ShapeFrame
+#' @importFrom sf st_as_sf st_geometry_type
+setMethod("geom_type", "ShapeFrame", \(x) {
+    y <- st_as_sf(data(x[1, ]))
+    z <- st_geometry_type(y)
+    return(as.character(z))
+})
 
 # sub ----
 
