@@ -30,7 +30,7 @@ Miscellaneous methods (e.g., \code{show}) for the
 \examples{
 zs <- file.path("extdata", "blobs.zarr")
 zs <- system.file(zs, package="SpatialData")
-(sd <- readSpatialData(zs, anndataR=TRUE))
+(sd <- readSpatialData(zs))
 
 # show element
 image(sd)
@@ -41,7 +41,4 @@ shape(sd)
 # show .zattrs
 meta(label(sd))
 meta(image(sd, 2))
-}
-\author{
-Helena L. Crowell
 }

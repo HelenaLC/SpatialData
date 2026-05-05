@@ -1,6 +1,6 @@
 x <- file.path("extdata", "blobs.zarr")
 x <- system.file(x, package="SpatialData")
-x <- readSpatialData(x, anndataR=TRUE)
+x <- readSpatialData(x)
 
 test_that("CTgraph", {
     # invalid
@@ -13,7 +13,7 @@ test_that("CTgraph", {
     # every element & transformation
     ns <- lapply(setdiff(SpatialData:::.LAYERS, "tables"), 
         \(l) lapply(names(x[[l]]), 
-            \(e) c(e, CTname(x[[l]][[e]]))))
+            \(e) c(paste0("_", e), CTname(x[[l]][[e]]))))
     ns <- sort(unique(unlist(ns)))
     expect_true(all(ns %in% sort(graph::nodes(g))))
     # element-wise
@@ -22,13 +22,13 @@ test_that("CTgraph", {
             y <- x[[l]][[e]]
             g <- CTgraph(y)
             expect_is(g, "graph")
-            expect_true("self" %in% graph::nodes(g))
+            expect_true("_self" %in% graph::nodes(g))
         }
 })
 
 test_that("CTpath", {
     i <- "blobs_image"
-    y <- element(x, "images", i)
+    y <- element(x, i)
     z <- CTpath(y, j <- CTname(y))
     expect_identical(CTpath(x, i, j), z)
     expect_is(z, "list")

@@ -1,16 +1,6 @@
 #' @name SpatialData
 #' @title The `SpatialData` class
 #' 
-#' @aliases data meta layer element
-#' image images image<- images<- imageNames 
-#' label labels label<- labels<- labelNames 
-#' point points point<- points<- pointNames 
-#' image images image<- images<- imageNames 
-#' shape shapes shape<- shapes<- shapeNames 
-#' table tables table<- tables<- tableNames 
-#' [[<-,SpatialData,character,ANY-method
-#' [[<-,SpatialData,numeric,ANY-method
-#' 
 #' @description ...
 #' 
 #' @param images list of \code{\link{ImageArray}}s
@@ -33,7 +23,7 @@
 #' @examples
 #' x <- file.path("extdata", "blobs.zarr")
 #' x <- system.file(x, package="SpatialData")
-#' (x <- readSpatialData(x, anndataR=TRUE))
+#' (x <- readSpatialData(x))
 #' 
 #' # subsetting
 #' # layers are taken in order of appearance

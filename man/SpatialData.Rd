@@ -5,53 +5,29 @@
 \alias{SpatialData-class}
 \alias{.SpatialData}
 \alias{SpatialData}
-\alias{data}
-\alias{meta}
-\alias{layer}
-\alias{element}
-\alias{image}
-\alias{images}
-\alias{image<-}
-\alias{images<-}
-\alias{imageNames}
-\alias{label}
-\alias{labels}
-\alias{label<-}
-\alias{labels<-}
-\alias{labelNames}
-\alias{point}
-\alias{points}
-\alias{point<-}
-\alias{points<-}
-\alias{pointNames}
-\alias{shape}
-\alias{shapes}
-\alias{shape<-}
-\alias{shapes<-}
-\alias{shapeNames}
-\alias{table}
-\alias{tables}
-\alias{table<-}
-\alias{tables<-}
-\alias{tableNames}
-\alias{[[<-,SpatialData,character,ANY-method}
-\alias{[[<-,SpatialData,numeric,ANY-method}
 \alias{$,SpatialData-method}
 \alias{[[,SpatialData,numeric,ANY-method}
 \alias{[[,SpatialData,character,ANY-method}
-\alias{[,SpatialData,ANY,ANY,ANY-method}
 \alias{data,SpatialDataElement-method}
 \alias{meta,SpatialDataElement-method}
+\alias{[,SpatialData,ANY,ANY,ANY-method}
 \alias{rownames,SpatialData-method}
 \alias{colnames,SpatialData-method}
 \alias{layer,SpatialData,character-method}
-\alias{layer,SpatialData,numeric-method}
-\alias{layer,SpatialData,missing-method}
 \alias{layer,SpatialData,ANY-method}
+<<<<<<< HEAD
 \alias{element,SpatialData,ANY,character-method}
 \alias{element,SpatialData,ANY,numeric-method}
 \alias{element,SpatialData,ANY,missing-method}
 \alias{element,SpatialData,ANY,ANY-method}
+=======
+\alias{element,SpatialData,character-method}
+\alias{element,SpatialData,numeric-method}
+\alias{element,SpatialData,missing-method}
+\alias{element,SpatialData,ANY-method}
+\alias{[[<-,SpatialData,numeric,ANY,ANY-method}
+\alias{[[<-,SpatialData,character,ANY,ANY-method}
+>>>>>>> main
 \title{The `SpatialData` class}
 \usage{
 SpatialData(images, labels, points, shapes, tables)
@@ -62,11 +38,11 @@ SpatialData(images, labels, points, shapes, tables)
 
 \S4method{[[}{SpatialData,character,ANY}(x, i, j, ...)
 
-\S4method{[}{SpatialData,ANY,ANY,ANY}(x, i, j, ..., drop = FALSE)
-
 \S4method{data}{SpatialDataElement}(x)
 
 \S4method{meta}{SpatialDataElement}(x)
+
+\S4method{[}{SpatialData,ANY,ANY,ANY}(x, i, j, ..., drop = FALSE)
 
 \S4method{rownames}{SpatialData}(x)
 
@@ -74,19 +50,17 @@ SpatialData(images, labels, points, shapes, tables)
 
 \S4method{layer}{SpatialData,character}(x, i)
 
-\S4method{layer}{SpatialData,numeric}(x, i)
-
-\S4method{layer}{SpatialData,missing}(x, i)
-
 \S4method{layer}{SpatialData,ANY}(x, i)
 
-\S4method{element}{SpatialData,ANY,character}(x, i, j)
+\S4method{element}{SpatialData,character}(x, i)
 
-\S4method{element}{SpatialData,ANY,numeric}(x, i, j)
+\S4method{element}{SpatialData,numeric}(x, i)
 
-\S4method{element}{SpatialData,ANY,missing}(x, i, j)
+\S4method{element}{SpatialData,missing}(x, i)
 
-\S4method{element}{SpatialData,ANY,ANY}(x, i, j)
+\S4method{element}{SpatialData,ANY}(x, i)
+
+\S4method{images}{SpatialData}(x)
 
 \S4method{[[}{SpatialData,numeric,ANY}(x, i) <- value
 
@@ -126,7 +100,7 @@ or NULL/\code{list()} to remove an element/layer completely.}
 \examples{
 x <- file.path("extdata", "blobs.zarr")
 x <- system.file(x, package="SpatialData")
-(x <- readSpatialData(x, anndataR=TRUE))
+(x <- readSpatialData(x))
 
 # subsetting
 # layers are taken in order of appearance

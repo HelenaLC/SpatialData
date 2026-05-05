@@ -1,5 +1,6 @@
 #' @name ImageArray
 #' @title The `ImageArray` class
+#' @aliases channels
 #' 
 #' @param x \code{ImageArray}
 #' @param data list of \code{\link[ZarrArray]{ZarrArray}}s
@@ -17,10 +18,28 @@
 #' @return \code{ImageArray}
 #'
 #' @examples
-#' library(SpatialData.data)
-#' zs <- get_demo_SDdata("merfish")
-#' pa <- file.path(zs, "images", "rasterized")
-#' (ia <- readImage(pa))
+#' zs <- file.path("extdata", "blobs.zarr")
+#' zs <- system.file(zs, package="SpatialData")
+#' 
+#' pa <- list.dirs(
+#'   file.path(zs, "images"), 
+#'   recursive=FALSE, full.names=TRUE)
+#' 
+#' # simple
+#' readImage(pa[1])
+#' 
+#' # multi-scale
+#' (x <- readImage(pa[2]))
+#' 
+#' dim(data(x, 1))   # highest res.
+#' dim(data(x, Inf)) # lowest res.
+#' 
+#' rgb <- apply(
+#'   data(x, 1), c(2, 3), 
+#'   \(.) rgb(.[1], .[2], .[3]))
+#' plot(
+#'   row(rgb), col(rgb), col=rgb, 
+#'   pch=15, asp=1, ylim=c(ncol(rgb), 0))
 #'
 #' @importFrom S4Vectors metadata<-
 #' @importFrom methods new
@@ -47,23 +66,12 @@ ImageArray <- function(data=list(), meta=Zattrs(), metadata=list(),
     return(x)
 }
 
-#' @rdname ImageArray
-#' @aliases channels
 #' @export
-setMethod("channels", "Zattrs", \(x, ...) {
-    v <- x$spatialdata_attrs$version
-    if (!length(v)) stop("couldn't find 'version' in 'spatialdata_attrs'")
-    if (v == "0.3") x <- x$ome
-    unlist(x$omero$channels)
-})
-
 #' @rdname ImageArray
-#' @aliases channels
-#' @export
 setMethod("channels", "ImageArray", \(x, ...) channels(meta(x)))
 
-#' @rdname ImageArray
 #' @export
+#' @rdname ImageArray
 setMethod("channels", "ANY", \(x, ...) stop("only 'images' have channels"))
 
 #' @importFrom S4Vectors isSequence
@@ -116,9 +124,9 @@ setMethod("channels", "ANY", \(x, ...) stop("only 'images' have channels"))
     )
 }
 
+#' @exportMethod [
 #' @rdname ImageArray
 #' @importFrom utils head tail
-#' @exportMethod [
 setMethod("[", "ImageArray", \(x, i, j, k, ..., drop=FALSE) {
     if (missing(i)) i <- TRUE
     if (missing(j)) j <- TRUE else if (isFALSE(j)) j <- 0 else .check_jk(j, "j")
@@ -126,7 +134,7 @@ setMethod("[", "ImageArray", \(x, i, j, k, ..., drop=FALSE) {
     ijk <- list(i, j, k)
     n <- length(data(x, NULL))
     d <- dim(data(x))
-    x@data <- lapply(seq_len(n), \(.) {
+    data(x) <- lapply(seq_len(n), \(.) {
         j <- if (isTRUE(j)) seq_len(d[2]) else j
         k <- if (isTRUE(k)) seq_len(d[3]) else k
         jk <- lapply(list(j, k), \(jk) {

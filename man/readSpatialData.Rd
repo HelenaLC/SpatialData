@@ -25,12 +25,11 @@ readSpatialData(
   labels = TRUE,
   points = TRUE,
   shapes = TRUE,
-  tables = TRUE,
-  anndataR = TRUE
+  tables = TRUE
 )
 }
 \arguments{
-\item{x}{For \code{readImage/Label/Point/Shape/Table}, 
+\item{x}{For \code{readImage/Label/Point/Shape/Table},
 path to a \code{SpatialData} element.
 For \code{readSpatialData},
 path to a \code{SpatialData}-.zarr store.}
@@ -38,35 +37,40 @@ path to a \code{SpatialData}-.zarr store.}
 \item{...}{option arguments passed to and from other methods.}
 
 \item{images, labels, points, shapes, tables}{Control which elements should be read for each layer.
-The default, NULL, reads all elements; alternatively, may be FALSE 
+The default, NULL, reads all elements; alternatively, may be FALSE
 to skip a layer, or a integer vector specifying which elements to read.}
 
-\item{anndataR}{logical specifying whether 
-to use \code{anndataR} to read tables; 
+\item{anndataR}{logical specifying whether
+to use \code{anndataR} to read tables;
 defaults to FALSE in `readSpatialData`, and `readTable`,
 so that pythonic \code{anndata} are used.}
 }
 \value{
 \itemize{
 \item{For \code{readSpatialData}, a \code{SpatialData}.},
-\item{For element readers, a \code{ImageArray}, \code{LabelArray}, 
+\item{For element readers, a \code{ImageArray}, \code{LabelArray},
 \code{PointFrame}, \code{ShapeFrame}, or \code{SingleCellExperiment}.}}
 }
 \description{
 Reading `SpatialData`
 }
 \examples{
-library(SpatialData.data)
-zs <- get_demo_SDdata("merfish")
+zs <- file.path("extdata", "blobs.zarr")
+zs <- system.file(zs, package="SpatialData")
 
 # read complete Zarr store
-(sd <- readSpatialData(zs, anndataR=TRUE))
+(sd <- readSpatialData(zs))
 
-# helper that gets path to first element in layer 'l' 
-fn <- \(l) list.files(file.path(zs, l), full.names=TRUE)[1]
-  
-# read individual element  
-readImage(fn("images"))
-readShape(fn("shapes"))
-readPoint(fn("points"))
+# helper that gets path to last element in layer 'l'
+fn <- \(.) tail(list.files(file.path(zs, .), full.names=TRUE), 1)
+
+# read individual elements
+(i <- readImage(fn("images")))
+channels(i)
+
+(p <- readPoint(fn("points")))
+as.data.frame(head(p))
+
+(s <- readShape(fn("shapes")))
+data(s)
 }

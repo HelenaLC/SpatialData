@@ -1,3 +1,48 @@
+changes in version 0.99.34
+
+- omit SpatialData.data everywhere
+- improved Point/ShapeFrame constructor
+- consolidated sdFrame code, docs, methods
+
+changes in version 0.99.33
+
+- added validity checks and tests for Zattrs
+- improved handling of 'spatialdata_attrs'
+- synchronize tables when subsetting/renaming
+- more memory efficient mask(), keeping 
+  an observation of unmapped instances
+- revised package 'Description:' field
+  to align with current capabilities
+
+changes in version 0.99.32
+
+- added unit tests for query()
+- improved 'table' element validation
+- split centroids/extent() code & docs
+- revised 'coordTrans' show method of Zattrs
+  (refactored code, fixed 'sequence' display)
+- implemented internal data/meta() get & set
+  to avoid @-accessiong throughout code base
+
+changes in version 0.99.31
+
+- refactored point/shape transformations
+- rebrand spatial queries as crop();
+  keeping table queries as query()
+- added object-wide spatial crop()
+- added .zattrs contructor
+- revised vignette
+
+changes in version 0.99.30
+
+- query() by table method draft
+- added xNames<-() methods (x = image, label, ...)
+- added combine() to make one SpatialData object from two
+- 'duckspatial' for handling of points and shapes
+- add ShapeFrame construction from matrix & 'sf'
+- bug fix in coord trans. graph representation 
+  for when element and space names collide
+
 changes in version 0.99.29
 
 - revision of Zarr version-specific .zattrs handling

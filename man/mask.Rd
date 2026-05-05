@@ -3,12 +3,13 @@
 \name{mask}
 \alias{mask}
 \alias{mask,SpatialData-method}
-\title{Masking}
+\title{Aggregate data across layers}
 \usage{
 \S4method{mask}{SpatialData}(
   x,
   i,
   j,
+  k,
   how = NULL,
   name = function(i, j) sprintf("\%s_by_\%s", i, j),
   ...
@@ -21,6 +22,9 @@
 specifically, \code{i} will be masked by \code{j},
 adding a \code{table} for \code{j} in \code{x}.}
 
+\item{k}{string or scalar integer; specifies target coordinate space
+(defaults to first common coordinate space between \code{i} and \code{j})}
+
 \item{how}{character string; statistic to use for masking.}
 
 \item{name}{function use to generate the new \code{table}'s name.}
@@ -31,7 +35,7 @@ adding a \code{table} for \code{j} in \code{x}.}
 Input \code{SpatialData} object \code{x} with an additional table.
 }
 \description{
-Masking operations serve to aggregate data across layers, e.g., 
+Masking operations serve to aggregate data across layers, e.g.,
 counting points in shapes, averaging image channels by labels, etc.
 For added flexibility, these may be carried out directly between elements,
 or using an input \code{SpatialData} object and specifying element names.
@@ -50,12 +54,5 @@ tail(tables(y), 1)
 y <- mask(x, "blobs_image", "blobs_labels")
 tail(tables(y), 1)
 
-library(SpatialData.data)
-x <- get_demo_SDdata("merfish")
-x <- readSpatialData(x)
-
-# sum table counts by shapes
-y <- mask(x, "cells", "anatomical")
-tail(tables(y), 1)
-
+# TODO: shape,shape example
 }

@@ -1,128 +1,74 @@
-#' @name utils
-#' @rdname utils
-#' @title Utilities
-#' @aliases centroids extent
-#' 
-#' @param x a \code{SpatialData} element (any but image).
-#' @param as character string; how results should be returned.
-#' @param ... optional arguments passed to and from other methods.
-#' 
-#' @returns
-#' For \code{centroids}, a table (\code{data.frame} or \code{matrix}) 
-#' of spatial coordinates (if \code{as="list"}, split by instance);
-#' for extend, a length-2 numeric list of x- and y-ranges.
-#' 
-#' @examples
-#' x <- file.path("extdata", "blobs.zarr")
-#' x <- system.file(x, package="SpatialData")
-#' x <- readSpatialData(x, tables=FALSE)
-#' 
-#' centroids(label(x))
-#' centroids(shape(x))
-#' centroids(shape(x, 3), "list")
-#' 
-#' head(centroids(point(x)))
-#' xy <- centroids(point(x), "list")
-#' plot(xy$gene_a, col=a <- "red")
-#' points(xy$gene_b, col=b <- "blue")
-#' legend("topright", legend=names(xy), col=c(a, b), pch=21)
-#' 
-#' # object-wide
-#' extent(x)
-#' 
-#' # element-wise
-#' extent(label(x))
-#' extent(point(x))
-#' extent(shape(x))
-NULL
+# internal helper for null-coalescing
+`%||%` <- \(a, b) if (is.null(a)) b else a
 
-# centroids ----
+# internal helpers for object-wide iteration 
+# across spatial elements (excluding tables)
 
-#' @export
-#' @rdname utils
-setMethod("centroids", "ANY", \(x, ...) stop("'centroids' ",
-    "only supported for label, shape, and point elements"))
+.ls <- .LAYERS[.LAYERS != "tables"]
 
-#' @export
-#' @rdname utils
-#' @importFrom Matrix summary
-setMethod("centroids", "LabelArray", \(x, 
-    as=c("data.frame", "matrix")) {
-    as <- match.arg(as)
-    y <- data(x)
-    y <- as(y, "dgCMatrix")
-    i <- summary(y)
-    # flip dimensions so that columns=x, rows=y
-    # TODO: should these be offset by 0.5?
-    i[, c(1, 2)] <- i[, c(2, 1)]-0.5
-    xy <- tapply(i[, -3], i[[3]], colMeans)
-    xy <- do.call(rbind, xy)
-    xy <- cbind(xy, as.integer(rownames(xy)))
-    dimnames(xy) <- list(NULL, c("x", "y", "i"))
-    if (as == "matrix") return(xy)
-    xy <- as.data.frame(xy)
-    xy$i <- factor(xy$i); xy
-})
+.lapplyLayer <- \(x, FUN, ...) {
+    lapply(.ls, \(l) lapply(x[[l]], FUN, ...))
+}
 
-#' @export
-#' @rdname utils
-#' @importFrom sf st_as_sf st_geometry_type st_coordinates
-setMethod("centroids", "ShapeFrame", \(x, 
-    as=c("data.frame", "matrix", "list")) {
-    as <- match.arg(as)
-    y <- st_as_sf(data(x))
-    xy <- st_coordinates(y)
-    colnames(xy)[c(1, 2)] <- c("x", "y")
-    if (as == "matrix") return(xy)
-    xy <- as.data.frame(xy)
-    rownames(xy) <- NULL
-    if (ncol(xy) > 2) 
-        for (. in seq(3, ncol(xy))) 
-            xy[[.]] <- factor(xy[[.]], unique(xy[[.]]))
-    if (as == "data.frame") return(xy)
-    split(xy, xy[seq(3, ncol(xy))])
-})
-
-#' @export
-#' @rdname utils
-setMethod("centroids", "PointFrame", \(x, 
-    as=c("data.frame", "list")) {
-    as <- match.arg(as)
-    i <- feature_key(x)
-    xy <- data(x)[, c("x", "y", i)]
-    xy <- as.data.frame(xy)
-    if (as == "data.frame") return(xy)
-    lapply(split(xy, xy[[i]]), `[`, -3)
-})
-
-# extent ----
-
-# TODO: this needs more work to consider transformations
-
-#' @export
-#' @rdname utils
-setMethod("extent", "SpatialData", \(x) {
-    ls <- setdiff(.LAYERS, "tables")
-    ex <- lapply(ls, \(.) lapply(x[[.]], extent))
-    ex <- Reduce(c, ex)
-    names(xy) <- xy <- c("x", "y")
-    lapply(xy, \(z) {
-        d <- vapply(ex, \(.) .[[z]], numeric(2))
-        c(min(d[1, ]), max(d[2, ]))
-    })
-})
-
-#' @export
-#' @rdname utils
-setMethod("extent", "SpatialDataElement", \(x) {
-    if (is(x, "sdArray")) {
-        nm <- vapply(ax <- axes(x), \(.) .$name, character(1))
-        xy <- vapply(ax, \(.) .$type == "space", logical(1))
-        d <- dim(x); names(d) <- nm
-        lapply(d[xy], \(.) c(0, .))
-    } else {
-        ax <- unlist(axes(x))
-        xy <- centroids(x)[ax]
-        apply(xy, 2, range, simplify=FALSE)
+.lapplyElement <- \(x, FUN, ...) {
+    for (l in .ls) {
+        for (e in names(x[[l]])) {
+            x[[l]][[e]] <- FUN(x[[l]][[e]], ...)
+        }
     }
-})
+    return(x)
+}
+
+.sync_tables <- \(x, old, new) {
+    if (!length(ts <- tables(x))) return(x)
+    for (i in seq_along(ts)) {
+        t <- ts[[i]]
+        # check for overlap
+        if (!any(region(t) %in% old)) next
+        # update 'regions' colData
+        # (automatically syncs 'region' metadata)
+        rs <- regions(t)
+        if (all(rs %in% old)) {
+            j <- match(rs, old)
+            regions(t) <- new[j]
+        } else {
+            # partial overlap (multi-region table)
+            ok <- rs %in% old
+            j <- match(rs[ok], old)
+            rs[ok] <- new[j]
+            regions(t) <- rs
+        }
+        ts[[i]] <- t
+    }
+    tables(x) <- ts
+    return(x)
+}
+
+.sync_tables_on_drop <- \(x) {
+    if (!length(ts <- tables(x))) return(x)
+    all_nms <- unlist(colnames(x)[.ls])
+    drop <- logical(length(ts))
+    for (i in seq_along(ts)) {
+        t <- ts[[i]]
+        # check which regions still exist
+        regs <- region(t)
+        keep <- regs %in% all_nms
+        if (!any(keep)) {
+            drop[i] <- TRUE
+            message(sprintf("dropping table '%s' because all its annotated regions were removed", names(ts)[i]))
+        } else if (!all(keep)) {
+            # partial drop: filter table
+            keep_regs <- regs[keep]
+            t <- t[, regions(t) %in% keep_regs]
+            # sync 'region' metadata
+            region(t) <- keep_regs
+            ts[[i]] <- t
+            message(sprintf("filtering table '%s' to remaining regions: %s", names(ts)[i], paste(keep_regs, collapse=", ")))
+        }
+    }
+    if (any(drop)) {
+        ts <- ts[!drop]
+    }
+    tables(x) <- ts
+    return(x)
+}

@@ -4,7 +4,7 @@
     msg <- c()
     sce <- \(.) is(., "SingleCellExperiment")
     for (i in seq_along(tables(object))) {
-        ok <- sce(se <- table(object, i))
+        ok <- sce(se <- SpatialData::table(object, i))
         if (!ok) msg <- c(msg, paste0(
             i, "-th table is not a 'SingleCellExperiment'"))
         if (!ok) next
@@ -17,16 +17,18 @@
             ok <- all(vapply(md, is.character, logical(1)))
             if (!ok) msg <- c(msg, paste0(
                 i, "-th table's ", .nm, " is not of type character"))
-            ok <- all(vapply(intersect(md, nm[-1]), length, integer(1)) == 1)
+            ok <- all(lengths(intersect(md, nm[-1])) == 1)
             if (!ok) msg <- c(msg, paste0(
                 i, "-th table's 'region/instance_key' is not length 1"))
-            ok <- !is.null(int_colData(se)[[md$region_key]])
-            if (!ok) msg <- c(msg, paste0(
-                i, "-th table missing 'region_key' column in 'int_colData'"))
             ok <- !is.null(int_colData(se)[[md$instance_key]])
             if (!ok) msg <- c(msg, paste0(
                 i, "-th table missing 'instance_key' column in 'int_colData'"))
-
+            ok <- !is.null(rs <- int_colData(se)[[rk <- md$region_key]])
+            if (!ok) msg <- c(msg, paste0(
+                i, "-th table missing 'region_key' column in 'int_colData'"))
+            ok <- all(md[[rk]] %in% rs)
+            if (!ok) msg <- c(msg, paste0(
+                i, "-th table's 'region_key' values not found in 'int_colData'"))
         }
     }
     na <- setdiff(
@@ -72,9 +74,11 @@ setValidity2("LabelArray", .validateLabelArray)
 
 .validatePointFrame <- \(object) {
     msg <- c()
-    if (!length(object)) return(msg)
-    if (!"x" %in% names(object)) msg <- c(msg, "'PointFrame' missing 'x'.")
-    if (!"y" %in% names(object)) msg <- c(msg, "'PointFrame' missing 'y'.")
+    # Explicitly call SpatialData::data to avoid utils::data masking
+    cnt <- tryCatch(as.integer(SpatialData::data(object) |> count() |> pull(n)), error=\(.) 0)
+    if (!cnt) return(msg)
+    if (!"geometry" %in% names(object)) 
+        msg <- c(msg, "'PointFrame' missing 'geometry'.")
     return(msg)
 }
 #' @importFrom S4Vectors setValidity2
@@ -82,8 +86,9 @@ setValidity2("PointFrame", .validatePointFrame)
 
 .validateShapeFrame <- \(object) {
     msg <- c()
-    if (!nrow(object)) return(msg)
-    if (!"geometry" %in% names(object)) msg <- c(msg, "'ShapeFrame' missing 'geometry'.")
+    #if (!nrow(object)) return(msg)
+    if (!"geometry" %in% names(object)) 
+        msg <- c(msg, "'ShapeFrame' missing 'geometry'.")
     return(msg)
 }
 #' @importFrom S4Vectors setValidity2
@@ -118,10 +123,12 @@ setValidity2("SpatialData", .validateSpatialData)
 .validateZattrs_multiscales <- \(x, msg) {
     if (is.null(ms <- x$multiscales[[1]]))
         msg <- c(msg, "missing 'multiscales'")
-    # MUST contain
-    for (. in c("axes", "datasets"))
-        if (is.null(ms[[.]]))
-            msg <- c(msg, sprintf("missing 'multiscales$%s'", .))
+    else {
+        # MUST contain
+        for (. in c("axes", "datasets"))
+            if (is.null(ms[[.]]))
+                msg <- c(msg, sprintf("missing 'multiscales$%s'", .))
+    }
     return(msg)
 }
 .validateZattrs_axes <- \(x, msg) {

@@ -47,33 +47,23 @@
 #' CTname(rmvCT(z, "global")) # identity is protected
 NULL
 
-# TODO: currently applying transformations only on 'data.frame's for plotting,
-# not the actual data (e.g., image)... but this might be necessary for queries?
-
-# TODO: for all layers, implement all transformations 
-# (translate, scale, rotate, affine, and sequential)
-
 # axes() ----
 
 #' @rdname CTutils
 #' @export
 setMethod("axes", "Zattrs", \(x, ...) {
-    ms <- multiscales(x)
+    ms <- .ms(x)
     if (!is.null(ms)) x <- ms[[1]]
     if (is.null(x <- x$axes)) stop("couldn't find 'axes'") 
     return(x)
 })
-
-#' @rdname CTutils
-#' @export
-setMethod("axes", "SpatialDataElement", \(x, ...) axes(meta(x)))
 
 # CTlist/data/type/name() ----
 
 #' @rdname CTutils
 #' @export
 setMethod("CTlist", "Zattrs", \(x, ...) {
-    ms <- multiscales(x)
+    ms <- .ms(x)
     ct <- "coordinateTransformations"
     if (is.null(ms)) return(x[[ct]])
     ms[[1]][[ct]]
@@ -111,21 +101,17 @@ setMethod("CTname", "Zattrs", \(x, ...) {
     vapply(CTlist(x), \(.) .$output$name, character(1))
 })
 
-#' @rdname CTutils
-#' @export
-setMethod("CTlist", "SpatialDataElement", \(x, ...) CTlist(meta(x)))
+# SpatialDataElement ----
+
+.SDE_METS <- c("axes", "CTlist", "CTtype", "CTname")
+for (. in .SDE_METS) {
+    setMethod(., "SpatialDataElement", 
+        eval(parse(text=sprintf("\\(x, ...) %s(meta(x), ...)", .))))
+}
 
 #' @rdname CTutils
 #' @export
-setMethod("CTdata", "SpatialDataElement", \(x, i=1, ...) CTdata(meta(x), i))
-
-#' @rdname CTutils
-#' @export
-setMethod("CTtype", "SpatialDataElement", \(x, ...) CTtype(meta(x)))
-
-#' @rdname CTutils
-#' @export
-setMethod("CTname", "SpatialDataElement", \(x, ...) CTname(meta(x)))
+setMethod("CTdata", "SpatialDataElement", \(x, i=1, ...) CTdata(meta(x), i, ...))
 
 #' @rdname CTutils
 #' @export
@@ -140,7 +126,7 @@ setMethod("CTname", "SpatialData", \(x, ...) {
 #' @rdname CTutils
 #' @export
 setMethod("rmvCT", "SpatialDataElement", 
-    \(x, i) { x@meta <- rmvCT(meta(x), i); x })
+    \(x, i) { meta(x) <- rmvCT(meta(x), i); x })
 
 #' @rdname CTutils
 #' @export
@@ -180,7 +166,7 @@ setMethod("rmvCT", "Zattrs", \(x, i) {
 #' @rdname CTutils
 #' @export
 setMethod("addCT", "SpatialDataElement", \(x, name, type, data) {
-    x@meta <- addCT(meta(x), name, type, data); x })
+    meta(x) <- addCT(meta(x), name, type, data); x })
 
 .check_ct <- \(x, type, data) {
     d <- length(axes(x))
@@ -190,7 +176,7 @@ setMethod("addCT", "SpatialDataElement", \(x, name, type, data) {
         identity=is.null(data),
         translation=length(data) == d & is.numeric(data),
         rotate=length(data) == 1 & is.numeric(data) & data > 0,
-        scale=length(data) == d & is.numeric(data) & all(data > 0),
+        scale=length(data) == d & is.numeric(unlist(data)) & all(unlist(data) > 0),
         TRUE)
     if (!.) f(t)
 }
@@ -207,7 +193,7 @@ setMethod("addCT", "Zattrs", \(x, name, type="identity", data=NULL) {
     new <- old[[1]][c("input", "output", "type")]
     new$type <- type
     new$output$name <- name
-    new[[new$type]] <- list(data)
+    new[[new$type]] <- data
     # append/overwrite & stash
     ms <- "multiscales"
     ct <- "coordinateTransformations"
