@@ -23,22 +23,22 @@
   meta
 }
 
-.make_datasets <- function(x, axes){
-  paths <- paste0(seq_len(length(x)) - 1)
-  mapply(\(p) {
-    list(
-      coordinateTransformations = list(
-        list(
-          scale = vapply(axes, \(.){
-            if(. == "c") 1 else (2^as.numeric(p))
-          }, numeric(1)),
-          type = "scale"
-        )
-      ),
-      path = p
-    )
-  }, paths, USE.NAMES = FALSE, SIMPLIFY = FALSE)
-}
+# .make_datasets <- function(x, axes){
+#   paths <- paste0(seq_len(length(x)) - 1)
+#   mapply(\(p) {
+#     list(
+#       coordinateTransformations = list(
+#         list(
+#           scale = vapply(axes, \(.){
+#             if(. == "c") 1 else (2^as.numeric(p))
+#           }, numeric(1)),
+#           type = "scale"
+#         )
+#       ),
+#       path = p
+#     )
+#   }, paths, USE.NAMES = FALSE, SIMPLIFY = FALSE)
+# }
 
 # metadata constructors ----
 #' @title Make point/shape metadata
@@ -141,7 +141,7 @@
                spatialdata_attrs = list(version = "0.1"))
 
   # update json list
-  meta <- fromJSON(toJSON(meta, auto_unbox = TRUE), simplifyVector = FALSE)
+  # meta <- fromJSON(toJSON(meta, auto_unbox = TRUE), simplifyVector = FALSE)
   Zattrs(meta)
 }
 

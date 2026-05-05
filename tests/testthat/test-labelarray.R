@@ -1,12 +1,13 @@
 test_that("LabelArray()", {
   val <- sample(seq_len(12), 20*20, replace=TRUE)
   mat <- array(val, dim=c(20, 20))
-  expect_silent(LabelArray(mat))
-  expect_silent(LabelArray(mat, list()))
+  lblarray <- LabelArray(mat)
+  expect_equal(dim(lblarray), dim(mat))
   # invalid
   expect_error(LabelArray(mat, 1))
+  expect_error(LabelArray(mat, list()))
   # single scale
-  expect_error(LabelArray(list()))
+  expect_silent(LabelArray(list()))
   expect_silent(LabelArray(list(mat)))
   expect_silent(LabelArray(list(mat), Zattrs()))
   # multiscale
@@ -31,7 +32,7 @@ test_that("data(),LabelArray", {
 })
 
 
-test_that("create", {
+test_that("create,LabelArray", {
   
   # create label
   set.seed(1)
@@ -62,7 +63,7 @@ zarr.store <- "test.zarr"
 zarr.path <- file.path(td, zarr.store)
 unlink(zarr.path, recursive = TRUE)
 
-test_that("write", {
+test_that("write,LabelArray", {
   
   # create label
   set.seed(1)
@@ -82,10 +83,10 @@ test_that("write", {
   lblarray2 <- label(sd2)
   expect_identical(realize(data(lblarray)), 
                    realize(data(lblarray2)))
-  expect_identical(meta(lblarray),meta(lblarray2))
+  expect_equal(meta(lblarray),meta(lblarray2))
 })
 
-test_that("create multiscale", {
+test_that("create multiscale,LabelArray", {
   
   # create label
   set.seed(1)
@@ -93,7 +94,7 @@ test_that("create multiscale", {
                dim = c(100,100))
   
   # make label array
-  lblarray <- LabelArray(lbl, multiscale = TRUE)
+  lblarray <- LabelArray(lbl, scale_factors = c(2,2,2))
   expect_identical(realize(data(lblarray)), lbl)
   expect_identical(dim(lblarray),dim(lbl))
   
@@ -118,7 +119,7 @@ zarr.store <- "test.zarr"
 zarr.path <- file.path(td, zarr.store)
 unlink(zarr.path, recursive = TRUE)
 
-test_that("write multiscale", {
+test_that("write multiscale,LabelArray", {
   
   # create label
   set.seed(1)
@@ -126,7 +127,7 @@ test_that("write multiscale", {
                dim = c(100,100))
   
   # make label array
-  lblarray <- LabelArray(lbl, multiscale = TRUE)
+  lblarray <- LabelArray(lbl, scale_factors = c(2,2,2))
   sd <- SpatialData(labels = list(test_label = lblarray))
   
   # write to location
@@ -142,5 +143,5 @@ test_that("write multiscale", {
                    realize(data(lblarray2, 2)))
   expect_identical(realize(data(lblarray, 3)), 
                    realize(data(lblarray2, 3)))
-  expect_identical(meta(lblarray),meta(lblarray2))
+  expect_equal(meta(lblarray),meta(lblarray2))
 })

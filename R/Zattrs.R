@@ -35,7 +35,7 @@
 #' Zattrs(type="array", label=TRUE)
 #' 
 #' @export
-Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, ver="0.4", n=3, ...) {
+Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, ver="0.4", n=3, scale_factors = NULL, ...) {
     if (!missing(x)) return(.Zattrs(x))
     type <- match.arg(type)
     # axes:
@@ -46,21 +46,37 @@ Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, ver="0.
     if (type == "array") {
         # yx for labels
         ax <- rev(ax)
-        # cyx for images
+        # yx for images, cyx if requested
         if (!label) ax <- c(list(list(name="c", type="channel")), ax)
     }
     # transformations:
     ct <- trans %||% .default_ct(ax)
+    if(!is.null(scale_factors)){
+      ds <- .default_ds(ax, scale_factors) 
+    } else {
+      ds <- .default_ds(ax)
+    }
     # .zattrs list:
     if (type == "array") {
         # default structure
-        res <- list(
-            omero=list(channels=list(label=letters[seq_len(n)])),
-            multiscales=list(list(
-                axes=ax,
-                version="0.4",
-                coordinateTransformations=ct,
-                datasets=list(list(path="0", coordinateTransformations=list(list(type="scale", scale=list(1, 1))))))))
+        res <- list()
+        if(!label)
+          res <- c(res,
+                   list(channels=lapply(letters[seq_len(n)], 
+                                        \(.) list(label = .))))
+        res <- c(res,
+                 list(
+                   multiscales=
+                     list(
+                       list(
+                         axes=ax,
+                         version="0.4",
+                         coordinateTransformations=ct,
+                         datasets=ds
+                         )
+                       )
+                   )
+                 )
         if (ver == "0.3") res <- list(ome=res)
     } else {
         # points/shapes
@@ -90,6 +106,25 @@ Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, ver="0.
     if (!is.null(data)) ct[[type]] <- data
     list(ct)
 }
+
+.default_ds <- function(axes, scale_factors = NULL){
+  scale_factors <- cumprod(c(1,scale_factors))
+  paths <- paste0(seq_along(scale_factors) - 1)
+  mapply(\(p,s) {
+    list(
+      coordinateTransformations = list(
+        list(
+          scale = lapply(
+            vapply(axes, \(.) .$name, character(1)),
+            \(.) if(. == "c") 1 else s),
+          type = "scale"
+        )
+      ),
+      path = p
+    )
+  }, paths, scale_factors, USE.NAMES = FALSE, SIMPLIFY = FALSE)
+}
+
 
 #' @export
 #' @importFrom utils .DollarNames
