@@ -12,11 +12,6 @@
 #'   For \code{writeImage/Label/Point/Shape/Table}, 
 #'   a \code{ImageArray},\code{LabelArray}, 
 #'   \code{PointFrame}, \code{ShapeFrame}
-#' @param name
-#'   For \code{writeSpatialData},
-#'   name of the zarr store
-#'   For \code{writeImage/Label/Point/Shape/Table}, 
-#'   name of spatial element to write in the zarr store
 #' @param path path to zarr store.
 #' @param replace if TRUE, existing elements with the same name will be
 #' replaced with the given element
@@ -33,10 +28,10 @@ NULL
 
 #' @rdname writeSpatialData
 #' @export
-writeSpatialData <- function(x, name, path, replace = TRUE, version = "0.2",
+writeSpatialData <- function(x, path, replace = TRUE, version = "0.2",
                              ...) {
   fmt <- sdFormat(version)
-  zarr.path <- .replace_zarr(name, path, 
+  zarr.path <- .replace_zarr(path, 
                              replace, 
                              version = zarr_version(fmt))
 

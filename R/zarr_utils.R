@@ -32,26 +32,27 @@ create_zarr_group <- function(store, name, version = 2){
 
 #' create_zarr
 #'
-#' create zarr store
+#' Create Zarr store
 #'
-#' @param name prefix of the zarr store, e.g. <name>.zarr
-#' @param dir the location of zarr store, e.g. <dir>/<name>.zarr
-#' @param version zarr version
-#' 
+#' @param store The location of the Zarr store
+#' @param version Zarr version
+#'
+#' @return `NULL`
+#'
 #' @examples
-#' dir.create(td <- tempfile())
-#' zarr_name <- "test"
-#' create_zarr(name = td, dir = "test")
-#' dir.exists(file.path(td, "test.zarr"))
-#' 
+#' store <- tempfile(fileext = ".zarr")
+#' create_zarr(store = store)
+#' dir.exists(store)
+#'
 #' @export
-create_zarr <- function(name, dir, version = 2){
-  create_zarr_group(store = dir, name = name, version = version)
-} 
+create_zarr <- function(store, version = 2) {
+  prefix <- basename(store)
+  dir <- gsub(paste0(prefix, "$"), "", store)
+  create_zarr_group(store = dir, name = prefix, version = version)
+}
 
-.replace_zarr <- function(name, path, replace, version = 2)
+.replace_zarr <- function(zarr.path, replace, version = 2)
 {
-  zarr.path <- file.path(path, name)
   if (dir.exists(zarr.path) && !replace)
     stop("zarr store with name ", zarr.path ," doesnt exist")
   if (!replace)
@@ -60,7 +61,7 @@ create_zarr <- function(name, dir, version = 2){
          "Its content will be lost!")
   if (unlink(zarr.path, recursive=TRUE) != 0L)
     stop("failed to delete directory \"", dir, "\"")
-  create_zarr(name, path, version = version)
+  create_zarr(zarr.path, version = version)
   return(zarr.path)
 }
 

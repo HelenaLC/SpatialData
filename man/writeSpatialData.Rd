@@ -9,7 +9,7 @@
 \alias{writeTable}
 \title{Writing `SpatialData`}
 \usage{
-writeSpatialData(x, name, path, replace = TRUE, version = "0.2", ...)
+writeSpatialData(x, path, replace = TRUE, version = "0.2", ...)
 
 writePoint(x, name, path, replace = TRUE, version = "0.2")
 
@@ -25,11 +25,6 @@ a \code{SpatialData}
 For \code{writeImage/Label/Point/Shape/Table}, 
 a \code{ImageArray},\code{LabelArray}, 
 \code{PointFrame}, \code{ShapeFrame}}
-
-\item{name}{For \code{writeSpatialData},
-name of the zarr store
-For \code{writeImage/Label/Point/Shape/Table}, 
-name of spatial element to write in the zarr store}
 
 \item{path}{path to zarr store.}
 

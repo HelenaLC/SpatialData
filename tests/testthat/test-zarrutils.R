@@ -2,35 +2,32 @@
 
 test_that("create zarr/group", {
   
-  dir.create(td <- tempfile())
-  name <- "test.zarr"
-  output_zarr <- file.path(td, name)
-  
   # open zarr
-  create_zarr(name = name, dir = td)
-  expect_true(dir.exists(output_zarr))
-  expect_true(file.exists(file.path(output_zarr, ".zgroup")))
+  store <- tempfile(fileext = ".zarr")
+  create_zarr(store = store)
+  expect_true(dir.exists(store))
+  expect_true(file.exists(file.path(store, ".zgroup")))
   
   # create group one group
-  create_zarr_group(store = output_zarr, name = "group1")
-  expect_true(dir.exists(file.path(output_zarr, "group1")))
-  expect_true(file.exists(file.path(output_zarr, "group1", ".zgroup")))
+  create_zarr_group(store = store, name = "group1")
+  expect_true(dir.exists(file.path(store, "group1")))
+  expect_true(file.exists(file.path(store, "group1", ".zgroup")))
   
   # create nested two groups
-  create_zarr_group(store = output_zarr, name = "group2/subgroup1")
-  expect_true(dir.exists(file.path(output_zarr, "group2")))
-  expect_true(file.exists(file.path(output_zarr, "group2", ".zgroup")))
-  expect_true(dir.exists(file.path(output_zarr, "group2/subgroup1")))
-  expect_true(file.exists(file.path(output_zarr, "group2/subgroup1", ".zgroup")))
+  create_zarr_group(store = store, name = "group2/subgroup1")
+  expect_true(dir.exists(file.path(store, "group2")))
+  expect_true(file.exists(file.path(store, "group2", ".zgroup")))
+  expect_true(dir.exists(file.path(store, "group2/subgroup1")))
+  expect_true(file.exists(file.path(store, "group2/subgroup1", ".zgroup")))
   
   # create nested three groups
-  create_zarr_group(store = output_zarr, name = "group3/subgroup1/subsubgroup1")
-  expect_true(dir.exists(file.path(output_zarr, "group3")))
-  expect_true(file.exists(file.path(output_zarr, "group3", ".zgroup")))
-  expect_true(dir.exists(file.path(output_zarr, "group3/subgroup1")))
-  expect_true(file.exists(file.path(output_zarr, "group3/subgroup1", ".zgroup")))
-  expect_true(dir.exists(file.path(output_zarr, "group3/subgroup1/subsubgroup1")))
-  expect_true(file.exists(file.path(output_zarr, "group3/subgroup1/subsubgroup1", ".zgroup")))
+  create_zarr_group(store = store, name = "group3/subgroup1/subsubgroup1")
+  expect_true(dir.exists(file.path(store, "group3")))
+  expect_true(file.exists(file.path(store, "group3", ".zgroup")))
+  expect_true(dir.exists(file.path(store, "group3/subgroup1")))
+  expect_true(file.exists(file.path(store, "group3/subgroup1", ".zgroup")))
+  expect_true(dir.exists(file.path(store, "group3/subgroup1/subsubgroup1")))
+  expect_true(file.exists(file.path(store, "group3/subgroup1/subsubgroup1", ".zgroup")))
   
   # invalid version string
   dir.create(td <- tempfile())
@@ -40,29 +37,26 @@ test_that("create zarr/group", {
 
 test_that("create zarr/group v3", {
 
-  dir.create(td <- tempfile())
-  name <- "test.zarr"
-  output_zarr <- file.path(td, name)
-
   # open v3 zarr store
-  create_zarr(name = name, dir = td, version = 3)
-  expect_true(dir.exists(output_zarr))
-  expect_true(file.exists(file.path(output_zarr, "zarr.json")))
-  expect_false(file.exists(file.path(output_zarr, ".zgroup")))
+  store <- tempfile(fileext = ".zarr")
+  create_zarr(store = store, version = 3)
+  expect_true(dir.exists(store))
+  expect_true(file.exists(file.path(store, "zarr.json")))
+  expect_false(file.exists(file.path(store, ".zgroup")))
 
   # check zarr.json exists and attributes are empty
-  expect_true(file.exists(file.path(output_zarr, "zarr.json")))
-  expect_equal(Rarr::read_zarr_attributes(output_zarr), list())
+  expect_true(file.exists(file.path(store, "zarr.json")))
+  expect_equal(Rarr::read_zarr_attributes(store), list())
 
   # create a sub-group
-  create_zarr_group(store = output_zarr, name = "images", version = 3)
-  expect_true(file.exists(file.path(output_zarr, "images", "zarr.json")))
-  expect_false(file.exists(file.path(output_zarr, "images", ".zgroup")))
+  create_zarr_group(store = store, name = "images", version = 3)
+  expect_true(file.exists(file.path(store, "images", "zarr.json")))
+  expect_false(file.exists(file.path(store, "images", ".zgroup")))
 
   # create nested groups — parent group should also be v3
-  create_zarr_group(store = output_zarr, name = "points/blobs_points", version = 3)
-  expect_true(file.exists(file.path(output_zarr, "points", "zarr.json")))
-  expect_true(file.exists(file.path(output_zarr, "points/blobs_points", "zarr.json")))
+  create_zarr_group(store = store, name = "points/blobs_points", version = 3)
+  expect_true(file.exists(file.path(store, "points", "zarr.json")))
+  expect_true(file.exists(file.path(store, "points/blobs_points", "zarr.json")))
 })
 
 
