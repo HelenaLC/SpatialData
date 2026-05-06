@@ -68,3 +68,56 @@ setMethod("data_type", "sdArray", \(x) {
 #' @importFrom Rarr zarr_overview
 #' @importFrom ZarrArray path
 setMethod("data_type", "DelayedArray", \(x) zarr_overview(path(x), as_data_frame=TRUE)$data_type)
+
+
+#' .create_mip
+#' 
+#' Generate a downsampled pyramid of images.
+#' 
+#' @param image image
+#' @param scale_factors 
+#' 
+#' @importFrom EBImage resize
+#' @importFrom stats setNames
+#' 
+#' @inheritParams write_image
+#' 
+#' @noRd
+.generate_multiscale <- function(image,
+                                 scale_factors = c(2,2,2,2),
+                                 axes, 
+                                 method = "image"){
+  
+  # check dim
+  ndim <- length(dim(image))
+  if (ndim > 3) {
+    stop("Only images of 5D or less are supported")
+  }
+  
+  # get x y dimensions for EBImage
+  dim_image <- stats::setNames(dim(image), axes)
+  dim_image <- dim_image[c("x", "y")]
+  
+  # downscale image
+  image_list <- list(image)
+  cur_image <- aperm(image, 
+                     perm = rev(seq_len(length(axes))))
+  for (i in seq_along(scale_factors)) {
+    dim_image <- ceiling(dim_image / scale_factors[i])
+    image_list[[i+1]] <- 
+      aperm(EBImage::resize(cur_image,
+                            w = dim_image[1],
+                            h = dim_image[2],
+                            filter = switch(method, 
+                                            image = "bilinear",
+                                            label = "none")), 
+            perm = rev(seq_len(length(axes))))
+  }
+  if (method == "label") {
+    image_list <- lapply(image_list, function(x) {
+      storage.mode(x) <- "integer"
+      x
+    })
+  }
+  image_list
+}

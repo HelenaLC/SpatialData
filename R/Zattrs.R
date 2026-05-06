@@ -35,32 +35,36 @@
 #' Zattrs(type="array", label=TRUE)
 #' 
 #' @export
-Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, ver="0.4", n=3, ...) {
+Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, 
+                   ver="0.3", n=3, scale_factors = NULL, ...) {
     if (!missing(x)) return(.Zattrs(x))
     type <- match.arg(type)
     # axes:
-    # xy for points/shapes
-    ax <-  list(
-        list(name="x", type="space"), 
-        list(name="y", type="space"))
-    if (type == "array") {
-        # yx for labels
-        ax <- rev(ax)
-        # cyx for images
-        if (!label) ax <- c(list(list(name="c", type="channel")), ax)
-    }
+    ax <- .default_ax(type, label)
     # transformations:
     ct <- trans %||% .default_ct(ax)
+    ds <- .default_ds(.ax_names(ax), scale_factors) 
     # .zattrs list:
     if (type == "array") {
         # default structure
-        res <- list(
-            omero=list(channels=list(label=letters[seq_len(n)])),
-            multiscales=list(list(
-                axes=ax,
-                version="0.4",
-                coordinateTransformations=ct,
-                datasets=list(list(path="0", coordinateTransformations=list(list(type="scale", scale=list(1, 1))))))))
+        res <- list()
+        if(!label)
+          res <- c(res,
+                   list(omero=list(channels=lapply(letters[seq_len(n)], 
+                                                   \(.) list(label = .)))))
+        res <- c(res,
+                 list(
+                   multiscales=
+                     list(
+                       list(
+                         axes=ax,
+                         version="0.4",
+                         coordinateTransformations=ct,
+                         datasets=ds
+                         )
+                       )
+                   )
+                 )
         if (ver == "0.3") res <- list(ome=res)
     } else {
         # points/shapes
@@ -71,17 +75,31 @@ Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, ver="0.
 }
 
 # Internal helper to generate OME-NGFF axes
-.default_ax <- \(type=c("array", "frame")) {
+.default_ax <- \(type=c("array", "frame"), label = FALSE) {
     switch(match.arg(type),
-        # cyx for images/labels
-        array=list(
-            list(name="c", type="channel"),
-            list(name="y", type="space"),
-            list(name="x", type="space")),
+        # (c)yx for images/labels
+        array={
+          ax <-  list(
+            list(name="x", type="space"), 
+            list(name="y", type="space"))
+          if (type == "array") {
+            # yx for labels
+            ax <- rev(ax)
+            # yx for images, cyx if requested
+            if (!label) ax <- c(list(list(name="c", type="channel")), ax)
+          }
+          ax
+        },
         # xy for points/shapes
-        list(
-            list(name="x", type="space"),
-            list(name="y", type="space")))
+        list("x", "y"))
+}
+
+.ax_names <- function(ax){
+  if (is.character(ax[[1]])) {
+    unlist(ax)
+  } else {
+    vapply(ax, \(.) .$name, character(1))
+  }
 }
 
 # Internal helper to generate coordinate transformations
@@ -90,6 +108,25 @@ Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, ver="0.
     if (!is.null(data)) ct[[type]] <- data
     list(ct)
 }
+
+.default_ds <- function(axes, scale_factors = NULL){
+  scale_factors <- cumprod(c(1,scale_factors))
+  paths <- paste0(seq_along(scale_factors) - 1)
+  mapply(\(p,s) {
+    list(
+      coordinateTransformations = list(
+        list(
+          scale = lapply(
+            axes,
+            \(.) if(. == "c") 1 else s),
+          type = "scale"
+        )
+      ),
+      path = p
+    )
+  }, paths, scale_factors, USE.NAMES = FALSE, SIMPLIFY = FALSE)
+}
+
 
 #' @export
 #' @importFrom utils .DollarNames
@@ -101,23 +138,13 @@ setMethod("$", "Zattrs", \(x, name) x[[name]])
 
 # internal use only!
 #' @noRd 
-.zv <- \(x) {
-    v <- x$spatialdata_attrs$version
-    if (!length(v)) stop("couldn't find 'version' in 'spatialdata_attrs'")
-    ok <- length(v) == 1 && is.character(v) && v %in% sprintf("0.%d", seq_len(5))
-    if (!ok) stop("invalid 'version' in 'spatialdata_attrs'; expected '0.x' where x is 1-5")
-    return(v)
-}
-
-# internal use only!
-#' @noRd 
-.ms <- \(x) switch(.zv(x), "0.3"=x$ome$multiscales, x$multiscales)
+.ms <- \(x) switch(version(x), "0.3"=x$ome$multiscales, x$multiscales)
 
 # internal use only!
 #' @noRd 
 .ch <- \(x) {
-    if (.zv(x) == "0.3") x <- x$ome
-    unlist(x$omero$channels)
+  if (version(x) == "0.3") x <- x$ome
+  unlist(x$omero$channels)
 }
 
 # internal use only!

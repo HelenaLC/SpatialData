@@ -8,7 +8,14 @@
 \alias{[,ImageArray,ANY,ANY,ANY-method}
 \title{The `ImageArray` class}
 \usage{
-ImageArray(data = list(), meta = Zattrs(), metadata = list(), ...)
+ImageArray(
+  data = list(),
+  meta = Zattrs(),
+  version = image(sdFormat(0.1)),
+  metadata = list(),
+  scale_factors = NULL,
+  ...
+)
 
 \S4method{channels}{ImageArray}(x, ...)
 
@@ -33,6 +40,11 @@ content describing the overall object.}
 \item{k}{scalar index specifying which scale to extract.}
 
 \item{drop}{ignored.}
+
+\item{multiscale}{if TRUE (and \code{data} is not a list), 
+multiscale image will be generated.}
+
+\item{axes}{axes}
 }
 \value{
 \code{ImageArray}

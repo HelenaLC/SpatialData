@@ -113,3 +113,10 @@ setGeneric("multiscales", \(x, ...) standardGeneric("multiscales"))
 setGeneric("hasTable", \(x, i, ...) standardGeneric("hasTable"))
 setGeneric("getTable", \(x, i, ...) standardGeneric("getTable"))
 setGeneric("setTable", \(x, i, ...) standardGeneric("setTable"))
+
+# zarr ----
+
+setGeneric("version", \(x, ...) standardGeneric("version"))
+setGeneric("version<-", \(x, value) standardGeneric("version<-"))
+setGeneric("zarr_version", \(x, ...) standardGeneric("zarr_version"))
+setGeneric("ome_version", \(x, ...) standardGeneric("ome_version"))

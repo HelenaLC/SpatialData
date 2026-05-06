@@ -5,7 +5,14 @@
 \alias{[,LabelArray,ANY,ANY,ANY-method}
 \title{The \code{LabelArray} class}
 \usage{
-LabelArray(data = list(), meta = Zattrs(), metadata = list(), ...)
+LabelArray(
+  data = list(),
+  meta = Zattrs(label = TRUE),
+  version = image(sdFormat(0.1)),
+  metadata = list(),
+  scale_factors = NULL,
+  ...
+)
 
 \S4method{[}{LabelArray,ANY,ANY,ANY}(x, i, j, ..., drop = FALSE)
 }
@@ -24,6 +31,11 @@ content describing the overall object.}
 \item{i, j}{indices specifying elements to extract.}
 
 \item{drop}{ignored.}
+
+\item{multiscale}{if TRUE (and \code{data} is not a list), 
+multiscale image will be generated.}
+
+\item{axes}{axes}
 }
 \value{
 \code{LabelArray}
