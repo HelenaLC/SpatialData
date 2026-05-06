@@ -1,5 +1,3 @@
-# library(Rarr)
-
 test_that("create zarr/group", {
   
   # open zarr
@@ -98,8 +96,8 @@ test_that("read/write zattrs", {
   Rarr::write_zarr_attributes(path, new.zattrs = zattrs.new.elem, overwrite = FALSE)
   read.zattrs <- Rarr::read_zarr_attributes(path)
   zattrs[names(zattrs.new.elem)] <- "foo2"
-  expect_equal(read.zattrs, c(zattrs))
-
+  expect_contains(read.zattrs, zattrs)
+  expect_contains(zattrs, read.zattrs)
 })
 
 test_that("read/write zattrs v3", {

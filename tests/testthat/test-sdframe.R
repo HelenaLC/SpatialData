@@ -150,7 +150,8 @@ test_that("write, PointFrame", {
   sd <- SpatialData(points = list(test_points = pf))
   
   # write to location
-  writeSpatialData(sd, "test.zarr", path = td)
+  zarr.path <- tempfile(fileext = ".zarr")
+  writeSpatialData(sd, path = zarr.path)
   expect_true(dir.exists(zarr.path))
   
   # read back and compare
@@ -227,7 +228,8 @@ test_that("write polygon, ShapeFrame", {
   sd <- SpatialData(shapes = list(test_shapes = pf))
   
   # write to location
-  writeSpatialData(sd, "test.zarr", path = td)
+  zarr.path <- tempfile(fileext = ".zarr")
+  writeSpatialData(sd, path = zarr.path)
   expect_true(dir.exists(zarr.path))
   
   # read back and compare
@@ -300,7 +302,8 @@ test_that("write circle, ShapeFrame", {
   sd <- SpatialData(shapes = list(test_shapes = pf))
   
   # write to location
-  writeSpatialData(sd, "test.zarr", path = td)
+  zarr.path <- tempfile(fileext = ".zarr")
+  writeSpatialData(sd, path = zarr.path)
   expect_true(dir.exists(zarr.path))
   
   # read back and compare

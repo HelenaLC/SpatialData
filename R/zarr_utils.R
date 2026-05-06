@@ -119,36 +119,36 @@ create_zarr <- function(store, version = 2) {
 #   vapply(axes, `[[`, character(1), "name")
 # }
 
-# Post-processes Rarr-written v3 array zarr.json:
-#   1. Sorts codecs to required order [array-array → array-bytes → bytes-bytes].
-#      Rarr currently serialises them as [transpose, zstd, bytes] which Python rejects.
-#   2. Adds "attributes": {} and "storage_transformers": [] which Python zarr expects
-#      but Rarr does not emit.
-# dimension_names are handled upstream by setting names(dimnames()) before write_zarr_array.
-.normalize_v3_array_metadata <- function(zarr_array_path) {
-  metadata_path <- file.path(zarr_array_path, "zarr.json")
-  if (!file.exists(metadata_path)) return(invisible(FALSE))
-
-  metadata <- jsonlite::read_json(metadata_path, simplifyVector = FALSE)
-  codecs <- metadata[["codecs"]]
-  if (!is.null(codecs) && length(codecs) > 1L) {
-    codec_names <- vapply(codecs, `[[`, character(1), "name")
-    codec_stage <- ifelse(
-      codec_names %in% "transpose", 1L,
-      ifelse(codec_names %in% c("bytes", "vlen-utf8", "vlen_utf8"), 2L, 3L)
-    )
-    metadata[["codecs"]] <- codecs[order(codec_stage)]
-  }
-
-  if (is.null(metadata[["attributes"]])) metadata[["attributes"]] <- list()
-  if (is.null(metadata[["storage_transformers"]])) metadata[["storage_transformers"]] <- list()
-
-  jsonlite::write_json(
-    metadata,
-    path = metadata_path,
-    auto_unbox = TRUE,
-    pretty = 4,
-    null = "null"
-  )
-  invisible(TRUE)
-}
+# # Post-processes Rarr-written v3 array zarr.json:
+# #   1. Sorts codecs to required order [array-array → array-bytes → bytes-bytes].
+# #      Rarr currently serialises them as [transpose, zstd, bytes] which Python rejects.
+# #   2. Adds "attributes": {} and "storage_transformers": [] which Python zarr expects
+# #      but Rarr does not emit.
+# # dimension_names are handled upstream by setting names(dimnames()) before write_zarr_array.
+# .normalize_v3_array_metadata <- function(zarr_array_path) {
+#   metadata_path <- file.path(zarr_array_path, "zarr.json")
+#   if (!file.exists(metadata_path)) return(invisible(FALSE))
+# 
+#   metadata <- jsonlite::read_json(metadata_path, simplifyVector = FALSE)
+#   codecs <- metadata[["codecs"]]
+#   if (!is.null(codecs) && length(codecs) > 1L) {
+#     codec_names <- vapply(codecs, `[[`, character(1), "name")
+#     codec_stage <- ifelse(
+#       codec_names %in% "transpose", 1L,
+#       ifelse(codec_names %in% c("bytes", "vlen-utf8", "vlen_utf8"), 2L, 3L)
+#     )
+#     metadata[["codecs"]] <- codecs[order(codec_stage)]
+#   }
+# 
+#   if (is.null(metadata[["attributes"]])) metadata[["attributes"]] <- list()
+#   if (is.null(metadata[["storage_transformers"]])) metadata[["storage_transformers"]] <- list()
+# 
+#   jsonlite::write_json(
+#     metadata,
+#     path = metadata_path,
+#     auto_unbox = TRUE,
+#     pretty = 4,
+#     null = "null"
+#   )
+#   invisible(TRUE)
+# }

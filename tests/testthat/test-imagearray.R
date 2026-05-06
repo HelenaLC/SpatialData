@@ -77,7 +77,8 @@ test_that("write, ImageArray", {
   sd <- SpatialData(images = list(test_image = imgarray))
   
   # write to location
-  writeSpatialData(sd, "test.zarr", path = td)
+  zarr.path <- tempfile(fileext = ".zarr")
+  writeSpatialData(sd, path = zarr.path)
   expect_true(dir.exists(zarr.path))
   
   # read back and compare
@@ -134,7 +135,8 @@ test_that("write multiscale, ImageArray", {
   sd <- SpatialData(images = list(test_image = imgarray))
   
   # write to location
-  writeSpatialData(sd, "test.zarr", path = td)
+  zarr.path <- tempfile(fileext = ".zarr")
+  writeSpatialData(sd, path = zarr.path)
   expect_true(dir.exists(zarr.path))
   
   # read back and compare
