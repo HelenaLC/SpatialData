@@ -6,7 +6,7 @@
 #' @param name name of the group
 #' @param version zarr version
 #' @export
-create_zarr_group <- function(store, name, version = "v2"){
+create_zarr_group <- function(store, name, version = 2){
   split.name <- strsplit(name, split = "\\/")[[1]]
   if(length(split.name) > 1){
     split.name <- vapply(seq_len(length(split.name)),
@@ -17,15 +17,15 @@ create_zarr_group <- function(store, name, version = "v2"){
       create_zarr_group(store = store, name = split.name[2], version = version)
   }
   dir.create(file.path(store, split.name[1]), showWarnings = FALSE)
-  switch(version,
-         v2 = {
+  switch(as.character(version),
+         "2" = {
            write("{\"zarr_format\":2}", file = file.path(store, split.name[1], ".zgroup"))},
-         v3 = {
+         "3" = {
            write(
              "{\"zarr_format\":3,\"node_type\":\"group\",\"attributes\":{}}",
              file = file.path(store, split.name[1], "zarr.json"))
          },
-         stop("version must be 'v2' or 'v3'")
+         stop("version must be '2' or '3'")
   )
 
 }
@@ -45,12 +45,12 @@ create_zarr_group <- function(store, name, version = "v2"){
 #' dir.exists(file.path(td, "test.zarr"))
 #' 
 #' @export
-create_zarr <- function(name, dir, version = "v2"){
+create_zarr <- function(name, dir, version = 2){
   create_zarr_group(store = dir, name = name, version = version)
 }
 
 
-.replace_zarr <- function(name, path, replace, version = "v2")
+.replace_zarr <- function(name, path, replace, version = 2)
 {
   zarr.path <- file.path(path,name)
   if (dir.exists(zarr.path) && !replace)

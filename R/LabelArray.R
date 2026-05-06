@@ -39,7 +39,10 @@
 #' @importFrom S4Vectors metadata<-
 #' @importFrom methods new
 #' @export
-LabelArray <- function(data=list(), meta=Zattrs(label = TRUE), metadata=list(),
+LabelArray <- function(data=list(), 
+                       meta=Zattrs(label = TRUE),
+                       version = image(sdFormat(0.1)),
+                       metadata=list(),
                        scale_factors = NULL, ...) {
     if(!is.list(data))
       data <- list(data)  
@@ -54,6 +57,10 @@ LabelArray <- function(data=list(), meta=Zattrs(label = TRUE), metadata=list(),
     }
     x <- .LabelArray(data=data, meta=meta, ...)
     metadata(x) <- metadata
+    
+    # update version if provided
+    if(!is.null(version))
+      version(x) <- version
     return(x)
 }
 

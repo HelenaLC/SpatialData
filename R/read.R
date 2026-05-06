@@ -108,7 +108,8 @@ readTable <- function(x) {
     })
     # move these to 'int_metadata'
     nm <- "spatialdata_attrs"
-    md <- metadata(sce)[[nm]]
+    # md <- metadata(sce)[[nm]]
+    md <- read_zarr_attributes(x)
     int_metadata(sce)[[nm]] <- md
     metadata(sce)[[nm]] <- NULL
     # move these to 'int_colData'

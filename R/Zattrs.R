@@ -35,7 +35,8 @@
 #' Zattrs(type="array", label=TRUE)
 #' 
 #' @export
-Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, ver="0.4", n=3, scale_factors = NULL, ...) {
+Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, 
+                   ver="0.3", n=3, scale_factors = NULL, ...) {
     if (!missing(x)) return(.Zattrs(x))
     type <- match.arg(type)
     # axes:
@@ -49,8 +50,8 @@ Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, ver="0.
         res <- list()
         if(!label)
           res <- c(res,
-                   list(channels=lapply(letters[seq_len(n)], 
-                                        \(.) list(label = .))))
+                   list(omero=list(channels=lapply(letters[seq_len(n)], 
+                                                   \(.) list(label = .)))))
         res <- c(res,
                  list(
                    multiscales=
@@ -136,6 +137,7 @@ Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, ver="0.
 setMethod("$", "Zattrs", \(x, name) x[[name]])
 
 # internal use only!
+# TODO: remove these when version() method is solid!
 #' @noRd 
 .zv <- \(x) {
     v <- x$spatialdata_attrs$version

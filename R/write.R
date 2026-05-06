@@ -20,7 +20,7 @@
 #' @param path path to zarr store.
 #' @param replace if TRUE, existing elements with the same name will be
 #' replaced with the given element
-#' @param version zarr version, v2 or v3 (only v2 is supported now)
+#' @param version SpatialData version, 0.1 (zarr v2) or 0.2 (zarr v3)
 #' @param ... option arguments passed to and from other methods.
 #'
 #' @return 
@@ -33,59 +33,75 @@ NULL
 
 #' @rdname writeSpatialData
 #' @export
-writeSpatialData <- function(x, name, path, replace = TRUE, version = "v2",
+writeSpatialData <- function(x, name, path, replace = TRUE, version = "0.2",
                              ...) {
-  zarr.path <- .replace_zarr(name, path, replace, version)
+  fmt <- sdFormat(version)
+  zarr.path <- .replace_zarr(name, path, 
+                             replace, 
+                             version = zarr_version(fmt))
 
   # write root-level spatialdata_attrs for v3 (Python uses this to pick the read path)
-  if (version == "v3")
-    Rarr::write_zarr_attributes(zarr.path,
-      new.zattrs = list(spatialdata_attrs = list(version = "0.2")))
+  if (version == "0.2")
+    Rarr::write_zarr_attributes(
+      zarr.path,
+      new.zattrs = list(
+        spatialdata_attrs = list(version = version),
+        spatialdata_software_version = 
+          paste0("SpatialData v", packageVersion("SpatialData"))
+      )
+    )
 
   # write points
   . <- lapply(pointNames(x), \(.){
-    writePoint(point(x, .),., path = zarr.path, replace = replace, version = version)
+    writePoint(point(x, .),., path = zarr.path, 
+               replace = replace, version = fmt)
   })
 
   # write shapes
   . <- lapply(shapeNames(x), \(.){
-    writeShape(shape(x, .),., path = zarr.path, replace = replace, version = version)
+    writeShape(shape(x, .),., path = zarr.path, 
+               replace = replace, version = fmt)
   })
 
   # write images
   . <- lapply(imageNames(x), \(.){
-    writeImage(image(x, .),., path = zarr.path, replace = replace, version = version)
+    writeImage(image(x, .),., path = zarr.path, 
+               replace = replace, version = fmt)
   })
 
   # write labels
   . <- lapply(labelNames(x), \(.){
-    writeLabel(label(x, .),., path = zarr.path, replace = replace, version = version)
+    writeLabel(label(x, .),., path = zarr.path, 
+               replace = replace, version = fmt)
   })
 
-  # write labels group metadata listing all label names (required by spatialdata spec)
-  # v2: {"labels": [...]}, v3: {"ome": {"labels": [...]}}
-  lnames <- labelNames(x)
-  if (length(lnames) > 0L) {
-    labels.dir <- file.path(zarr.path, "labels")
-    lnames_zattrs <- if (version == "v3")
-      list(ome = list(labels = as.list(lnames))) else
-      list(labels = as.list(lnames))
-    Rarr::write_zarr_attributes(labels.dir, new.zattrs = lnames_zattrs)
-  }
+  # # write labels group metadata listing all label names (required by spatialdata spec)
+  # # v2: {"labels": [...]}, v3: {"ome": {"labels": [...]}}
+  # lnames <- labelNames(x)
+  # if (length(lnames) > 0L) {
+  #   labels.dir <- file.path(zarr.path, "labels")
+  #   lnames_zattrs <- if (version == "v3")
+  #     list(ome = list(labels = as.list(lnames))) else
+  #     list(labels = as.list(lnames))
+  #   Rarr::write_zarr_attributes(labels.dir, new.zattrs = lnames_zattrs)
+  # }
 }
 
 #' @rdname writeSpatialData
 #' @export
-writePoint <- function(x, name, path, replace = TRUE, version = "v2") {
+writePoint <- function(x, name, path, replace = TRUE, version = "0.2") {
   
   # if no PointFrames were written before, update zarr store
-  zarr.group <- .make_zarr_group(x, name, file.path(path, "points"), 
-                                 replace, version)
+  zarr.group <- .make_zarr_group(x, name, 
+                                 file.path(path, "points"), 
+                                 replace, 
+                                 version = zarr_version(version))
   
   # write meta
-  zattrs <- as.list(meta(x))
-  if (version == "v3") zattrs$spatialdata_attrs$version <- "0.2"
-  Rarr::write_zarr_attributes(zarr.group, new.zattrs = zattrs)
+  # zattrs <- as.list(meta(x))
+  # if (version == "v3")
+  #   zattrs$spatialdata_attrs$version <- "0.2"
+  Rarr::write_zarr_attributes(zarr.group, new.zattrs = meta(x))
   
   # write data
   arrow::write_dataset(.point_to_xy(data(x)), 
@@ -114,15 +130,18 @@ writePoint <- function(x, name, path, replace = TRUE, version = "v2") {
 #' @rdname writeSpatialData
 #' @importFrom duckspatial ddbs_write_dataset
 #' @export
-writeShape <- function(x, name, path, replace = TRUE, version = "v2") {
+writeShape <- function(x, name, path, replace = TRUE, version = "0.3") {
   
   # if no ShapeFrames were written before, update zarr store
-  zarr.group <- .make_zarr_group(x, name, file.path(path, "shapes"), replace, version)
+  zarr.group <- .make_zarr_group(x, name, 
+                                 file.path(path, "shapes"), 
+                                 replace, 
+                                 version = zarr_version(version))
   
   # write meta
-  zattrs <- as.list(meta(x))
-  if (version == "v3") zattrs$spatialdata_attrs$version <- "0.3"
-  Rarr::write_zarr_attributes(zarr.group, new.zattrs = zattrs)
+  # zattrs <- as.list(meta(x))
+  # if (version == "v3") zattrs$spatialdata_attrs$version <- "0.3"
+  Rarr::write_zarr_attributes(zarr.group, new.zattrs = meta(x))
   
   # write data as a single parquet file (matches Python spatialdata convention)
   duckspatial::ddbs_write_dataset(
@@ -135,18 +154,21 @@ writeShape <- function(x, name, path, replace = TRUE, version = "v2") {
 #' @importFrom Rarr write_zarr_array
 #' @importFrom DelayedArray realize
 #' @export
-writeImage <- function(x, name, path, replace = TRUE, version = "v2") {
+writeImage <- function(x, name, path, replace = TRUE, version = "0.3") {
   
   # if no ImageArray were written before, update zarr store
-  zarr.group <- .make_zarr_group(x, name, file.path(path, "images"), 
-                                 replace, version)
+  zarr.group <- .make_zarr_group(x, name, 
+                                 file.path(path, "images"), 
+                                 replace, 
+                                 version = zarr_version(version))
+  
   # dimension_names <- .get_multiscale_axes(meta(x))
   dimension_names <- vapply(axes(meta(x)), \(.) .$name, character(1))
 
   # write meta: for v3, OME-NGFF content goes under "ome" key in attributes
-  zattrs <- .wrap_ome_for_v3(meta(x), version)
-  if (version == "v3") zattrs$spatialdata_attrs$version <- "0.3"
-  Rarr::write_zarr_attributes(zarr.group, new.zattrs = zattrs)
+  # zattrs <- .wrap_ome_for_v3(meta(x), version)
+  # if (version == "v3") zattrs$spatialdata_attrs$version <- "0.3"
+  Rarr::write_zarr_attributes(zarr.group, new.zattrs = meta(x))
   
   # write data
   lapply(
@@ -161,9 +183,9 @@ writeImage <- function(x, name, path, replace = TRUE, version = "v2") {
                              chunk_dim = dim(arr),
                              order = "C",
                              dimension_separator = "/",
-                             zarr_version = if (version == "v3") 3L else 2L)
-      if (version == "v3")
-        .normalize_v3_array_metadata(file.path(zarr.group, .))
+                             zarr_version = zarr_version(version))
+      # if (version == "v3")
+      #   .normalize_v3_array_metadata(file.path(zarr.group, .))
     }
   )
 }
@@ -172,18 +194,21 @@ writeImage <- function(x, name, path, replace = TRUE, version = "v2") {
 #' @importFrom Rarr write_zarr_array
 #' @importFrom DelayedArray realize
 #' @export
-writeLabel <- function(x, name, path, replace = TRUE, version = "v2") {
+writeLabel <- function(x, name, path, replace = TRUE, version = "0.3") {
   
   # if no LabelArray were written before, update zarr store
-  zarr.group <- .make_zarr_group(x, name, file.path(path, "labels"), 
-                                 replace, version)
+  zarr.group <- .make_zarr_group(x, name, 
+                                 file.path(path, "labels"), 
+                                 replace,
+                                 version = zarr_version(version))
+  
   # dimension_names <- .get_multiscale_axes(meta(x))
   dimension_names <- vapply(axes(meta(x)), \(.) .$name, character(1))
   
   # write meta: for v3, OME-NGFF content goes under "ome" key in attributes
-  zattrs <- .wrap_ome_for_v3(meta(x), version)
-  if (version == "v3") zattrs$spatialdata_attrs$version <- "0.3"
-  Rarr::write_zarr_attributes(zarr.group, new.zattrs = zattrs)
+  # zattrs <- .wrap_ome_for_v3(meta(x), version)
+  # if (version == "v3") zattrs$spatialdata_attrs$version <- "0.3"
+  Rarr::write_zarr_attributes(zarr.group, new.zattrs = meta(x))
   
   # write data
   lapply(
@@ -197,9 +222,9 @@ writeLabel <- function(x, name, path, replace = TRUE, version = "v2") {
                              chunk_dim = dim(arr),
                              order = "C",
                              dimension_separator = "/",
-                             zarr_version = if (version == "v3") 3L else 2L)
-      if (version == "v3")
-        .normalize_v3_array_metadata(file.path(zarr.group, .))
+                             zarr_version = zarr_version(version))
+      # if (version == "v3")
+      #   .normalize_v3_array_metadata(file.path(zarr.group, .))
     }
   )
 }

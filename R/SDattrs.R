@@ -180,3 +180,48 @@ setReplaceMethod("instances", c("SingleCellExperiment", "ANY"), \(x, value) {
     int_colData(x)[[ik]] <- value
     return(x)
 })
+
+# elements ----
+
+setMethod("version", c("SpatialDataElement"), \(x) {
+  version(meta(x))
+})
+
+setMethod("version", c("SingleCellExperiment"), \(x) {
+  meta(x)$version
+})
+
+setMethod("version", "Zattrs", \(x) {
+  x$spatialdata_attrs$version
+})
+
+setReplaceMethod("version", c("sdFrame"), \(x, value) {
+  if(!version %in% c("0.2", "0.3"))
+    stop("Unknown version for shape/point! Must be 0.2 or 0.3.")
+  meta(x)$spatialdata_attrs$version <- value
+  x
+})
+
+setReplaceMethod("version", c("sdArray"), \(x, value) {
+  mt <- meta(x)
+  if(value == "0.3"){
+    if(is.null(mt$ome)){
+      print("here")
+      mt$ome = list(omero = mt$omero, 
+                    multiscales = mt$multiscales)
+      mt$omero <- NULL
+      mt$multiscales <- NULL 
+    }
+  } else if(value == "0.2"){
+    if(is.null(mt$multiscales)){
+      mt$omero <- mt$ome$omero
+      mt$multiscales <- mt$ome$multiscales
+      mt[["ome"]] <- NULL
+    }
+  } else {
+    stop("Unknown version for image/label! Must be 0.2 or 0.3.")
+  }
+  mt$spatialdata_attrs$version <- value
+  meta(x) <- mt
+  x
+})
