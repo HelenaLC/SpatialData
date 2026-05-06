@@ -114,10 +114,11 @@ writeShape <- function(x, name, path, replace = TRUE, version = "v2") {
 writeImage <- function(x, name, path, replace = TRUE, version = "v2") {
   
   # if no ImageArray were written before, update zarr store
-  zarr.group <- .make_zarr_group(x, name, file.path(path, "images"), replace, version)
-  zarr_version <- if (version == "v3") 3L else 2L
-  dimension_names <- .get_multiscale_axes(meta(x))
-  
+  zarr.group <- .make_zarr_group(x, name, file.path(path, "images"), 
+                                 replace, version)
+  # dimension_names <- .get_multiscale_axes(meta(x))
+  dimension_names <- vapply(axes(meta(x)), \(.) .$name, character(1))
+
   # write meta: for v3, OME-NGFF content goes under "ome" key in attributes
   zattrs <- .wrap_ome_for_v3(meta(x), version)
   if (version == "v3") zattrs$spatialdata_attrs$version <- "0.3"
@@ -136,7 +137,7 @@ writeImage <- function(x, name, path, replace = TRUE, version = "v2") {
                              chunk_dim = dim(arr),
                              order = "C",
                              dimension_separator = "/",
-                             zarr_version = zarr_version)
+                             zarr_version = if (version == "v3") 3L else 2L)
       if (version == "v3")
         .normalize_v3_array_metadata(file.path(zarr.group, .))
     }
@@ -150,9 +151,10 @@ writeImage <- function(x, name, path, replace = TRUE, version = "v2") {
 writeLabel <- function(x, name, path, replace = TRUE, version = "v2") {
   
   # if no LabelArray were written before, update zarr store
-  zarr.group <- .make_zarr_group(x, name, file.path(path, "labels"), replace, version)
-  zarr_version <- if (version == "v3") 3L else 2L
-  dimension_names <- .get_multiscale_axes(meta(x))
+  zarr.group <- .make_zarr_group(x, name, file.path(path, "labels"), 
+                                 replace, version)
+  # dimension_names <- .get_multiscale_axes(meta(x))
+  dimension_names <- vapply(axes(meta(x)), \(.) .$name, character(1))
   
   # write meta: for v3, OME-NGFF content goes under "ome" key in attributes
   zattrs <- .wrap_ome_for_v3(meta(x), version)
@@ -171,7 +173,7 @@ writeLabel <- function(x, name, path, replace = TRUE, version = "v2") {
                              chunk_dim = dim(arr),
                              order = "C",
                              dimension_separator = "/",
-                             zarr_version = zarr_version)
+                             zarr_version = if (version == "v3") 3L else 2L)
       if (version == "v3")
         .normalize_v3_array_metadata(file.path(zarr.group, .))
     }

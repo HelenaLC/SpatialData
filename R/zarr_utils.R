@@ -66,15 +66,12 @@ create_zarr <- function(name, dir, version = "v2"){
 }
 
 .make_zarr_group <- function(x, name, path, replace, version){
-  # gd <- file.path(path, "points")
-  if(!dir.exists(path)) {
+  
+  # create element parent dir
+  if(!dir.exists(path))
     dir.create(path)
-    switch(version,
-      v2 = write('{"zarr_format":2}', file = file.path(path, ".zgroup")),
-      v3 = write('{"zarr_format":3,"node_type":"group","attributes":{}}',
-                 file = file.path(path, "zarr.json"))
-    )
-  }
+  
+  # check element dir
   ng <- file.path(path, name)
   if(replace){
     unlink(ng, recursive = TRUE)
@@ -85,7 +82,10 @@ create_zarr <- function(name, dir, version = "v2"){
            "Use 'replace=TRUE' to replace it. ",
            "Its content will be lost!")
   }
+  
+  # create group
   create_zarr_group(path, name, version)
+  
   return(ng)
 }
 
@@ -109,15 +109,15 @@ create_zarr <- function(name, dir, version = "v2"){
   )
 }
 
-.get_multiscale_axes <- function(zattrs) {
-  multiscales <- zattrs[["multiscales"]]
-  if (is.null(multiscales) && !is.null(zattrs[["ome"]]))
-    multiscales <- zattrs[["ome"]][["multiscales"]]
-  if (is.null(multiscales) || length(multiscales) == 0L) return(NULL)
-  axes <- multiscales[[1]][["axes"]]
-  if (is.null(axes) || length(axes) == 0L) return(NULL)
-  vapply(axes, `[[`, character(1), "name")
-}
+# .get_multiscale_axes <- function(zattrs) {
+#   multiscales <- zattrs[["multiscales"]]
+#   if (is.null(multiscales) && !is.null(zattrs[["ome"]]))
+#     multiscales <- zattrs[["ome"]][["multiscales"]]
+#   if (is.null(multiscales) || length(multiscales) == 0L) return(NULL)
+#   axes <- multiscales[[1]][["axes"]]
+#   if (is.null(axes) || length(axes) == 0L) return(NULL)
+#   vapply(axes, `[[`, character(1), "name")
+# }
 
 # Post-processes Rarr-written v3 array zarr.json:
 #   1. Sorts codecs to required order [array-array → array-bytes → bytes-bytes].
