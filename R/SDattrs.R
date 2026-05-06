@@ -191,12 +191,20 @@ setMethod("version", c("SingleCellExperiment"), \(x) {
   meta(x)$version
 })
 
-setMethod("version", "Zattrs", \(x) {
-  x$spatialdata_attrs$version
-})
+setMethod("version", "Zattrs", \(x) .zv(x))
+
+setMethod("version", "list", \(x) .zv(x))
+
+.zv <- \(x) {
+    v <- x$spatialdata_attrs$version
+    if (!length(v)) stop("couldn't find 'version' in 'spatialdata_attrs'")
+    ok <- length(v) == 1 && is.character(v) && v %in% sprintf("0.%d", seq_len(5))
+    if (!ok) stop("invalid 'version' in 'spatialdata_attrs'; expected '0.x' where x is 1-5")
+    return(v)
+}
 
 setReplaceMethod("version", c("sdFrame"), \(x, value) {
-  if(!version %in% c("0.2", "0.3"))
+  if(!value %in% c("0.1", "0.2", "0.3"))
     stop("Unknown version for shape/point! Must be 0.2 or 0.3.")
   meta(x)$spatialdata_attrs$version <- value
   x
@@ -212,14 +220,14 @@ setReplaceMethod("version", c("sdArray"), \(x, value) {
       mt$omero <- NULL
       mt$multiscales <- NULL 
     }
-  } else if(value == "0.2"){
+  } else if(value %in% c("0.1" ,"0.2")){
     if(is.null(mt$multiscales)){
       mt$omero <- mt$ome$omero
       mt$multiscales <- mt$ome$multiscales
       mt[["ome"]] <- NULL
     }
   } else {
-    stop("Unknown version for image/label! Must be 0.2 or 0.3.")
+    stop("Unknown version for image/label! Must be 0.1, 0.2, 0.3.")
   }
   mt$spatialdata_attrs$version <- value
   meta(x) <- mt

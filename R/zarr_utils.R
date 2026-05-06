@@ -41,18 +41,17 @@ create_zarr_group <- function(store, name, version = 2){
 #' @examples
 #' dir.create(td <- tempfile())
 #' zarr_name <- "test"
-#' create_zarr(dir = td, prefix = "test")
+#' create_zarr(name = td, dir = "test")
 #' dir.exists(file.path(td, "test.zarr"))
 #' 
 #' @export
 create_zarr <- function(name, dir, version = 2){
   create_zarr_group(store = dir, name = name, version = version)
-}
-
+} 
 
 .replace_zarr <- function(name, path, replace, version = 2)
 {
-  zarr.path <- file.path(path,name)
+  zarr.path <- file.path(path, name)
   if (dir.exists(zarr.path) && !replace)
     stop("zarr store with name ", zarr.path ," doesnt exist")
   if (!replace)

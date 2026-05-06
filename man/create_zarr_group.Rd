@@ -4,7 +4,7 @@
 \alias{create_zarr_group}
 \title{create_zarr_group}
 \usage{
-create_zarr_group(store, name, version = "v2")
+create_zarr_group(store, name, version = 2)
 }
 \arguments{
 \item{store}{the location of (zarr) store}

@@ -51,13 +51,20 @@
 PointFrame(
   data = NULL,
   meta = Zattrs(type = "frame"),
+  version = point(sdFormat(0.1)),
   metadata = list(),
   ik = NULL,
   fk = NULL,
   ...
 )
 
-ShapeFrame(data = NULL, meta = Zattrs(type = "frame"), metadata = list(), ...)
+ShapeFrame(
+  data = NULL,
+  meta = Zattrs(type = "frame"),
+  version = shape(sdFormat(0.1)),
+  metadata = list(),
+  ...
+)
 }
 \arguments{
 \item{...}{optional arguments passed to and from other methods.}

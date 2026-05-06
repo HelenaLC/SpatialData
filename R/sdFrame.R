@@ -214,7 +214,8 @@ setMethod("[", c("sdFrame", "ANY", "ANY"), \(x, i, j, ...) {
 #' @importFrom sf st_geometry_type
 #' @importFrom S4Vectors metadata<-
 #' @importFrom duckspatial as_duckspatial_df
-PointFrame <- \(data=NULL, meta=Zattrs(type="frame", ver = point(sdFormat())), 
+PointFrame <- \(data=NULL, meta=Zattrs(type="frame"), 
+                version = point(sdFormat(0.1)), 
                 metadata=list(), ik=NULL, fk=NULL, ...) {
     data <- .df_to_sf(data, "POINT")
     # validate geometry type (must be points)
@@ -242,6 +243,10 @@ PointFrame <- \(data=NULL, meta=Zattrs(type="frame", ver = point(sdFormat())),
     # construct S4 object
     x <- .PointFrame(data=data, meta=Zattrs(za), ...)
     metadata(x) <- metadata
+    
+    # update version if provided
+    if(!is.null(version))
+      version(x) <- version
     return(x)
 }
 
@@ -250,7 +255,8 @@ PointFrame <- \(data=NULL, meta=Zattrs(type="frame", ver = point(sdFormat())),
 #' @importFrom methods is
 #' @importFrom S4Vectors metadata<-
 #' @importFrom duckspatial as_duckspatial_df
-ShapeFrame <- \(data=NULL, meta=Zattrs(type="frame", ver = shape(sdFormat())), 
+ShapeFrame <- \(data=NULL, meta=Zattrs(type="frame"),
+                version = shape(sdFormat(0.1)), 
                 metadata=list(), ...) {
     data <- .df_to_sf(data, "POLYGON")
     # always ensure internal data is 'duckspatial_df'
@@ -259,5 +265,9 @@ ShapeFrame <- \(data=NULL, meta=Zattrs(type="frame", ver = shape(sdFormat())),
         data <- as_duckspatial_df(data, crs=NA)
     x <- .ShapeFrame(data=data, meta=meta, ...)
     metadata(x) <- metadata
+    
+    # update version if provided
+    if(!is.null(version))
+      version(x) <- version
     return(x)
 }

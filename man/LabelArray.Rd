@@ -7,10 +7,10 @@
 \usage{
 LabelArray(
   data = list(),
-  meta = Zattrs(),
+  meta = Zattrs(label = TRUE),
+  version = image(sdFormat(0.1)),
   metadata = list(),
-  multiscale = FALSE,
-  axes = NULL,
+  scale_factors = NULL,
   ...
 )
 
@@ -24,11 +24,6 @@ LabelArray(
 \item{metadata}{optional list of arbitrary 
 content describing the overall object.}
 
-\item{multiscale}{if TRUE (and \code{data} is not a list), 
-multiscale image will be generated.}
-
-\item{axes}{axes}
-
 \item{...}{option arguments passed to and from other methods.}
 
 \item{x}{\code{LabelArray}}
@@ -36,6 +31,11 @@ multiscale image will be generated.}
 \item{i, j}{indices specifying elements to extract.}
 
 \item{drop}{ignored.}
+
+\item{multiscale}{if TRUE (and \code{data} is not a list), 
+multiscale image will be generated.}
+
+\item{axes}{axes}
 }
 \value{
 \code{LabelArray}

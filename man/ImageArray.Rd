@@ -11,9 +11,9 @@
 ImageArray(
   data = list(),
   meta = Zattrs(),
+  version = image(sdFormat(0.1)),
   metadata = list(),
-  multiscale = FALSE,
-  axes = NULL,
+  scale_factors = NULL,
   ...
 )
 
@@ -31,11 +31,6 @@ ImageArray(
 \item{metadata}{optional list of arbitrary 
 content describing the overall object.}
 
-\item{multiscale}{if TRUE (and \code{data} is not a list), 
-multiscale image will be generated.}
-
-\item{axes}{axes}
-
 \item{...}{option arguments passed to and from other methods.}
 
 \item{x}{\code{ImageArray}}
@@ -45,6 +40,11 @@ multiscale image will be generated.}
 \item{k}{scalar index specifying which scale to extract.}
 
 \item{drop}{ignored.}
+
+\item{multiscale}{if TRUE (and \code{data} is not a list), 
+multiscale image will be generated.}
+
+\item{axes}{axes}
 }
 \value{
 \code{ImageArray}

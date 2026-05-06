@@ -9,15 +9,15 @@
 \alias{writeTable}
 \title{Writing `SpatialData`}
 \usage{
-writeSpatialData(x, name, path, replace = TRUE, version = "v2", ...)
+writeSpatialData(x, name, path, replace = TRUE, version = "0.2", ...)
 
-writePoint(x, name, path, replace = TRUE, version = "v2")
+writePoint(x, name, path, replace = TRUE, version = "0.2")
 
-writeShape(x, name, path, replace = TRUE, version = "v2")
+writeShape(x, name, path, replace = TRUE, version = "0.3")
 
-writeImage(x, name, path, replace = TRUE, version = "v2")
+writeImage(x, name, path, replace = TRUE, version = "0.3")
 
-writeLabel(x, name, path, replace = TRUE, version = "v2")
+writeLabel(x, name, path, replace = TRUE, version = "0.3")
 }
 \arguments{
 \item{x}{For \code{writeSpatialData},
@@ -36,7 +36,7 @@ name of spatial element to write in the zarr store}
 \item{replace}{if TRUE, existing elements with the same name will be
 replaced with the given element}
 
-\item{version}{zarr version, v2 or v3 (only v2 is supported now)}
+\item{version}{SpatialData version, 0.1 (zarr v2) or 0.2 (zarr v3)}
 
 \item{...}{option arguments passed to and from other methods.}
 }

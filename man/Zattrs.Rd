@@ -10,8 +10,9 @@ Zattrs(
   type = c("array", "frame"),
   label = FALSE,
   trans = NULL,
-  ver = "0.4",
+  ver = "0.3",
   n = 3,
+  scale_factors = NULL,
   ...
 )
 
