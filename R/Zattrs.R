@@ -39,23 +39,10 @@ Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, ver="0.
     if (!missing(x)) return(.Zattrs(x))
     type <- match.arg(type)
     # axes:
-    # xy for points/shapes
-    ax <-  list(
-        list(name="x", type="space"), 
-        list(name="y", type="space"))
-    if (type == "array") {
-        # yx for labels
-        ax <- rev(ax)
-        # yx for images, cyx if requested
-        if (!label) ax <- c(list(list(name="c", type="channel")), ax)
-    }
+    ax <- .default_ax(type, label)
     # transformations:
     ct <- trans %||% .default_ct(ax)
-    if(!is.null(scale_factors)){
-      ds <- .default_ds(ax, scale_factors) 
-    } else {
-      ds <- .default_ds(ax)
-    }
+    ds <- .default_ds(.ax_names(ax), scale_factors) 
     # .zattrs list:
     if (type == "array") {
         # default structure
@@ -87,17 +74,31 @@ Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, ver="0.
 }
 
 # Internal helper to generate OME-NGFF axes
-.default_ax <- \(type=c("array", "frame")) {
+.default_ax <- \(type=c("array", "frame"), label = FALSE) {
     switch(match.arg(type),
-        # cyx for images/labels
-        array=list(
-            list(name="c", type="channel"),
-            list(name="y", type="space"),
-            list(name="x", type="space")),
+        # (c)yx for images/labels
+        array={
+          ax <-  list(
+            list(name="x", type="space"), 
+            list(name="y", type="space"))
+          if (type == "array") {
+            # yx for labels
+            ax <- rev(ax)
+            # yx for images, cyx if requested
+            if (!label) ax <- c(list(list(name="c", type="channel")), ax)
+          }
+          ax
+        },
         # xy for points/shapes
-        list(
-            list(name="x", type="space"),
-            list(name="y", type="space")))
+        list("x", "y"))
+}
+
+.ax_names <- function(ax){
+  if (is.character(ax[[1]])) {
+    unlist(ax)
+  } else {
+    vapply(ax, \(.) .$name, character(1))
+  }
 }
 
 # Internal helper to generate coordinate transformations
@@ -115,7 +116,7 @@ Zattrs <- function(x, type=c("array", "frame"), label=FALSE, trans=NULL, ver="0.
       coordinateTransformations = list(
         list(
           scale = lapply(
-            vapply(axes, \(.) .$name, character(1)),
+            axes,
             \(.) if(. == "c") 1 else s),
           type = "scale"
         )

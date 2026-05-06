@@ -79,7 +79,8 @@ writeSpatialData <- function(x, name, path, replace = TRUE, version = "v2",
 writePoint <- function(x, name, path, replace = TRUE, version = "v2") {
   
   # if no PointFrames were written before, update zarr store
-  zarr.group <- .make_zarr_group(x, name, file.path(path, "points"), replace, version)
+  zarr.group <- .make_zarr_group(x, name, file.path(path, "points"), 
+                                 replace, version)
   
   # write meta
   zattrs <- as.list(meta(x))
@@ -87,11 +88,31 @@ writePoint <- function(x, name, path, replace = TRUE, version = "v2") {
   Rarr::write_zarr_attributes(zarr.group, new.zattrs = zattrs)
   
   # write data
-  arrow::write_dataset(data(x), file.path(zarr.group, "points.parquet"),
+  arrow::write_dataset(.point_to_xy(data(x)), 
+                       file.path(zarr.group, "points.parquet"),
                        basename_template = "part.{i}.parquet")
 }
 
+#' @importFrom dplyr bind_cols tibble
+.point_to_xy <- function(data) {
+  data %>%
+    st_as_sf() %>%
+    {
+      coords <- st_coordinates(.)
+      
+      bind_cols(
+        tibble(
+          x = coords[,1],
+          y = coords[,2]
+        ),
+        .
+      )
+    } %>%
+    select(-geometry)
+}
+
 #' @rdname writeSpatialData
+#' @importFrom duckspatial ddbs_write_dataset
 #' @export
 writeShape <- function(x, name, path, replace = TRUE, version = "v2") {
   
@@ -104,8 +125,11 @@ writeShape <- function(x, name, path, replace = TRUE, version = "v2") {
   Rarr::write_zarr_attributes(zarr.group, new.zattrs = zattrs)
   
   # write data as a single parquet file (matches Python spatialdata convention)
-  arrow::write_parquet(data(x), file.path(zarr.group, "shapes.parquet"))
-}
+  duckspatial::ddbs_write_dataset(
+    data(x),
+    file.path(zarr.group, "shapes.parquet"),
+    overwrite = TRUE
+  )}
 
 #' @rdname writeSpatialData
 #' @importFrom Rarr write_zarr_array
