@@ -5,7 +5,7 @@ on:
     branches: [main, devel]
   pull_request:
 
-name: R-CMD-check.yaml
+name: check-SpatialData.Plot
 
 permissions: read-all
 
