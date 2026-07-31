@@ -329,3 +329,8 @@ test_that("[,SpatialData", {
     # infinite 'j'
     expect_no_error(y <- x[1, Inf])
 })
+
+# show ----
+test_that("show", {
+    expect_snapshot(show(x))
+})
