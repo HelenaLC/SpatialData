@@ -375,7 +375,7 @@ f <- \(e) setReplaceMethod(e,
     \(x, i, ..., value) { 
         nms <- get(paste0(e, "Names"))(x)
         n <- length(get(paste0(e, "s"))(x))
-        i <- ifelse(i > n, paste0(e, n+1), nms[i])
+        i <- if(i > n) paste0(e, n+1) else nms[i]
         set <- get(paste0(e, "<-"))
         set(x, i, value=value)
     })
