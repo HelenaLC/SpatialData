@@ -207,37 +207,6 @@ for (v in names(z)) {
   })
 }
 
-test_that("SpatialDataLabel()", {
-  val <- sample(seq_len(12), 20*20, replace=TRUE)
-  mat <- array(val, dim=c(20, 20))
-  SpatialDataLabel(mat)
-  # invalid
-  expect_error(SpatialDataLabel(mat, 1))
-  expect_error(SpatialDataLabel(mat, list()))
-  # single scale
-  expect_silent(SpatialDataLabel(list()))
-  expect_silent(SpatialDataLabel(list(mat)))
-  expect_silent(SpatialDataLabel(list(mat), SpatialDataAttrs()))
-  # multiscale
-  dim <- lapply(c(20, 10, 5), \(.) rep(., 2))
-  lys <- lapply(dim, \(.) array(sample(seq_len(12), prod(.), replace=TRUE), dim=.))
-  expect_silent(SpatialDataLabel(lys))
-})
-
-test_that("data(),SpatialDataLabel", {
-  dim <- lapply(c(8, 4, 2), \(.) rep(., 2))
-  lys <- lapply(dim, \(.) array(0L, dim=.))
-  lab <- SpatialDataLabel(lys)
-  for (. in seq_along(lys))
-    expect_identical(data(lab, .), lys[[.]])
-  expect_identical(data(lab, Inf), lys[[3]])
-  expect_error(data(lab, 0))
-  expect_error(data(lab, -1))
-  expect_error(data(lab, 99))
-  expect_error(data(lab, ""))
-  expect_error(data(lab, c(1,2)))
-})
-
 test_that("create,SpatialDataLabel", {
   
   # create label

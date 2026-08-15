@@ -81,7 +81,7 @@ SpatialDataImage <- function(data=list(), meta=SpatialDataAttrs(type="image"),
                                  scale_factors = scale_factors, 
                                  method = "image")
     # TODO: this supposed to update the scale_factors not write a new meta
-    meta <- SpatialDataAttrs(scale_factors = scale_factors) 
+    meta <- SpatialDataAttrs(type = "image", scale_factors = scale_factors) 
   }
   # construct S4 object
   x <- .SpatialDataImage(data=data, meta=meta, ...)
@@ -111,7 +111,7 @@ SpatialDataLabel <- function(data=list(),
                                                character(1)), 
                                  scale_factors = scale_factors, 
                                  method = "label")
-    meta <- SpatialDataAttrs(scale_factors = scale_factors, label = TRUE) 
+    meta <- SpatialDataAttrs(type = "label", scale_factors = scale_factors) 
   }
   x <- .SpatialDataLabel(data=data, meta=meta, ...)
   metadata(x) <- metadata

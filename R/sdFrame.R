@@ -159,12 +159,19 @@ SpatialDataPoint <- \(data=NULL, meta=SpatialDataAttrs(type="frame"),
 #' @rdname SpatialDataFrame
 #' @importFrom methods is
 #' @importFrom S4Vectors metadata<-
-SpatialDataShape <- \(data=NULL, meta=SpatialDataAttrs(type="frame"), metadata=list(), ...) {
-    data <- .df_to_sf(data, "POLYGON")
-    if (!is(data, "duckspatial_df")) 
+SpatialDataShape <- \(data=NULL, meta=SpatialDataAttrs(type="frame"), 
+                      version = shape(sdFormat(0.1)),
+                      metadata=list(), ...) {
+  # always ensure internal data is 'duckspatial_df'
+  if (isTRUE(nrow(data) > 0L) &&
+      !is(data, "duckspatial_df"))
         data <- .duck(data, "sdShape")
     x <- .SpatialDataShape(data=data, meta=meta, ...)
     metadata(x) <- metadata
+    
+    # update version if provided
+    if(!is.null(version))
+      version(x) <- version
     return(x)
 }
 

@@ -42,7 +42,7 @@ writeSpatialData <- function(x, path, replace = TRUE, version = "0.2",
       new.zattrs = list(
         spatialdata_attrs = list(version = version),
         spatialdata_software_version = 
-          paste0("SpatialData v", packageVersion("SpatialData"))
+          paste0("SpatialData v", packageVersion("spatialdataR"))
       )
     )
   
