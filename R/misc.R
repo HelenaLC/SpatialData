@@ -54,7 +54,7 @@ NULL
     cat(sprintf("  - %s (%s)\n", p, d), sep="")
     # shapes
     nc <- vapply(shapes(object), ncol, numeric(1))
-    geom <- c("circle", "polygon")[as.integer(nc == 1) + 1L]
+    geom <- c("circle", "polygon")[(nc == 1) + 1L]
     d <- vapply(shapes(object), nrow, numeric(1))
     d <- paste(d, unname(geom), sep=",")
     cat(sprintf("- shapes(%s):\n", length(s)))
@@ -88,8 +88,8 @@ setMethod("show", "SpatialData", .showSpatialData)
 
 #' @importFrom S4Vectors coolcat
 .showArray <- function(object) {
-    n.object <- length(object@data)
-    cat("class: ", class(object), if (n.object > 1) "(MultiScale)" else "", "\n")
+    n <- length(object@data)
+    cat("class:", class(object), if (n > 1) "(MultiScale)" else "", "\n")
     scales <- vapply(object@data, \(x) paste0(dim(x), collapse=","), character(1))
     coolcat("Scales (%d): (%s)", scales)
 }
@@ -132,8 +132,8 @@ setMethod("show", "SpatialDataShape", .showShape)
     # coordinate transformations
     CTshow <- \(l) {
         f <- \(.) {
-            if (length(.) > 1).
-              sprintf("[%s]", paste(unlist(.), collapse=","))
+            if (length(.) <= 1) return(.)
+            sprintf("[%s]", paste(unlist(.), collapse=","))
         }
         g <- \(.) {
             na <- !length(unlist(.))
