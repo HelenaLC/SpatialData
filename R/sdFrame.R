@@ -123,7 +123,9 @@ NULL
 #' @importFrom methods is
 #' @importFrom sf st_geometry_type
 #' @importFrom S4Vectors metadata<-
-SpatialDataPoint <- \(data=NULL, meta=SpatialDataAttrs(type="frame"), metadata=list(), ik=NULL, fk=NULL, ...) {
+SpatialDataPoint <- \(data=NULL, meta=SpatialDataAttrs(type="frame"), 
+                      version = point(sdFormat(0.1)), 
+                      metadata=list(), ik=NULL, fk=NULL, ...) {
     data <- .df_to_sf(data, "POINT")
     if (isTRUE(nrow(data) > 0L)) {
         gt <- tryCatch(unique(st_geometry_type(data)), error=\(.) "n/a")
@@ -146,6 +148,10 @@ SpatialDataPoint <- \(data=NULL, meta=SpatialDataAttrs(type="frame"), metadata=l
     }
     x <- .SpatialDataPoint(data=data, meta=SpatialDataAttrs(za), ...)
     metadata(x) <- metadata
+    
+    # update version if provided
+    if(!is.null(version))
+      version(x) <- version
     return(x)
 }
 

@@ -65,22 +65,61 @@ NULL
 
 #' @export
 #' @rdname SpatialDataArray
+#' @importFrom methods new
 #' @importFrom S4Vectors metadata<-
-SpatialDataImage <- \(data=list(), meta=SpatialDataAttrs(type="image"), metadata=list(), ...) {
-    if (is.array(data)) data <- list(data)
-    x <- .SpatialDataImage(data=data, meta=meta, ...)
-    metadata(x) <- metadata
-    return(x)
+SpatialDataImage <- function(data=list(), meta=SpatialDataAttrs(),
+                             version = image(sdFormat(0.1)),
+                             metadata=list(),
+                             scale_factors = NULL, ...) {
+  if(!is.list(data))
+    data <- list(data)  
+  if(!is.null(scale_factors)){
+    data <- .generate_multiscale(data[[1]], 
+                                 axes = vapply(axes(meta), 
+                                               \(.) .$name, 
+                                               character(1)), 
+                                 scale_factors = scale_factors, 
+                                 method = "image")
+    # TODO: this supposed to update the scale_factors not write a new meta
+    meta <- SpatialDataAttrs(scale_factors = scale_factors) 
+  }
+  # construct S4 object
+  x <- .SpatialDataImage(data=data, meta=meta, ...)
+  metadata(x) <- metadata
+  
+  # update version if provided
+  if(!is.null(version))
+    version(x) <- version
+  return(x)
 }
 
 #' @export
 #' @rdname SpatialDataArray
+#' @importFrom methods new
 #' @importFrom S4Vectors metadata<-
-SpatialDataLabel <- \(data=list(), meta=SpatialDataAttrs(type="label"), metadata=list(), ...) {
-    if (is.array(data)) data <- list(data)
-    x <- .SpatialDataLabel(data=data, meta=meta, ...)
-    metadata(x) <- metadata
-    return(x)
+SpatialDataLabel <- function(data=list(), 
+                             meta=SpatialDataAttrs(label = TRUE),
+                             version = image(sdFormat(0.1)),
+                             metadata=list(),
+                             scale_factors = NULL, ...) {
+  if(!is.list(data))
+    data <- list(data)  
+  if(!is.null(scale_factors)){
+    data <- .generate_multiscale(data[[1]], 
+                                 axes = vapply(axes(meta), 
+                                               \(.) .$name, 
+                                               character(1)), 
+                                 scale_factors = scale_factors, 
+                                 method = "label")
+    meta <- SpatialDataAttrs(scale_factors = scale_factors, label = TRUE) 
+  }
+  x <- .SpatialDataLabel(data=data, meta=meta, ...)
+  metadata(x) <- metadata
+  
+  # update version if provided
+  if(!is.null(version))
+    version(x) <- version
+  return(x)
 }
 
 # utils ----
@@ -110,6 +149,76 @@ setMethod("data_type", "DelayedArray", \(x) {
     df <- zarr_overview(path(x), as_data_frame=TRUE)
     return(df$data_type)
 })
+
+# multiscales ----
+
+#' @importFrom S4Vectors isSequence
+.get_multiscales_paths <- function(x) {
+  ps <- list.files(x)
+  ps <- suppressWarnings(as.numeric(sort(ps, decreasing=FALSE)))
+  ps <- ps[!is.na(ps)]
+  if (length(ps)) {
+    qs <- seq(min(ps), max(ps))
+    if (!isTRUE(all.equal(ps, qs)))
+      stop("SpatialDataImage paths are ill-defined, should",
+           " be an integer sequence, e.g., 0,1,...,n")
+  } else {
+    stop("SpatialDataImage path is empty")
+  }
+  return(ps)
+}
+
+#' .create_mip
+#' 
+#' Generate a downsampled pyramid of images.
+#' 
+#' @param image image
+#' @param scale_factors 
+#' 
+#' @importFrom EBImage resize
+#' @importFrom stats setNames
+#' 
+#' @inheritParams write_image
+#' 
+#' @noRd
+.generate_multiscale <- function(image,
+                                 scale_factors = c(2,2,2,2),
+                                 axes, 
+                                 method = "image"){
+  
+  # check dim
+  ndim <- length(dim(image))
+  if (ndim > 3) {
+    stop("Only images of 5D or less are supported")
+  }
+  
+  # get x y dimensions for EBImage
+  dim_image <- stats::setNames(dim(image), axes)
+  dim_image <- dim_image[c("x", "y")]
+  
+  # downscale image
+  image_list <- list(image)
+  cur_image <- aperm(image, 
+                     perm = rev(seq_along(axes)))
+  for (i in seq_along(scale_factors)) {
+    dim_image <- ceiling(dim_image / scale_factors[i])
+    image_list[[i+1]] <- 
+      aperm(EBImage::resize(cur_image,
+                            w = dim_image[1],
+                            h = dim_image[2],
+                            filter = switch(method, 
+                                            image = "bilinear",
+                                            label = "none")), 
+            perm = rev(seq_along(axes)))
+  }
+  if (method == "label") {
+    image_list <- lapply(image_list, function(x) {
+      storage.mode(x) <- "integer"
+      x
+    })
+  }
+  image_list
+}
 
 # chs ----
 

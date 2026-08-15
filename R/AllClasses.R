@@ -97,3 +97,17 @@ setClass("SpatialDataFrame",
 setClassUnion("SpatialDataElement", c(
     "SpatialDataImage", "SpatialDataLabel", 
     "SpatialDataPoint", "SpatialDataShape"))
+
+.sdFormat <- setClass(
+  Class = "sdFormat",
+  slots = list(
+    version = "character",
+    zarr_version = "integer",
+    ome_version = "character",
+    image = "character",
+    label = "character",
+    point = "character",
+    shape = "character",
+    table = "character"
+  )
+)
