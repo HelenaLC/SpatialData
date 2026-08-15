@@ -63,10 +63,10 @@ zs <- system.file(zs, package="spatialdataR")
 
 # show element
 image(sd)
-#> class:  SpatialDataImage  
+#> class: SpatialDataImage  
 #> Scales (1): (3,64,64)
 label(sd)
-#> class:  SpatialDataLabel  
+#> class: SpatialDataLabel  
 #> Scales (1): (64,64)
 point(sd)
 #> class: SpatialDataPoint

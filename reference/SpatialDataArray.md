@@ -109,10 +109,10 @@ fn <- \(l, i=1) list.dirs(file.path(zs, l), recursive=FALSE)[i]
 
 # label
 (x <- readLabel(fn("labels")))
-#> class:  SpatialDataLabel  
+#> class: SpatialDataLabel  
 #> Scales (1): (64,64)
 x[1:10, 1:10]
-#> class:  SpatialDataLabel  
+#> class: SpatialDataLabel  
 #> Scales (1): (10,10)
 meta(x)
 #> class: SpatialDataAttrs
@@ -130,12 +130,12 @@ meta(x)
 
 # image
 readImage(fn("images"))
-#> class:  SpatialDataImage  
+#> class: SpatialDataImage  
 #> Scales (1): (3,64,64)
 
 # multi-scale
 (x <- readImage(fn("images", 2)))
-#> class:  SpatialDataImage (MultiScale) 
+#> class: SpatialDataImage (MultiScale) 
 #> Scales (3): (3,64,64 3,32,32 3,16,16)
 
 channels(x)
