@@ -6,63 +6,63 @@ sd <- readSpatialData(zs)
 test_that("path,image", {
     x <- path(image(sd))
     expect_length(x, 1)
-    expect_is(x, "character")
+    expect_type(x, "character")
     expect_true(file.info(x)$isdir)
     
     x <- path(SpatialDataImage())
     expect_length(x, 1)
     expect_true(is.na(x))
-    expect_is(x, "character")
+    expect_type(x, "character")
 })
 
 test_that("path,label", {
     x <- path(label(sd))
     expect_length(x, 1)
-    expect_is(x, "character")
+    expect_type(x, "character")
     expect_true(file.info(x)$isdir)
     
     x <- path(SpatialDataLabel())
     expect_length(x, 1)
     expect_true(is.na(x))
-    expect_is(x, "character")
+    expect_type(x, "character")
 })
 
 test_that("path,shape", {
     x <- path(shape(sd))
     expect_length(x, 1)
-    expect_is(x, "character")
+    expect_type(x, "character")
     expect_true(file.exists(x))
     expect_true(endsWith(x, ".parquet"))
     
     x <- path(SpatialDataShape())
     expect_length(x, 1)
     expect_true(is.na(x))
-    expect_is(x, "character")
+    expect_type(x, "character")
 })
 
 test_that("path,point", {
     x <- path(point(sd))
     expect_length(x, 1)
-    expect_is(x, "character")
+    expect_type(x, "character")
     expect_true(file.exists(x))
     expect_true(endsWith(x, ".parquet"))
     
     x <- path(SpatialDataPoint())
     expect_length(x, 1)
     expect_true(is.na(x))
-    expect_is(x, "character")
+    expect_type(x, "character")
 })
 
 test_that("path,table", {
     x <- path(table(sd))
     expect_length(x, 1)
-    expect_is(x, "character")
+    expect_type(x, "character")
     expect_true(file.info(x)$isdir)
     
     x <- path(SingleCellExperiment())
     expect_length(x, 1)
     expect_true(is.na(x))
-    expect_is(x, "character")
+    expect_type(x, "character")
 })
 
 test_that("path,sdata", {
@@ -71,11 +71,11 @@ test_that("path,sdata", {
     ne <- length(es)
     
     x <- path(sd, simplify=TRUE)
-    expect_is(x, "data.frame")
+    expect_s3_class(x, "data.frame")
     expect_equal(ncol(x), 3)
     expect_equal(nrow(x), ne)
     for (. in seq_along(x))
-        expect_is(x[[.]], "character")
+        expect_type(x[[.]], "character")
     expect_all_true(x[[1]] %in% ls)
     expect_all_true(x[[2]] %in% es)
     expect_all_true(file.exists(x[[3]]))
@@ -89,7 +89,7 @@ test_that("path,sdata", {
     expect_identical(x, y)
     
     x <- path(sd, simplify=FALSE)
-    expect_is(x, "list")
+    expect_type(x, "list")
     expect_length(unlist(x), ne)
     expect_equal(names(x), ls)
     for (l in names(x)) {
@@ -98,7 +98,7 @@ test_that("path,sdata", {
         for (e in names(x[[l]])) {
             y <- x[[l]][[e]]
             expect_length(y, 1)
-            expect_is(y, "character")
+            expect_type(y, "character")
             expect_true(file.exists(y))
             expect_equal(y, path(sd[[l]][[e]]))
         }

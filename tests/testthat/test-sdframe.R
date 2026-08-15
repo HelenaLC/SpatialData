@@ -55,14 +55,14 @@ test_that("new,sdFrame", {
 
 test_that("names", {
     y <- names(p <- point(x))
-    expect_is(y, "character")
+    expect_type(y, "character")
     expect_identical(y, colnames(data(p)))
 })
 
 test_that("$,[[", {
     # names
     nms <- .DollarNames(p <- point(x))
-    expect_is(nms, "character")
+    expect_type(nms, "character")
     expect_length(nms, ncol(p))
     expect_identical(nms, colnames(data(p)))
     # valid
@@ -100,7 +100,7 @@ test_that("select", {
 
 test_that("as.data.frame", {
     y <- as.data.frame(p <- point(x))
-    expect_is(y, "data.frame")
+    expect_s3_class(y, "data.frame")
     expect_equal(dim(y), dim(p))
     expect_equal(names(y), names(p))
     expect_identical(y, as.data.frame(collect(data(p))))

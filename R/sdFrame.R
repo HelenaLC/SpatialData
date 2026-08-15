@@ -103,13 +103,14 @@ NULL
 #' @importFrom duckspatial as_duckspatial_df
 .duck <- \(data, name) {
     # silent complaint re: missing CRS
-    suppressMessages( 
+    suppressWarnings(suppressMessages(
         ddbs_write_table(
             conn=.conn(),
             data=data,
             name=name,
             overwrite=TRUE,
-            temp_view=FALSE))
+            temp_view=FALSE)
+    ))    
     as_duckspatial_df(
         x=name, 
         conn=.conn(), 
@@ -122,7 +123,6 @@ NULL
 #' @importFrom methods is
 #' @importFrom sf st_geometry_type
 #' @importFrom S4Vectors metadata<-
-#' @importFrom duckspatial as_duckspatial_df
 SpatialDataPoint <- \(data=NULL, meta=SpatialDataAttrs(type="frame"), metadata=list(), ik=NULL, fk=NULL, ...) {
     data <- .df_to_sf(data, "POINT")
     if (isTRUE(nrow(data) > 0L)) {

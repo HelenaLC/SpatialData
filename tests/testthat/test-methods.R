@@ -16,7 +16,7 @@ test_that("get all", {
         expect_identical(x[[.LAYERS[.]]], y)
     }
     for (f in paste0(fun, "s"))
-        expect_is(get(f)(x), "SimpleList")
+        expect_s4_class(get(f)(x), "SimpleList")
     expect_error(x[[0]])
     expect_error(x[[7]])
     expect_error(x[["x"]])
@@ -26,10 +26,10 @@ test_that("get one", {
     env <- asNamespace("spatialdataR")
     # i=numeric
     mapply(f=fun, t=typ, \(f, t)
-        expect_is(get(f, envir=env)(x, i=1), t))
+        expect_s4_class(get(f, envir=env)(x, i=1), t))
     # i=character
     mapply(f=fun, t=typ, n=nms, \(f, t, n)
-        expect_is(get(f, envir=env)(x, i=n), t))
+        expect_s4_class(get(f, envir=env)(x, i=n), t))
     # i=invalid
     for (f in fun) {
         expect_error(get(f, envir=env)(x, 0))
@@ -53,7 +53,7 @@ test_that("layer()", {
         i <- sample(ok, 1)
         y <- layer(x, i)
         expect_length(y, 1)
-        expect_is(y, "character")
+        expect_type(y, "character")
         expect_in(y, rownames(x))
     })
 })
@@ -126,12 +126,12 @@ test_that("set all", {
         y <- x; y[[.]] <- list(obj[[.]]) # all unnamed
         expect_named(y[[.]])
         expect_length(y[[.]], 1)
-        expect_is(y[[.]], "SimpleList")
+        expect_s4_class(y[[.]], "SimpleList")
         expect_identical(names(y[[.]]), gsub("s$", "1", .))
         y <- x; y[[.]] <- list(a=obj[[.]], obj[[.]], b=obj[[.]]) # one unnamed
         expect_named(y[[.]])
         expect_length(y[[.]], 3)
-        expect_is(y[[.]], "SimpleList")
+        expect_s4_class(y[[.]], "SimpleList")
         expect_identical(names(y[[.]]), c("a", gsub("s$", "2", .), "b"))
     }
 })
@@ -154,10 +154,10 @@ test_that("set one", {
         # character
         y <- set(x, i=".", value=o)
         expect_true("." %in% nms(y))
-        expect_is(get(f)(y, "."), t)
+        expect_s4_class(get(f)(y, "."), t)
         # numeric
         y <- set(x, i=1, value=o)
-        expect_is(get(f)(y, 1), t)
+        expect_s4_class(get(f)(y, 1), t)
         # when index > number of elements,
         # element name becomes layer+index
         y <- set(x, i=n(x)+1, value=o)
@@ -180,7 +180,7 @@ test_that("get nms", {
     for (f in fun) {
         lys <- get(paste0(f, "s"))
         nms <- get(paste0(f, "Names"))
-        expect_is(nms(x), "character")
+        expect_type(nms(x), "character")
         expect_identical(nms(x), names(lys(x)))
     }
 })
@@ -205,12 +205,12 @@ test_that("$", {
     mapply(i=paste0(fun, "s"), n=nms, t=typ, \(i, n, t) {
         # object-wide
         f <- parse(text=sprintf("x$%s", i))
-        expect_is(y <- eval(f), "SimpleList")
+        expect_s4_class(y <- eval(f), "SimpleList")
         # element-wise
-        expect_is(names(y), "character")
+        expect_type(names(y), "character")
         expect_length(names(y), length(y))
         f <- parse(text=sprintf("y$%s", n))
-        expect_is(eval(f), t)
+        expect_s4_class(eval(f), t)
     })
 })
 
