@@ -61,7 +61,7 @@
 #' 
 #' @export
 SpatialDataAttrs <- \(x, type=c("image", "label", "frame"), 
-    trans=NULL, ver="0.4", dim=2, nch=3, ...) 
+    trans=NULL, ver="0.4", dim=2, nch=3, scale_factors = NULL, ...) 
 {
     stopifnot(
         length(dim) == 1, is.numeric(dim), dim %in% seq(2, 4),
@@ -72,17 +72,30 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "frame"),
     ax <- .default_ax(type, dim)
     # transformations:
     ct <- trans %||% .default_ct(ax)
+    # datasets:
+    ds <- .default_ds(.ax_names(ax), scale_factors) 
     # .zattrs list:
     if (type != "frame") {
-        # default structure
-        res <- list(
-            omero=list(channels=list(label=letters[seq_len(nch)])),
-            multiscales=list(list(
-                axes=ax,
-                version="0.4",
-                coordinateTransformations=ct,
-                datasets=list(list(path="0", coordinateTransformations=list(list(type="scale", scale=list(1, 1))))))))
-        if (ver == "0.3") res <- list(ome=res)
+      # default structure
+      res <- list()
+      if(type == "label")
+        res <- c(res,
+                 list(omero=list(channels=lapply(letters[seq_len(nch)], 
+                                                 \(.) list(label = .)))))
+      res <- c(res,
+               list(
+                 multiscales=
+                   list(
+                     list(
+                       axes=ax,
+                       version="0.4",
+                       coordinateTransformations=ct,
+                       datasets=ds
+                     )
+                   )
+               )
+      )
+      if (ver == "0.3") res <- list(ome=res)
     } else {
         # points/shapes
         res <- list(axes=ax, coordinateTransformations=ct)
@@ -120,12 +133,41 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "frame"),
     return(ax)
 }
 
+# Internal helper to get axes names
+.ax_names <- function(ax){
+  if (is.character(ax[[1]])) {
+    unlist(ax)
+  } else {
+    vapply(ax, \(.) .$name, character(1))
+  }
+}
+
 # Internal helper to generate coordinate transformations
 .default_ct <- \(axes, name="global", type="identity", data=NULL) {
     ct <- list(input=axes, output=list(name=name), type=type)
     if (!is.null(data)) ct[[type]] <- data
     list(ct)
 }
+
+# Internal helper to generate datasets
+.default_ds <- function(axes, scale_factors = NULL){
+  scale_factors <- cumprod(c(1,scale_factors))
+  paths <- paste0(seq_along(scale_factors) - 1)
+  mapply(\(p,s) {
+    list(
+      coordinateTransformations = list(
+        list(
+          scale = lapply(
+            axes,
+            \(.) if(. == "c") 1 else s),
+          type = "scale"
+        )
+      ),
+      path = p
+    )
+  }, paths, scale_factors, USE.NAMES = FALSE, SIMPLIFY = FALSE)
+}
+
 
 #' @export
 #' @importFrom utils .DollarNames
