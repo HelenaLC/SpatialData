@@ -9,7 +9,7 @@ test_that("SpatialData()", {
     # empty
     expect_silent(x <- SpatialData())
     expect_all_true(lengths(colnames(x)) == 0)
-    for (l in .LAYERS) expect_is(get(l)(x), "SimpleList")
+    for (l in .LAYERS) expect_s4_class(get(l)(x), "SimpleList")
     # single layer
     e <- list(
         images=SpatialDataImage(),
@@ -22,7 +22,7 @@ test_that("SpatialData()", {
         expect_silent(x <- do.call("SpatialData", arg))
         expect_named(x[[l]])
         expect_length(x[[l]], 1)
-        expect_is(x[[l]], "SimpleList")
+        expect_s4_class(x[[l]], "SimpleList")
         expect_identical(names(x[[l]]), gsub("s$", 1, l))
     }
 })

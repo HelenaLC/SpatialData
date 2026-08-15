@@ -54,7 +54,7 @@ NULL
     cat(sprintf("  - %s (%s)\n", p, d), sep="")
     # shapes
     nc <- vapply(shapes(object), ncol, numeric(1))
-    geom <- ifelse(nc == 1, "polygon", "circle")
+    geom <- c("circle", "polygon")[(nc == 1) + 1L]
     d <- vapply(shapes(object), nrow, numeric(1))
     d <- paste(d, unname(geom), sep=",")
     cat(sprintf("- shapes(%s):\n", length(s)))
@@ -88,8 +88,8 @@ setMethod("show", "SpatialData", .showSpatialData)
 
 #' @importFrom S4Vectors coolcat
 .showArray <- function(object) {
-    n.object <- length(object@data)
-    cat("class: ", class(object), ifelse(n.object > 1, "(MultiScale)", ""),"\n")
+    n <- length(object@data)
+    cat("class:", class(object), if (n > 1) "(MultiScale)" else "", "\n")
     scales <- vapply(object@data, \(x) paste0(dim(x), collapse=","), character(1))
     coolcat("Scales (%d): (%s)", scales)
 }
@@ -132,12 +132,12 @@ setMethod("show", "SpatialDataShape", .showShape)
     # coordinate transformations
     CTshow <- \(l) {
         f <- \(.) {
-            . <- paste(unlist(.), collapse=",")
-            ifelse(grepl(",", .), sprintf("[%s]", .), .)
+            if (length(.) <= 1) return(.)
+            sprintf("[%s]", paste(unlist(.), collapse=","))
         }
         g <- \(.) {
-            na <- is.null(.) || !length(unlist(.))
-            ifelse(na, "", paste0(":", f(lapply(., f))))
+            na <- !length(unlist(.))
+            if (na) "" else paste0(":", f(lapply(., f)))
         }
         h <- \(.) sprintf("(%s%s)", .$type, g(.[[.$type]]))
         if (l$type == "sequence") {

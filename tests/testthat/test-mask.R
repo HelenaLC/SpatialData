@@ -43,9 +43,10 @@ test_that("mask,sdImage,sdLabel", {
     expect_identical(y, z)
     
     # check against original
-    expect_equivalent(
-        assay(tables(y)[[2]]), 
-        assay(tables(x)[[1]]))
+    y <- mask(x, i, j, how="sum")
+    expect_equal(
+        unname(assay(tables(x)[[1]])),
+        unname(assay(tables(y)[[2]])))
     
     # no matching scale
     .i <- image(x, "blobs_multiscale_image")

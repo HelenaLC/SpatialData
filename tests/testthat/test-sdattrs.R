@@ -9,27 +9,27 @@ for (v in names(z)) {
     test_that(paste0(v, "-multiscales"), {
         y <- meta(image(x))
         z <- multiscales(y)
-        expect_is(z, "list")
+        expect_type(z, "list")
         expect_length(z, 1)
     })
 
     test_that(paste0(v, "-axes"), {
         # image
         y <- axes(image(x))
-        expect_is(y, "list")
+        expect_type(y, "list")
         expect_length(y, 3)
         # label
         y <- axes(label(x))
-        expect_is(y, "list")
+        expect_type(y, "list")
         expect_length(y, 2)
         # shape
         y <- axes(shape(x))
-        expect_is(y, "list")
+        expect_type(y, "list")
         expect_length(y, 2)
         expect_equal(unlist(y), c("x", "y"))
         # point
         y <- axes(point(x))
-        expect_is(y, "list")
+        expect_type(y, "list")
         expect_length(y, 2)
         expect_equal(unlist(y), c("x", "y"))
         # missing
@@ -57,7 +57,7 @@ test_that(".val_ome_ver()", {
     # valid
     expect_silent(.val_ome_ver(v <- "0.3-x"))
     expect_silent(x <- .val_ome_ver(v <- "0.3"))
-    expect_is(x, "character")
+    expect_type(x, "character")
     expect_length(x, 1)
     expect_identical(x, v)
 })
@@ -75,7 +75,7 @@ test_that("SpatialDataAttrs()", {
         # axes name
         y <- axes(x, "name")
         expect_length(y, 1+d)
-        expect_is(y, "character")
+        expect_type(y, "character")
         expect_identical(y, ok)
         # axes type
         y <- axes(x, "type")
@@ -85,7 +85,7 @@ test_that("SpatialDataAttrs()", {
         # channels
         y <- channels(x)
         expect_length(y, 7)
-        expect_is(y, "character")
+        expect_type(y, "character")
         expect_all_true(!duplicated(y))
     }
     # 2-4D label
