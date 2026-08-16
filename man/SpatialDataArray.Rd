@@ -20,14 +20,18 @@
 SpatialDataImage(
   data = list(),
   meta = SpatialDataAttrs(type = "image"),
+  version = image(sdFormat(0.1)),
   metadata = list(),
+  scale_factors = NULL,
   ...
 )
 
 SpatialDataLabel(
   data = list(),
   meta = SpatialDataAttrs(type = "label"),
+  version = image(sdFormat(0.1)),
   metadata = list(),
+  scale_factors = NULL,
   ...
 )
 
