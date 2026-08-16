@@ -30,52 +30,32 @@ NULL
 #' @export
 writeSpatialData <- function(x, path, replace = TRUE, version = "0.2",
                              ...) {
-  format <- sdFormat(version)
-  zarr.path <- .write_replace_zarr_group(path, 
-                                         "",
-                                         replace, 
-                                         version = zarr_version(format))
-  
-  # write root-level spatialdata_attrs for v3 (Python uses this to pick the read path)
-  if (version == "0.2")
-    Rarr::write_zarr_attributes(
-      zarr.path,
-      new.zattrs = list(
-        spatialdata_attrs = list(version = version),
-        spatialdata_software_version = 
-          paste0("SpatialData v", packageVersion("spatialdataR"))
-      )
-    )
-  
-  # write points
-  . <- lapply(pointNames(x), \(.){
-    writePoint(point(x, .),., path = zarr.path, 
-               replace = replace, format = format)
-  })
-  
-  # write shapes
-  . <- lapply(shapeNames(x), \(.){
-    writeShape(shape(x, .),., path = zarr.path, 
-               replace = replace, format = format)
-  })
-  
-  # write images
-  . <- lapply(imageNames(x), \(.){
-    writeImage(image(x, .),., path = zarr.path, 
-               replace = replace, format = format)
-  })
-  
-  # write labels
-  . <- lapply(labelNames(x), \(.){
-    writeLabel(label(x, .),., path = zarr.path, 
-               replace = replace, format = format)
-  })
-  
-  # write tables
-  . <- lapply(tableNames(x), \(.){
-    writeTable(table(x, .),., path = zarr.path, 
-               replace = replace, format = format)
-  })
+    fmt <- sdFormat(version)
+    zs <- .write_replace_zarr_group(path, 
+                                    "",
+                                    replace, 
+                                    version=zarr_version(fmt))
+
+    # write root-level spatialdata_attrs for v3 
+    # (scverse/spatialdata uses this to pick the read path)
+    if (version == "0.2")
+        Rarr::write_zarr_attributes(zs, new.zattrs=list(
+            spatialdata_attrs=list(version=version),
+            spatialdata_software_version=
+                paste0("SpatialData v", packageVersion("spatialdataR"))))
+
+    # helper for layer writing
+    .writeLayer <- \(l) {
+        s <- substr(l, 1, nchar(l)-1)
+        g <- match.fun(s)
+        f <- match.fun(paste0("write", 
+                              toupper(substr(s, 1, 1)), 
+                              substr(s, 2, nchar(s))))
+        nms <- match.fun(paste0(s, "Names"))(x)
+        lapply(nms, \(.) f(g(x, .), ., path=zs, replace=replace, format=fmt))
+    }
+
+    invisible(lapply(.LAYERS, .writeLayer))
 }
 
 #' @rdname writeSpatialData
@@ -229,6 +209,7 @@ writeTable <- function(x, name, path, replace = TRUE,
 # utils ----
 
 #' @noRd
+#' @importFrom Rarr write_zarr_group
 .write_replace_zarr_group <- function(path, name, replace, version){
   ng <- file.path(path, name)
   
