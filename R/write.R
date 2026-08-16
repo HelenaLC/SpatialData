@@ -31,9 +31,10 @@ NULL
 writeSpatialData <- function(x, path, replace = TRUE, version = "0.2",
                              ...) {
   format <- sdFormat(version)
-  zarr.path <- .replace_zarr(path, 
-                             replace, 
-                             version = zarr_version(format))
+  zarr.path <- .write_replace_zarr_group(path, 
+                                         "",
+                                         replace, 
+                                         version = zarr_version(format))
   
   # write root-level spatialdata_attrs for v3 (Python uses this to pick the read path)
   if (version == "0.2")
@@ -83,10 +84,10 @@ writePoint <- function(x, name, path, replace = TRUE,
                        format = sdFormat("0.1")) {
   
   # if no PointFrames were written before, update zarr store
-  zarr.group <- .make_zarr_group(x, name, 
-                                 file.path(path, "points"), 
-                                 replace, 
-                                 version = zarr_version(format))
+  zarr.group <- .write_replace_zarr_group(file.path(path, "points"),
+                                          name, 
+                                          replace, 
+                                          version = zarr_version(format))
   
   # write meta
   Rarr::write_zarr_attributes(zarr.group, new.zattrs = meta(x))
@@ -100,24 +101,6 @@ writePoint <- function(x, name, path, replace = TRUE,
                        basename_template = "part.{i}.parquet")
 }
 
-#' @importFrom dplyr bind_cols tibble
-.point_to_xy <- function(data) {
-  data %>%
-    st_as_sf() %>%
-    {
-      coords <- st_coordinates(.)
-      
-      bind_cols(
-        tibble(
-          x = coords[,1],
-          y = coords[,2]
-        ),
-        .
-      )
-    } %>%
-    select(-geometry)
-}
-
 #' @rdname writeSpatialData
 #' @importFrom duckspatial ddbs_write_dataset
 #' @importFrom Rarr write_zarr_attributes
@@ -126,10 +109,10 @@ writeShape <- function(x, name, path, replace = TRUE,
                        format = sdFormat("0.1")) {
   
   # if no ShapeFrames were written before, update zarr store
-  zarr.group <- .make_zarr_group(x, name, 
-                                 file.path(path, "shapes"), 
-                                 replace, 
-                                 version = zarr_version(format))
+  zarr.group <- .write_replace_zarr_group(file.path(path, "shapes"), 
+                                          name,
+                                          replace, 
+                                          version = zarr_version(format))
   
   # write meta
   Rarr::write_zarr_attributes(zarr.group, new.zattrs = meta(x))
@@ -152,10 +135,10 @@ writeImage <- function(x, name, path, replace = TRUE,
                        format = sdFormat("0.1")) {
   
   # if no ImageArray were written before, update zarr store
-  zarr.group <- .make_zarr_group(x, name, 
-                                 file.path(path, "images"), 
-                                 replace, 
-                                 version = zarr_version(format))
+  zarr.group <- .write_replace_zarr_group(file.path(path, "images"), 
+                                          name,
+                                          replace, 
+                                          version = zarr_version(format))
   
   # write meta:
   Rarr::write_zarr_attributes(zarr.group, new.zattrs = meta(x))
@@ -189,10 +172,10 @@ writeLabel <- function(x, name, path, replace = TRUE,
                        format = sdFormat("0.1")) {
   
   # if no LabelArray were written before, update zarr store
-  zarr.group <- .make_zarr_group(x, name, 
-                                 file.path(path, "labels"), 
-                                 replace,
-                                 version = zarr_version(format))
+  zarr.group <- .write_replace_zarr_group(file.path(path, "labels"),
+                                          name,
+                                          replace,
+                                          version = zarr_version(format))
   
   # write meta:
   Rarr::write_zarr_attributes(zarr.group, new.zattrs = meta(x))
@@ -226,10 +209,10 @@ writeTable <- function(x, name, path, replace = TRUE,
                        format = sdFormat("0.1")) {
   
   # if no Table were written before, update zarr store
-  zarr.group <- .make_zarr_group(x, name, 
-                                 file.path(path, "tables"), 
-                                 replace,
-                                 version = zarr_version(format))
+  zarr.group <- .write_replace_zarr_group(file.path(path, "tables"), 
+                                          name, 
+                                          replace,
+                                          version = zarr_version(format))
   
   # write meta:
   Rarr::write_zarr_attributes(zarr.group, new.zattrs = meta(x))
@@ -241,4 +224,47 @@ writeTable <- function(x, name, path, replace = TRUE,
   if(zarr_version(format) == 3)
     stop("Write support for anndata v3 zarr is not supported yet!")
   anndataR::write_zarr(x, path = zarr.group, mode = "a")
+}
+
+# utils ----
+
+#' @noRd
+.write_replace_zarr_group <- function(path, name, replace, version){
+  ng <- file.path(path, name)
+  
+  # create element parent dir
+  if(!dir.exists(ng))
+    dir.create(ng, recursive = TRUE)
+  
+  # check element dir
+  if(replace){
+    unlink(ng, recursive = TRUE)
+  } else {
+    stop("Directory \"", ng, "\" already exists. ",
+         "Use 'replace=TRUE' to replace it. ",
+         "Its content will be lost!")
+  }
+  
+  # create group
+  write_zarr_group(path, name, zarr_version = version)
+  
+  return(ng)
+}
+
+#' @importFrom dplyr bind_cols tibble
+.point_to_xy <- function(data) {
+  data %>%
+    st_as_sf() %>%
+    {
+      coords <- st_coordinates(.)
+      
+      bind_cols(
+        tibble(
+          x = coords[,1],
+          y = coords[,2]
+        ),
+        .
+      )
+    } %>%
+    select(-geometry)
 }

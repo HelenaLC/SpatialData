@@ -141,13 +141,9 @@ test_that("create multiscale, SpatialDataImage", {
 z <- list(0.1, 0.2)
 
 for (v in names(z)) {
-  
-  td <- tempdir()
-  zarr.store <- "test.zarr"
-  zarr.path <- file.path(td, zarr.store)
-  unlink(zarr.path, recursive = TRUE)
-  
+
   test_that("write, SpatialDataImage", {
+    zarr.path <- tempfile(fileext = ".zarr")
     
     # create image
     set.seed(1)
@@ -172,12 +168,8 @@ for (v in names(z)) {
                  meta(imgarray2))
   })
   
-  td <- tempdir()
-  zarr.store <- "test.zarr"
-  zarr.path <- file.path(td, zarr.store)
-  unlink(zarr.path, recursive = TRUE)
-  
   test_that("write multiscale, SpatialDataImage", {
+    zarr.path <- tempfile(fileext = ".zarr")
     
     # create image
     set.seed(1)
@@ -208,6 +200,7 @@ for (v in names(z)) {
 }
 
 test_that("create,SpatialDataLabel", {
+  zarr.path <- tempfile(fileext = ".zarr")
   
   # create label
   set.seed(1)
@@ -265,12 +258,8 @@ z <- list(0.1, 0.2)
 
 for (v in names(z)) {
   
-  td <- tempdir()
-  zarr.store <- "test.zarr"
-  zarr.path <- file.path(td, zarr.store)
-  unlink(zarr.path, recursive = TRUE)
-  
   test_that("write,SpatialDataLabel", {
+    zarr.path <- tempfile(fileext = ".zarr")
     
     # create label
     set.seed(1)
@@ -294,12 +283,8 @@ for (v in names(z)) {
     expect_equal(meta(lblarray),meta(lblarray2))
   })
   
-  td <- tempdir()
-  zarr.store <- "test.zarr"
-  zarr.path <- file.path(td, zarr.store)
-  unlink(zarr.path, recursive = TRUE)
-  
   test_that("write multiscale,SpatialDataLabel", {
+    zarr.path <- tempfile(fileext = ".zarr")
     
     # create label
     set.seed(1)

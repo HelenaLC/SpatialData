@@ -188,12 +188,8 @@ z <- list(0.1, 0.2)
 
 for (v in z) {
   
-  td <- tempdir()
-  zarr.store <- "test.zarr"
-  zarr.path <- file.path(td, zarr.store)
-  unlink(zarr.path, recursive = TRUE)
-  
   test_that("write, SpatialDataPoint", {
+    zarr.path <- tempfile(fileext = ".zarr")
     
     # make sd data
     df <- example_points()
@@ -219,12 +215,8 @@ for (v in z) {
     expect_identical(names(pf), names(pf2))
   })
   
-  td <- tempdir()
-  zarr.store <- "test.zarr"
-  zarr.path <- file.path(td, zarr.store)
-  unlink(zarr.path, recursive = TRUE)
-  
   test_that("write polygon, SpatialDataShape", {
+    zarr.path <- tempfile(fileext = ".zarr")
     
     # make sd data
     df <- example_polygons()
@@ -248,12 +240,8 @@ for (v in z) {
                      data(pf2[1:2,1]) |> collect())
   })
   
-  td <- tempdir()
-  zarr.store <- "test.zarr"
-  zarr.path <- file.path(td, zarr.store)
-  unlink(zarr.path, recursive = TRUE)
-  
   test_that("write circle, SpatialDataShape", {
+    zarr.path <- tempfile(fileext = ".zarr")
     
     # make sd data
     df <- example_circles()
