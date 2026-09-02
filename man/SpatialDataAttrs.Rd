@@ -40,7 +40,7 @@ SpatialDataAttrs(
   x,
   type = c("image", "label", "frame"),
   trans = NULL,
-  ver = "0.4",
+  ver = "0.3",
   dim = 2,
   nch = 3,
   ...
