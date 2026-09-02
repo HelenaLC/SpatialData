@@ -609,7 +609,7 @@ rbind(native=unlist(xy), scaled=unlist(yx))
 sessionInfo()
 ```
 
-    ## R Under development (unstable) (2026-06-21 r90185)
+    ## R Under development (unstable) (2026-09-01 r90464)
     ## Platform: x86_64-pc-linux-gnu
     ## Running under: Ubuntu 24.04.4 LTS
     ## 
@@ -632,9 +632,9 @@ sessionInfo()
     ## 
     ## other attached packages:
     ##  [1] SingleCellExperiment_1.35.2 SummarizedExperiment_1.43.0
-    ##  [3] Biobase_2.73.2              GenomicRanges_1.65.1       
-    ##  [5] Seqinfo_1.3.0               IRanges_2.47.2             
-    ##  [7] S4Vectors_0.51.6            BiocGenerics_0.59.12       
+    ##  [3] Biobase_2.73.2              GenomicRanges_1.65.3       
+    ##  [5] Seqinfo_1.3.2               IRanges_2.47.5             
+    ##  [7] S4Vectors_0.51.9            BiocGenerics_0.59.12       
     ##  [9] generics_0.1.4              MatrixGenerics_1.25.0      
     ## [11] matrixStats_1.5.0           spatialdataR_0.99.44       
     ## [13] BiocStyle_2.41.0           
@@ -646,24 +646,24 @@ sessionInfo()
     ## [10] paws.storage_0.10.0 magrittr_2.0.5      compiler_4.7.0     
     ## [13] rlang_1.3.0         sass_0.4.10         tools_4.7.0        
     ## [16] yaml_2.3.12         knitr_1.51          S4Arrays_1.13.0    
-    ## [19] htmlwidgets_1.6.4   classInt_0.4-11     curl_7.1.0         
-    ## [22] reticulate_1.46.0   DelayedArray_0.39.5 abind_1.4-8        
-    ## [25] KernSmooth_2.23-26  withr_3.0.3         purrr_1.2.2        
+    ## [19] htmlwidgets_1.6.4   classInt_0.4-11     curl_8.0.0         
+    ## [22] reticulate_1.46.0   DelayedArray_0.39.6 abind_1.4-8        
+    ## [25] KernSmooth_2.23-27  withr_3.0.3         purrr_1.2.2        
     ## [28] desc_1.4.3          R.oo_1.27.1         grid_4.7.0         
-    ## [31] e1071_1.7-17        cli_3.6.6           rmarkdown_2.31     
+    ## [31] e1071_1.7-17        cli_3.6.6           rmarkdown_2.32     
     ## [34] crayon_1.5.3        ragg_1.5.2          otel_0.2.0         
     ## [37] DBI_1.3.0           cachem_1.1.0        proxy_0.4-29       
     ## [40] BiocManager_1.30.27 XVector_0.53.0      vctrs_0.7.3        
-    ## [43] Matrix_1.7-5        jsonlite_2.0.0      bookdown_0.47      
-    ## [46] RBGL_1.89.0         Rgraphviz_2.57.0    systemfonts_1.3.2  
+    ## [43] Matrix_1.7-6        jsonlite_2.0.0      bookdown_0.48      
+    ## [46] RBGL_1.89.0         Rgraphviz_2.57.1    systemfonts_1.3.2  
     ## [49] jquerylib_0.1.4     units_1.0-1         glue_1.8.1         
     ## [52] pkgdown_2.2.1       ZarrArray_1.0.1     Rarr_2.0.1         
     ## [55] tibble_3.3.1        pillar_1.11.1       htmltools_0.5.9    
     ## [58] graph_1.91.0        R6_2.6.1            dbplyr_2.6.0       
     ## [61] httr2_1.3.0         wk_0.9.5            textshaping_1.0.5  
-    ## [64] evaluate_1.0.5      lattice_0.22-9      R.methodsS3_1.8.2  
+    ## [64] evaluate_1.0.5      lattice_0.23-1      R.methodsS3_1.8.2  
     ## [67] png_0.1-9           duckspatial_1.2.1   paws.common_0.8.10 
-    ## [70] bslib_0.12.0        class_7.3-23        Rcpp_1.1.2         
+    ## [70] bslib_0.12.0        class_7.3-24        Rcpp_1.1.2         
     ## [73] uuid_1.2-2          SparseArray_1.13.2  anndataR_1.2.1     
     ## [76] xfun_0.60           fs_2.1.0            pkgconfig_2.0.3
 

@@ -9,7 +9,7 @@ SpatialDataAttrs(
   x,
   type = c("image", "label", "frame"),
   trans = NULL,
-  ver = "0.4",
+  ver = "0.3",
   dim = 2,
   nch = 3,
   ...
@@ -201,7 +201,7 @@ SpatialDataAttrs(type="image", nch=7)
 #> coordTrans(1):
 #> - global: (identity)
 #> datasets(1): 0
-#> - 0: (scale:[1,1])
+#> - 0: (scale:[1,1,1])
 #> channels(7): a b ... f g
 SpatialDataAttrs(type="label", dim=3)
 #> class: SpatialDataAttrs
@@ -211,6 +211,5 @@ SpatialDataAttrs(type="label", dim=3)
 #> coordTrans(1):
 #> - global: (identity)
 #> datasets(1): 0
-#> - 0: (scale:[1,1])
-#> channels(3): a b c
+#> - 0: (scale:[1,1,1])
 ```
