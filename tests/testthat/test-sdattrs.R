@@ -97,12 +97,15 @@ test_that("SpatialDataAttrs()", {
         expect_equal(sum(y == "space"), ifelse(d == 2, 2, 3))
     }
     # 3-4D shape/point
-    for (d in seq(2, 4)) {
+    for (d in seq(2, 3)) {
         x <- SpatialDataAttrs(type="frame", dim=d)
-        y <- axes(x, "type")
+        y <- axes(x)
         expect_length(y, d)
+        xy <- c("x", "y")
+        expect_equal(unlist(y), if(d == 2) xy else c(xy, "z"))
         expect_null(channels(x))
-        expect_equal(sum(y == "time"), ifelse(d == 4, 1, 0))
-        expect_equal(sum(y == "space"), ifelse(d == 2, 2, 3))
+        # TODO: should we return x itself, regardless of requested name?
+        expect_error(axes(x, "name"))
+        expect_error(axes(x, "type"))
     }
 })

@@ -114,10 +114,9 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "frame"),
     switch(match.arg(type), 
         # xyzt for points/shapes
         frame={
-            ax <- list(x, y)
+            ax <- list(x$name, y$name)
             if (dim > 2) {
-                ax <- c(ax, list(z))
-                if (dim > 3) ax <- c(ax, list(t))
+                ax <- c(ax, list(z$name))
             }
         },
         # tczyx for images/labels
