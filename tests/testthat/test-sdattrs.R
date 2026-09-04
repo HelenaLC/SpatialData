@@ -61,6 +61,23 @@ test_that(".val_ome_ver()", {
     expect_length(x, 1)
     expect_identical(x, v)
 })
+test_that(".val_sd_ver()", {
+  # invalid
+  expect_error(.val_sd_ver(1))
+  expect_error(.val_sd_ver(TRUE))
+  expect_error(.val_sd_ver("0.0"))
+  expect_error(.val_sd_ver("0.30"))
+  expect_error(.val_sd_ver(c("0.3", "0.4")))
+  expect_error(.val_sd_ver(v <- "0.3-x"))
+  expect_error(.val_sd_ver("0.3", "point"))
+  # valid
+  expect_silent(x <- .val_sd_ver(v <- "0.3", "image"))
+  expect_silent(x <- .val_sd_ver(v <- "0.3", "label"))
+  expect_silent(x <- .val_sd_ver(v <- "0.3", "shape"))
+  expect_type(x, "character")
+  expect_length(x, 1)
+  expect_identical(x, v)
+})
 test_that("SpatialDataAttrs()", {
     # invalid
     expect_error(SpatialDataAttrs(nch=0))
@@ -98,7 +115,8 @@ test_that("SpatialDataAttrs()", {
     }
     # 3-4D shape/point
     for (d in seq(2, 3)) {
-        x <- SpatialDataAttrs(type="frame", dim=d)
+      for(t in c("shape", "point")){
+        x <- SpatialDataAttrs(type=t, dim=d)
         y <- axes(x)
         expect_length(y, d)
         xy <- c("x", "y")
@@ -106,6 +124,7 @@ test_that("SpatialDataAttrs()", {
         expect_null(channels(x))
         # TODO: should we return x itself, regardless of requested name?
         expect_error(axes(x, "name"))
-        expect_error(axes(x, "type"))
+        expect_error(axes(x, "type")) 
+      }
     }
 })

@@ -174,6 +174,16 @@
     return(v)
 }
 
+# validate SpatialData version
+.val_sd_ver <- \(v, type) {
+  ok <- length(v) == 1 && 
+    is.character(v) && 
+    v %in% sprintf("0.%d", seq_len(if(type == "point") 2 else 3))
+  if (!ok) stop("invalid SpatialData 'version'; expected '0.x' where x is 1-3 ", 
+                "for image/label/shape and 1-2 for point")
+  return(v)
+}
+
 # multiscales ----
 
 # internal helper to get the 'active' metadata level

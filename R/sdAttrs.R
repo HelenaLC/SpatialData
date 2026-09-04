@@ -10,17 +10,17 @@
 #' 
 #' @param x element or list extracted from a OME-NGFF compliant .zattrs file.
 #' @param name character string for extraction (see ?base::`$`).
-#' @param type character string; either "array" (image/label) or "frame" (point/shape).
-#' @param label flag; when \code{type="frame"}, should attributes be for a label?
+#' @param type character string; either "image", "label", "point" or "shape"
 #' @param trans list of coordinate transformations; defaults to identity only.
 #' @param value character string (for one \code{region} and \code{_key}s), 
 #'   or vector (for many \code{region}s, \code{instances} and \code{regions}).
-#' @param ver character string; specifies the OME version to comply with.
+#' @param ver character string; specifies the SpatialData version to comply with.
 #' @param dim scalar integer in 2-4;
 #'   number of dimensions: 2 = XY, 3 adds Z, 4 adds T (time); 
 #'   when \code{type="image"}, C (channel) will be added (for any \code{dim}).
 #' @param nch scalar integer; how many channels should there be?
-#'   (ignored unless \code{type="frame"} and \code{label=FALSE}). 
+#'   (ignored unless \code{type="shape"} or \code{type="point"}, and 
+#'   \code{label=FALSE}). 
 #' @param ... additional attributes (e.g., version, feature_key).
 #' 
 #' @details 
@@ -29,8 +29,8 @@
 #' \code{SingleCellExperiment}: \code{region}, \code{region/instance_key}.
 #' 
 #' When missing \code{x}, \code{SpatialDataAttrs} will generate a valid object 
-#' with default axes (array: cyx, frame: xy) and transformations (identify) 
-#' according to the specified type.
+#' with default axes (image/label: cyx, point/shape: xy) and transformations 
+#' (identify) according to the specified type.
 #' 
 #' @return character string
 #' 
@@ -55,27 +55,29 @@
 #' CTdata(z, "scale")
 #' 
 #' # constructor
-#' SpatialDataAttrs(type="frame")
+#' SpatialDataAttrs(type="point")
+#' SpatialDataAttrs(type="shape")
 #' SpatialDataAttrs(type="image", nch=7)
 #' SpatialDataAttrs(type="label", dim=3)
 #' 
 #' @export
-SpatialDataAttrs <- \(x, type=c("image", "label", "frame"), 
-    trans=NULL, ver="0.3", dim=2, nch=3, ...) 
+SpatialDataAttrs <- \(x, type=c("image", "label", "point", "shape"), 
+    trans=NULL, ver=NULL, dim=2, nch=3, ...) 
 {
     stopifnot(
         length(dim) == 1, is.numeric(dim), dim %in% seq(2, 4),
         length(nch) == 1, is.numeric(nch), round(nch) == nch, nch > 0)
     if (!missing(x)) return(.SpatialDataAttrs(x))
     type <- match.arg(type)
-    ver <- .val_ome_ver(ver)
+    if(is.null(ver)) ver <- if(type == "point") "0.2" else "0.3"
+    ver <- .val_sd_ver(ver, type)
     ax <- .default_ax(type, dim)
     # transformations:
     ct <- trans %||% .default_ct(ax)
     # datasets:
     ds <- .default_ds(.ax_names(ax)) 
     # .zattrs list:
-    if (type != "frame") {
+    if (!type %in% c("point", "shape")) {
         # default structure
         res <- list()
         if(type != "label")
@@ -105,13 +107,15 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "frame"),
 }
 
 # Internal helper to generate OME-NGFF axes
-.default_ax <- \(type=c("image", "label", "frame"), dim=2) {
+.default_ax <- \(type=c("image", "label", "point", "shape"), dim=2) {
     c <- list(name="c", type="channel")
     t <- list(name="t", type="time")
     z <- list(name="z", type="space")
     y <- list(name="y", type="space")
     x <- list(name="x", type="space")
-    switch(match.arg(type), 
+    type <- match.arg(type)
+    type <- if(type %in% c("point", "shape")) "frame" else type
+    switch(type, 
         # xyzt for points/shapes
         frame={
             ax <- list(x$name, y$name)

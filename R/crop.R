@@ -141,9 +141,9 @@ NULL
         ct[[type]] <- .adapt(data, type)
     }
     # update input axes from 'cyx' to 'xy'
-    ct$input$axes <- .default_ax(type="frame")
+    ct$input$axes <- .default_ax(type="shape")
     # create temporary shape & transform back
-    md <- SpatialDataAttrs(type="frame", trans=list(ct))
+    md <- SpatialDataAttrs(type="shape", trans=list(ct))
     z <- SpatialDataShape(df, meta=md)
     z <- transform(z, 1, rev=TRUE)
     # extract coordinates & return range
