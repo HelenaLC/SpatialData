@@ -84,6 +84,7 @@ test_that("SpatialDataAttrs()", {
     expect_error(SpatialDataAttrs(dim=7))
     expect_error(SpatialDataAttrs(ver="0.0"))
     expect_error(SpatialDataAttrs(type="bad"))
+    expect_error(SpatialDataAttrs(type = "point", dim=4))
     # 2-4D image
     nms <- c("c", "t", "z", "y", "x")
     for (d in seq(2, 4)) {
@@ -115,8 +116,8 @@ test_that("SpatialDataAttrs()", {
     }
     # 3-4D shape/point
     for (d in seq(2, 3)) {
-      for(t in c("shape", "point")){
-        x <- SpatialDataAttrs(type=t, dim=d)
+      for(typ in c("shape", "point")){
+        x <- SpatialDataAttrs(type=typ, dim=d)
         y <- axes(x)
         expect_length(y, d)
         xy <- c("x", "y")

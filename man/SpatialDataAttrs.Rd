@@ -96,8 +96,9 @@ SpatialDataAttrs(
 \item{ver}{character string; specifies the SpatialData version to comply with.}
 
 \item{dim}{scalar integer in 2-4;
-number of dimensions: 2 = XY, 3 adds Z, 4 adds T (time); 
-when \code{type="image"}, C (channel) will be added (for any \code{dim}).}
+number of dimensions: 2 = XY, 3 adds Z, 4 adds T (time) for image and 
+label; when \code{type="image"}, C (channel) will be added (for any 
+\code{dim}).}
 
 \item{nch}{scalar integer; how many channels should there be?
 (ignored unless \code{type="shape"} or \code{type="point"}, and 
@@ -122,7 +123,7 @@ When \code{x} is a spatial element, the following applies:
 \code{SingleCellExperiment}: \code{region}, \code{region/instance_key}.
 
 When missing \code{x}, \code{SpatialDataAttrs} will generate a valid object 
-with default axes (image/label: cyx, point/shape: xy) and transformations 
+with default axes (image: cyx, label:yx, point/shape: xy) and transformations 
 (identify) according to the specified type.
 }
 \examples{
