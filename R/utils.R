@@ -175,8 +175,8 @@
 }
 
 # validate SpatialData version
-.val_sd_ver <- \(v, type=c("image", "label", "point", "shape")) {
-  type <- match.arg(type)
+.val_sd_ver <- \(v, type) {
+  type <- match.arg(type, c("image", "label", "point", "shape"))
   ok <- length(v) == 1 && 
     is.character(v) && 
     v %in% sprintf("0.%d", seq_len(if(type == "point") 2 else 3))

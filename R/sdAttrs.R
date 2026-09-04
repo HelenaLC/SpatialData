@@ -66,11 +66,11 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "point", "shape"),
     trans=NULL, ver=NULL, dim=2, nch=3, ...) 
 {
     if (!missing(x)) return(.SpatialDataAttrs(x))
+    type <- match.arg(type)
     stopifnot(
         length(dim) == 1, is.numeric(dim), 
-        dim %in% seq(2, if(type == "point") 3 else 4),
+        dim %in% seq(2, if(type %in% c("point", "shape")) 3 else 4),
         length(nch) == 1, is.numeric(nch), round(nch) == nch, nch > 0)
-    type <- match.arg(type)
     if(is.null(ver)) ver <- if(type == "point") "0.2" else "0.3"
     ver <- .val_sd_ver(ver, type)
     ax <- .default_ax(type, dim)

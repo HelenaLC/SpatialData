@@ -62,21 +62,20 @@ test_that(".val_ome_ver()", {
     expect_identical(x, v)
 })
 test_that(".val_sd_ver()", {
-  # invalid
-  expect_error(.val_sd_ver(1))
-  expect_error(.val_sd_ver(TRUE))
-  expect_error(.val_sd_ver("0.0"))
-  expect_error(.val_sd_ver("0.30"))
-  expect_error(.val_sd_ver(c("0.3", "0.4")))
-  expect_error(.val_sd_ver(v <- "0.3-x"))
-  expect_error(.val_sd_ver("0.3", "point"))
-  # valid
-  expect_silent(x <- .val_sd_ver(v <- "0.3", "image"))
-  expect_silent(x <- .val_sd_ver(v <- "0.3", "label"))
-  expect_silent(x <- .val_sd_ver(v <- "0.3", "shape"))
-  expect_type(x, "character")
-  expect_length(x, 1)
-  expect_identical(x, v)
+    # invalid
+    expect_error(.val_sd_ver(1))
+    expect_error(.val_sd_ver(TRUE))
+    expect_error(.val_sd_ver("0.0"))
+    expect_error(.val_sd_ver("0.30"))
+    expect_error(.val_sd_ver(c("0.3", "0.4")))
+    expect_error(.val_sd_ver("0.3", "point"))
+    # valid
+    expect_silent(x <- .val_sd_ver(v <- "0.3", "image"))
+    expect_silent(x <- .val_sd_ver(v <- "0.3", "label"))
+    expect_silent(x <- .val_sd_ver(v <- "0.3", "shape"))
+    expect_type(x, "character")
+    expect_length(x, 1)
+    expect_identical(x, v)
 })
 test_that("SpatialDataAttrs()", {
     # invalid
@@ -85,6 +84,7 @@ test_that("SpatialDataAttrs()", {
     expect_error(SpatialDataAttrs(ver="0.0"))
     expect_error(SpatialDataAttrs(type="bad"))
     expect_error(SpatialDataAttrs(type = "point", dim=4))
+    expect_error(SpatialDataAttrs(type = "shape", dim=4))
     # 2-4D image
     nms <- c("c", "t", "z", "y", "x")
     for (d in seq(2, 4)) {
