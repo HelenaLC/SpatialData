@@ -146,7 +146,7 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "point", "shape"),
   if (is.character(ax[[1]])) {
     unlist(ax)
   } else {
-    lapply(ax, \(.) .$name)
+    vapply(ax, \(.) .$name, character(1))
   }
 }
 
@@ -170,7 +170,7 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "point", "shape"),
       coordinateTransformations = list(
         list(
           scale = lapply(
-            unlist(axes),
+            axes,
             \(.) if(. == "c") 1 else s),
           type = "scale"
         )
