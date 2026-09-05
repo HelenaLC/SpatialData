@@ -14,7 +14,8 @@
 #' @param trans list of coordinate transformations; defaults to identity only.
 #' @param value character string (for one \code{region} and \code{_key}s), 
 #'   or vector (for many \code{region}s, \code{instances} and \code{regions}).
-#' @param ver character string; specifies the SpatialData version to comply with.
+#' @param ver character string; specifies the version of the SpatialData 
+#'   element to comply with.
 #' @param dim scalar integer in 2-4;
 #'   number of dimensions: 2 = XY, 3 adds Z, 4 adds T (time) for image and 
 #'   label; when \code{type="image"}, C (channel) will be added (for any 
