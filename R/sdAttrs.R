@@ -20,9 +20,8 @@
 #'   label; when \code{type="image"}, C (channel) will be added (for any 
 #'   \code{dim}).
 #' @param nch scalar integer; how many channels should there be?
-#'   (ignored unless \code{type="shape"} or \code{type="point"}, and 
-#'   \code{label=FALSE}). 
-#' @param ... additional attributes (e.g., version, feature_key).
+#'   (ignored if \code{type="label"}, \code{type="shape"}, or 
+#'   \code{type="point"}). 
 #' 
 #' @details 
 #' When \code{x} is a spatial element, the following applies:
@@ -30,10 +29,10 @@
 #' \code{SingleCellExperiment}: \code{region}, \code{region/instance_key}.
 #' 
 #' When missing \code{x}, \code{SpatialDataAttrs} will generate a valid object 
-#' with default axes (image: cyx, label:yx, point/shape: xy) and transformations 
-#' (identify) according to the specified type.
+#' with default axes (image: cyx, label: yx, point/shape: xy) and 
+#' transformations (identify) according to the specified type.
 #' 
-#' @return character string
+#' @return SpatialDataAttrs object
 #' 
 #' @examples
 #' x <- file.path("extdata", "blobs.zarr")
@@ -63,7 +62,7 @@
 #' 
 #' @export
 SpatialDataAttrs <- \(x, type=c("image", "label", "point", "shape"), 
-    trans=NULL, ver=NULL, dim=2, nch=3, ...) 
+    trans=NULL, ver=NULL, dim=2, nch=3) 
 {
     if (!missing(x)) return(.SpatialDataAttrs(x))
     type <- match.arg(type)
@@ -76,10 +75,10 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "point", "shape"),
     ax <- .default_ax(type, dim)
     # transformations:
     ct <- trans %||% .default_ct(ax)
-    # datasets:
-    ds <- .default_ds(.ax_names(ax)) 
-    # .zattrs list:
+    # zarr attributes list:
     if (!type %in% c("point", "shape")) {
+        # datasets:
+        ds <- .default_ds(.ax_names(ax)) 
         # default structure
         res <- list()
         if(type != "label")
@@ -118,8 +117,7 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "point", "shape"),
     z <- list(name="z", type="space")
     y <- list(name="y", type="space")
     x <- list(name="x", type="space")
-    type <- match.arg(type)
-    switch(type, 
+    switch(match.arg(type), 
         # xyzt for points/shapes
         point=,
         shape={
