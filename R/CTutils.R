@@ -59,7 +59,12 @@ setMethod("axes", "SpatialDataAttrs", \(x, y=NULL, ...) {
     if (is.null(x)) stop("couldn't find 'axes'") 
     if (is.null(y)) return(x)
     y <- match.arg(y, c("name", "type", "unit"))
-    vapply(x, `[[`, character(1), y)
+    # shape/point axes have no type and unit, return axes names as given
+    if(y == "name" && is.null(names(x[[1]]))){
+      unlist(x)
+    } else {
+      vapply(x, `[[`, character(1), y)
+    }
 })
 
 # CTlist/data/type/name() ----

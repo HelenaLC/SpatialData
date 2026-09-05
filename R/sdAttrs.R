@@ -102,7 +102,10 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "point", "shape"),
         if (ver == "0.3") res <- list(ome=res)
     } else {
         # points/shapes
-        res <- list(axes=ax, coordinateTransformations=ct)
+        res <- list(
+          axes=.ax_names(ax), # point and shape take only names
+          coordinateTransformations=ct
+        )
     }
     res$spatialdata_attrs <- list(version=ver)
     SpatialDataAttrs(res)
@@ -120,9 +123,9 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "point", "shape"),
         # xyzt for points/shapes
         point=,
         shape={
-            ax <- list(x$name, y$name)
+            ax <- list(x, y)
             if (dim > 2) {
-                ax <- c(ax, list(z$name))
+                ax <- c(ax, list(z))
             }
         },
         # tczyx for images/labels
@@ -143,13 +146,17 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "point", "shape"),
   if (is.character(ax[[1]])) {
     unlist(ax)
   } else {
-    vapply(ax, \(.) .$name, character(1))
+    lapply(ax, \(.) .$name)
   }
 }
 
 # Internal helper to generate coordinate transformations
 .default_ct <- \(axes, name="global", type="identity", data=NULL) {
-    ct <- list(input=axes, output=list(name=name), type=type)
+    ct <- list(input=list(axes=axes, 
+                          name=paste(.ax_names(axes), collapse = "")), 
+               output=list(axes=axes, 
+                           name=name), 
+               type=type)
     if (!is.null(data)) ct[[type]] <- data
     list(ct)
 }
@@ -163,7 +170,7 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "point", "shape"),
       coordinateTransformations = list(
         list(
           scale = lapply(
-            axes,
+            unlist(axes),
             \(.) if(. == "c") 1 else s),
           type = "scale"
         )

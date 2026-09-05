@@ -63,16 +63,18 @@ test_that(".val_ome_ver()", {
 })
 test_that(".val_sd_ver()", {
     # invalid
-    expect_error(.val_sd_ver(1))
-    expect_error(.val_sd_ver(TRUE))
-    expect_error(.val_sd_ver("0.0"))
-    expect_error(.val_sd_ver("0.30"))
-    expect_error(.val_sd_ver(c("0.3", "0.4")))
+    expect_error(.val_sd_ver(0.3), 'argument "type" is missing')
+    expect_error(.val_sd_ver(1, "image"))
+    expect_error(.val_sd_ver(TRUE, "image"))
+    expect_error(.val_sd_ver("0.0", "image"))
+    expect_error(.val_sd_ver("0.30", "image"))
+    expect_error(.val_sd_ver(c("0.3", "0.4"), "image"))
     expect_error(.val_sd_ver("0.3", "point"))
     # valid
     expect_silent(x <- .val_sd_ver(v <- "0.3", "image"))
     expect_silent(x <- .val_sd_ver(v <- "0.3", "label"))
     expect_silent(x <- .val_sd_ver(v <- "0.3", "shape"))
+    expect_silent(x <- .val_sd_ver(v <- "0.2", "point"))
     expect_type(x, "character")
     expect_length(x, 1)
     expect_identical(x, v)
@@ -105,6 +107,8 @@ test_that("SpatialDataAttrs()", {
         expect_length(y, 7)
         expect_type(y, "character")
         expect_all_true(!duplicated(y))
+        # version
+        expect_equal(x$spatialdata_attrs$version, "0.3")
     }
     # 2-4D label
     for (d in seq(2, 4)) {
@@ -113,19 +117,28 @@ test_that("SpatialDataAttrs()", {
         expect_length(y, d)
         expect_equal(sum(y == "time"), ifelse(d == 4, 1, 0))
         expect_equal(sum(y == "space"), ifelse(d == 2, 2, 3))
+        # version
+        expect_equal(x$spatialdata_attrs$version, "0.3")
     }
     # 3-4D shape/point
+    nms <- c("x", "y", "z")
     for (d in seq(2, 3)) {
       for(typ in c("shape", "point")){
         x <- SpatialDataAttrs(type=typ, dim=d)
+        ok <- if (d == 2) nms[-3] else nms
         y <- axes(x)
         expect_length(y, d)
-        xy <- c("x", "y")
-        expect_equal(unlist(y), if(d == 2) xy else c(xy, "z"))
+        expect_equal(unlist(y), ok)
         expect_null(channels(x))
-        # TODO: should we return x itself, regardless of requested name?
-        expect_error(axes(x, "name"))
+        # axes name
+        y <- axes(x, "name")
+        expect_length(y, d)
+        expect_type(y, "character")
+        expect_identical(y, ok)
         expect_error(axes(x, "type")) 
+        # version
+        expect_equal(x$spatialdata_attrs$version, 
+                     if(typ == "point") "0.2" else "0.3")
       }
     }
 })

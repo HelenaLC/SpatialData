@@ -21,6 +21,18 @@ test_that("axes", {
         expect_length(z, d)
         expect_in(z, c("time","channel","space"))
     }
+    es <- list(shape(x), point(x))
+    for (e in es) {
+        z <- axes(e)
+        d <- length(dim(e))
+        expect_type(z, "list")
+        expect_length(z, d)
+        expect_error(axes(e, "bad"))
+        # name
+        # TODO: should "name" only return itself for frames, or return error
+        expect_silent(z <- axes(e, "name"))
+        expect_type(z, "character")
+    }
 })
 
 .CTtype <- c(
