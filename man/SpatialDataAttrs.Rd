@@ -95,7 +95,8 @@ SpatialDataAttrs(
 \item{ver}{character string; specifies the version of the SpatialData 
 element to comply with.}
 
-\item{dim}{scalar integer in 2-4;
+\item{dim}{scalar integer in 2-4 when \code{type} is either "image" or 
+"label", and 2-3 when "shape" or "point";
 number of dimensions: 2 = XY, 3 adds Z, 4 adds T (time) for image and 
 label; when \code{type="image"}, C (channel) will be added (for any 
 \code{dim}).}
