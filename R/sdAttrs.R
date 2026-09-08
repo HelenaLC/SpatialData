@@ -16,10 +16,10 @@
 #'   or vector (for many \code{region}s, \code{instances} and \code{regions}).
 #' @param ver character string; specifies the version of the SpatialData 
 #'   element to comply with.
-#' @param dim scalar integer in 2-4;
+#' @param dim scalar integer in 2-4 when \code{type} is either "image" or 
+#'   "label", and 2-3 when "shape" or "point";
 #'   number of dimensions: 2 = XY, 3 adds Z, 4 adds T (time) for image and 
-#'   label; when \code{type="image"}, C (channel) will be added (for any 
-#'   \code{dim}).
+#'   label; when \code{type="image"}).
 #' @param nch scalar integer; how many channels should there be?
 #'   (ignored if \code{type="label"}, \code{type="shape"}, or 
 #'   \code{type="point"}). 
@@ -119,7 +119,7 @@ SpatialDataAttrs <- \(x, type=c("image", "label", "point", "shape"),
     y <- list(name="y", type="space")
     x <- list(name="x", type="space")
     switch(match.arg(type), 
-        # xyzt for points/shapes
+        # xyz for points/shapes
         point=,
         shape={
             ax <- list(x, y)

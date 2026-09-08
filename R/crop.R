@@ -142,6 +142,7 @@ NULL
     }
     # update input axes from 'cyx' to 'xy'
     ct$input$axes <- .default_ax(type="shape")
+    ct$input$name <- "xy"
     # create temporary shape & transform back
     md <- SpatialDataAttrs(type="shape", trans=list(ct))
     z <- SpatialDataShape(df, meta=md)
