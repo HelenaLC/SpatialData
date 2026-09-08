@@ -38,12 +38,11 @@
 \usage{
 SpatialDataAttrs(
   x,
-  type = c("image", "label", "frame"),
+  type = c("image", "label", "point", "shape"),
   trans = NULL,
-  ver = "0.3",
+  ver = NULL,
   dim = 2,
-  nch = 3,
-  ...
+  nch = 3
 )
 
 \S4method{$}{SpatialDataAttrs}(x, name)
@@ -89,30 +88,30 @@ SpatialDataAttrs(
 \arguments{
 \item{x}{element or list extracted from a OME-NGFF compliant .zattrs file.}
 
-\item{type}{character string; either "array" (image/label) or "frame" (point/shape).}
+\item{type}{character string; either "image", "label", "point" or "shape"}
 
 \item{trans}{list of coordinate transformations; defaults to identity only.}
 
-\item{ver}{character string; specifies the OME version to comply with.}
+\item{ver}{character string; specifies the version of the SpatialData 
+element to comply with.}
 
-\item{dim}{scalar integer in 2-4;
-number of dimensions: 2 = XY, 3 adds Z, 4 adds T (time); 
-when \code{type="image"}, C (channel) will be added (for any \code{dim}).}
+\item{dim}{scalar integer in 2-4 when \code{type} is either "image" or 
+"label", and 2-3 when "shape" or "point";
+number of dimensions: 2 = XY, 3 adds Z, 4 adds T (time) for image and 
+label; when \code{type="image"}, C (channel) will be added (for any 
+\code{dim}).}
 
 \item{nch}{scalar integer; how many channels should there be?
-(ignored unless \code{type="frame"} and \code{label=FALSE}).}
-
-\item{...}{additional attributes (e.g., version, feature_key).}
+(ignored if \code{type="label"}, \code{type="shape"}, or 
+\code{type="point"}).}
 
 \item{name}{character string for extraction (see ?base::`$`).}
 
 \item{value}{character string (for one \code{region} and \code{_key}s), 
 or vector (for many \code{region}s, \code{instances} and \code{regions}).}
-
-\item{label}{flag; when \code{type="frame"}, should attributes be for a label?}
 }
 \value{
-character string
+SpatialDataAttrs object
 }
 \description{
 The `SpatialDataAttrs` class
@@ -123,8 +122,8 @@ When \code{x} is a spatial element, the following applies:
 \code{SingleCellExperiment}: \code{region}, \code{region/instance_key}.
 
 When missing \code{x}, \code{SpatialDataAttrs} will generate a valid object 
-with default axes (array: cyx, frame: xy) and transformations (identify) 
-according to the specified type.
+with default axes (image: cyx, label: yx, point/shape: xy) and 
+transformations (identify) according to the specified type.
 }
 \examples{
 x <- file.path("extdata", "blobs.zarr")
@@ -147,7 +146,8 @@ CTtype(z)
 CTdata(z, "scale")
 
 # constructor
-SpatialDataAttrs(type="frame")
+SpatialDataAttrs(type="point")
+SpatialDataAttrs(type="shape")
 SpatialDataAttrs(type="image", nch=7)
 SpatialDataAttrs(type="label", dim=3)
 

@@ -123,7 +123,7 @@ NULL
 #' @importFrom methods is
 #' @importFrom sf st_geometry_type
 #' @importFrom S4Vectors metadata<-
-SpatialDataPoint <- \(data=NULL, meta=SpatialDataAttrs(type="frame"), metadata=list(), ik=NULL, fk=NULL, ...) {
+SpatialDataPoint <- \(data=NULL, meta=SpatialDataAttrs(type="point"), metadata=list(), ik=NULL, fk=NULL, ...) {
     data <- .df_to_sf(data, "POINT")
     if (isTRUE(nrow(data) > 0L)) {
         gt <- tryCatch(unique(st_geometry_type(data)), error=\(.) "n/a")
@@ -153,7 +153,7 @@ SpatialDataPoint <- \(data=NULL, meta=SpatialDataAttrs(type="frame"), metadata=l
 #' @rdname SpatialDataFrame
 #' @importFrom methods is
 #' @importFrom S4Vectors metadata<-
-SpatialDataShape <- \(data=NULL, meta=SpatialDataAttrs(type="frame"), metadata=list(), ...) {
+SpatialDataShape <- \(data=NULL, meta=SpatialDataAttrs(type="shape"), metadata=list(), ...) {
     data <- .df_to_sf(data, "POLYGON")
     if (!is(data, "duckspatial_df")) 
         data <- .duck(data, "sdShape")
