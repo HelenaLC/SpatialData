@@ -28,7 +28,7 @@ Currently defined methods (here, `x` is an `SpatialDataFrame`):
 ``` r
 SpatialDataPoint(
   data = NULL,
-  meta = SpatialDataAttrs(type = "frame"),
+  meta = SpatialDataAttrs(type = "point"),
   metadata = list(),
   ik = NULL,
   fk = NULL,
@@ -37,7 +37,7 @@ SpatialDataPoint(
 
 SpatialDataShape(
   data = NULL,
-  meta = SpatialDataAttrs(type = "frame"),
+  meta = SpatialDataAttrs(type = "shape"),
   metadata = list(),
   ...
 )

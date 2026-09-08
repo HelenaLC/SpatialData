@@ -7,12 +7,11 @@ The \`SpatialDataAttrs\` class
 ``` r
 SpatialDataAttrs(
   x,
-  type = c("image", "label", "frame"),
+  type = c("image", "label", "point", "shape"),
   trans = NULL,
-  ver = "0.3",
+  ver = NULL,
   dim = 2,
-  nch = 3,
-  ...
+  nch = 3
 )
 
 # S4 method for class 'SpatialDataAttrs'
@@ -84,8 +83,7 @@ instances(x) <- value
 
 - type:
 
-  character string; either "array" (image/label) or "frame"
-  (point/shape).
+  character string; either "image", "label", "point" or "shape"
 
 - trans:
 
@@ -93,22 +91,20 @@ instances(x) <- value
 
 - ver:
 
-  character string; specifies the OME version to comply with.
+  character string; specifies the version of the SpatialData element to
+  comply with.
 
 - dim:
 
-  scalar integer in 2-4; number of dimensions: 2 = XY, 3 adds Z, 4 adds
-  T (time); when `type="image"`, C (channel) will be added (for any
-  `dim`).
+  scalar integer in 2-4 when `type` is either "image" or "label", and
+  2-3 when "shape" or "point"; number of dimensions: 2 = XY, 3 adds Z, 4
+  adds T (time) for image and label; when `type="image"`, C (channel)
+  will be added (for any `dim`).
 
 - nch:
 
-  scalar integer; how many channels should there be? (ignored unless
-  `type="frame"` and `label=FALSE`).
-
-- ...:
-
-  additional attributes (e.g., version, feature_key).
+  scalar integer; how many channels should there be? (ignored if
+  `type="label"`, `type="shape"`, or `type="point"`).
 
 - name:
 
@@ -119,13 +115,9 @@ instances(x) <- value
   character string (for one `region` and `_key`s), or vector (for many
   `region`s, `instances` and `regions`).
 
-- label:
-
-  flag; when `type="frame"`, should attributes be for a label?
-
 ## Value
 
-character string
+SpatialDataAttrs object
 
 ## Details
 
@@ -134,8 +126,8 @@ When `x` is a spatial element, the following applies:
 `region`, `region/instance_key`.
 
 When missing `x`, `SpatialDataAttrs` will generate a valid object with
-default axes (array: cyx, frame: xy) and transformations (identify)
-according to the specified type.
+default axes (image: cyx, label: yx, point/shape: xy) and
+transformations (identify) according to the specified type.
 
 ## Examples
 
@@ -186,11 +178,16 @@ CTdata(z, "scale")
 #> 
 
 # constructor
-SpatialDataAttrs(type="frame")
+SpatialDataAttrs(type="point")
 #> class: SpatialDataAttrs
 #> axes(2):
 #> - name: x y 
-#> - type: space space 
+#> coordTrans(1):
+#> - global: (identity)
+SpatialDataAttrs(type="shape")
+#> class: SpatialDataAttrs
+#> axes(2):
+#> - name: x y 
 #> coordTrans(1):
 #> - global: (identity)
 SpatialDataAttrs(type="image", nch=7)

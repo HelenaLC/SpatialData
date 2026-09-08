@@ -45,12 +45,11 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">SpatialDataAttrs</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
-<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"image"</span>, <span class="st">"label"</span>, <span class="st">"frame"</span><span class="op">)</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"image"</span>, <span class="st">"label"</span>, <span class="st">"point"</span>, <span class="st">"shape"</span><span class="op">)</span>,</span>
 <span>  trans <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ver <span class="op">=</span> <span class="st">"0.3"</span>,</span>
+<span>  ver <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dim <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  nch <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  nch <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SpatialDataAttrs'</span></span>
@@ -123,7 +122,7 @@
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>character string; either "array" (image/label) or "frame" (point/shape).</p></dd>
+<dd><p>character string; either "image", "label", "point" or "shape"</p></dd>
 
 
 <dt id="arg-trans">trans<a class="anchor" aria-label="anchor" href="#arg-trans"></a></dt>
@@ -131,22 +130,22 @@
 
 
 <dt id="arg-ver">ver<a class="anchor" aria-label="anchor" href="#arg-ver"></a></dt>
-<dd><p>character string; specifies the OME version to comply with.</p></dd>
+<dd><p>character string; specifies the version of the SpatialData
+element to comply with.</p></dd>
 
 
 <dt id="arg-dim">dim<a class="anchor" aria-label="anchor" href="#arg-dim"></a></dt>
-<dd><p>scalar integer in 2-4;
-number of dimensions: 2 = XY, 3 adds Z, 4 adds T (time);
-when <code>type="image"</code>, C (channel) will be added (for any <code>dim</code>).</p></dd>
+<dd><p>scalar integer in 2-4 when <code>type</code> is either "image" or
+"label", and 2-3 when "shape" or "point";
+number of dimensions: 2 = XY, 3 adds Z, 4 adds T (time) for image and
+label; when <code>type="image"</code>, C (channel) will be added (for any
+<code>dim</code>).</p></dd>
 
 
 <dt id="arg-nch">nch<a class="anchor" aria-label="anchor" href="#arg-nch"></a></dt>
 <dd><p>scalar integer; how many channels should there be?
-(ignored unless <code>type="frame"</code> and <code>label=FALSE</code>).</p></dd>
-
-
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>additional attributes (e.g., version, feature_key).</p></dd>
+(ignored if <code>type="label"</code>, <code>type="shape"</code>, or
+<code>type="point"</code>).</p></dd>
 
 
 <dt id="arg-name">name<a class="anchor" aria-label="anchor" href="#arg-name"></a></dt>
@@ -157,14 +156,10 @@ when <code>type="image"</code>, C (channel) will be added (for any <code>dim</co
 <dd><p>character string (for one <code>region</code> and <code>_key</code>s),
 or vector (for many <code>region</code>s, <code>instances</code> and <code>regions</code>).</p></dd>
 
-
-<dt id="arg-label">label<a class="anchor" aria-label="anchor" href="#arg-label"></a></dt>
-<dd><p>flag; when <code>type="frame"</code>, should attributes be for a label?</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>character string</p>
+    <p>SpatialDataAttrs object</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -172,8 +167,8 @@ or vector (for many <code>region</code>s, <code>instances</code> and <code>regio
 <code>SpatialDataFrame</code>: <code>feature/instance_key</code>,
 <code>SingleCellExperiment</code>: <code>region</code>, <code>region/instance_key</code>.</p>
 <p>When missing <code>x</code>, <code>SpatialDataAttrs</code> will generate a valid object
-with default axes (array: cyx, frame: xy) and transformations (identify)
-according to the specified type.</p>
+with default axes (image: cyx, label: yx, point/shape: xy) and
+transformations (identify) according to the specified type.</p>
     </div>
 
     <div class="section level2">
@@ -224,11 +219,16 @@ according to the specified type.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># constructor</span></span></span>
-<span class="r-in"><span><span class="fu">SpatialDataAttrs</span><span class="op">(</span>type<span class="op">=</span><span class="st">"frame"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">SpatialDataAttrs</span><span class="op">(</span>type<span class="op">=</span><span class="st">"point"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> class: SpatialDataAttrs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> axes(2):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> - name: x y </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> - type: space space </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> coordTrans(1):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> - global: (identity)</span>
+<span class="r-in"><span><span class="fu">SpatialDataAttrs</span><span class="op">(</span>type<span class="op">=</span><span class="st">"shape"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> class: SpatialDataAttrs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> axes(2):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> - name: x y </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> coordTrans(1):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> - global: (identity)</span>
 <span class="r-in"><span><span class="fu">SpatialDataAttrs</span><span class="op">(</span>type<span class="op">=</span><span class="st">"image"</span>, nch<span class="op">=</span><span class="fl">7</span><span class="op">)</span></span></span>
